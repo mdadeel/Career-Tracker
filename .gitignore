@@ -1,0 +1,29 @@
+# ── Dependencies ──
+node_modules/
+.pnp/
+.pnp.js
+
+# ── Build output ──
+dist/
+build/
+*.tsbuildinfo
+
+# ── Secrets & environment (NEVER commit real secrets) ──
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# ── Logs & runtime artifacts ──
+*.log
+dev.log
+pid.txt
+
+# ── Agent memory (project-internal, not source) ──
+.ai/
+
+# ── Editor / OS ──
+.vscode/
+.idea/
+.DS_Store
