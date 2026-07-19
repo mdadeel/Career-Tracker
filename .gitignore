@@ -20,10 +20,14 @@ build/
 dev.log
 pid.txt
 
-# ── Agent memory (project-internal, not source) ──
+# ── Agent memory & project docs (not source) ──
 .ai/
+docs/
+CLAUDE.md
+CareerTrack_Lite_3-Day_Project_Task_8_Pages.docx
 
 # ── Editor / OS ──
 .vscode/
 .idea/
 .DS_Store
+CareerTrack_Lite_3-Day_Project_Task_8_Pages.docx
