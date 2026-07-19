@@ -11,3 +11,5 @@ export { DropdownMenu } from "./DropdownMenu";
 export { Dialog } from "./Dialog";
 export { SidebarLayout } from "./Sidebar";
 export { ToastContainer } from "./Toast";
+export { Logo, LogoFull } from "./Logo";
+

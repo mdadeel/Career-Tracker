@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "../components/ui";
+import { Button, LogoFull } from "../components/ui";
 
 // TODO: Replace with your real details (spec §8 / §20 requires full name + student ID).
 const SITE_OWNER = {
@@ -185,13 +185,8 @@ function Navigation() {
   return (
     <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/85 dark:border-dark-border dark:bg-dark/80 backdrop-blur-md">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5 lg:px-8">
-        <Link to="/" className="flex items-center gap-2.5">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-brand-500 text-[11px] font-bold text-white shadow-sm">
-            CT
-          </span>
-          <span className="text-sm font-semibold tracking-tight text-ink dark:text-white/90">
-            CareerTrack
-          </span>
+        <Link to="/" className="flex items-center">
+          <LogoFull size={28} showSubtitle />
         </Link>
 
         <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">

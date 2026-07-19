@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
-import { Button, Input } from "../components/ui";
+import { Button, Input, LogoFull } from "../components/ui";
 
 export function RegisterPage() {
   const { register } = useAuth();
@@ -33,11 +33,8 @@ export function RegisterPage() {
         <div className="w-full max-w-sm">
           {/* Brand */}
           <div className="mb-10">
-            <Link to="/" className="inline-flex items-center gap-2.5">
-              <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-500 text-sm font-bold text-white shadow-sm">
-                CT
-              </span>
-              <span className="text-base font-semibold tracking-tight text-ink dark:text-white/90">CareerTrack</span>
+            <Link to="/" className="inline-flex items-center">
+              <LogoFull size={32} showSubtitle />
             </Link>
           </div>
 

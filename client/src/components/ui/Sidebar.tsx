@@ -5,6 +5,8 @@ import { useTheme } from "../../hooks/useTheme";
 import { useKeyboardShortcuts } from "../../hooks/useKeyboardShortcuts";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { CommandPalette } from "../CommandPalette";
+import { Logo, LogoFull } from "./Logo";
+
 
 interface NavItem {
   path: string;
@@ -126,11 +128,10 @@ export function SidebarLayout() {
         {/* Header: Logo + collapse */}
         <div className={`flex h-12 items-center border-b border-white/[0.06] ${collapsed ? "justify-center px-0" : "px-3"}`}>
           <Link to="/dashboard" className={`flex items-center gap-2 ${collapsed ? "justify-center" : ""}`}>
-            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-500 text-[10px] font-bold text-white">
-              CT
-            </span>
-            {!collapsed && (
-              <span className="text-sm font-semibold tracking-tight text-white/85">CareerTrack</span>
+            {collapsed ? (
+              <Logo size={24} />
+            ) : (
+              <LogoFull size={24} textClassName="text-white/85" />
             )}
           </Link>
           {!collapsed && (
