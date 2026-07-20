@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDemoRateLimiter } from "../hooks/useDemoRateLimiter";
 import { Button, Input, LogoFull } from "../components/ui";
+import { Lightning, WarningCircle, Spinner } from "@phosphor-icons/react";
 
 const DEMO_EMAIL = "alex@example.com";
 const DEMO_PASSWORD = "password123";
@@ -109,17 +110,12 @@ export function LoginPage() {
             >
               {isDemoLoggingIn ? (
                 <>
-                  <svg className="h-3.5 w-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                  </svg>
+                  <Spinner size={14} className="animate-spin" />
                   Logging in...
                 </>
               ) : !rateLimit.allowed ? (
                 <>
-                  <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                  </svg>
+                  <WarningCircle size={16} />
                   <span>
                     Cooldown —{" "}
                     <span className="font-mono tabular-nums">{rateLimit.cooldownSeconds}s</span>
@@ -127,9 +123,7 @@ export function LoginPage() {
                 </>
               ) : (
                 <>
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                  </svg>
+                  <Lightning size={16} />
                   <span>
                     Demo Login —{" "}
                     <span className="font-mono opacity-75">{DEMO_EMAIL}</span>
@@ -141,9 +135,7 @@ export function LoginPage() {
             {/* Rate limit status below the button */}
             {!rateLimit.allowed && (
               <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-3 py-2 border border-amber-200 dark:border-amber-500/20" role="alert" aria-live="polite">
-                <svg className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                </svg>
+                <WarningCircle size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
                 <span className="text-xs text-amber-700 dark:text-amber-400">
                   Too many demo login attempts. Please wait{" "}
                   <span className="font-mono font-semibold tabular-nums">{rateLimit.cooldownSeconds}</span>{" "}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import { ArrowRight, List, X, FileText, ChartBar, ShieldCheck, Plus, SignIn } from "@phosphor-icons/react";
 import { Button, LogoFull } from "../components/ui";
 
 // TODO: Replace with your real details (spec §8 / §20 requires full name + student ID).
@@ -8,78 +9,16 @@ const SITE_OWNER = {
   studentId: "Your Student ID",
 };
 
-function IconArrowRight({ className = "", size = 16 }: { className?: string; size?: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M5 12h14" />
-      <path d="m12 5 7 7-7 7" />
-    </svg>
-  );
-}
-
-function IconMenu({ className = "", size = 24 }: { className?: string; size?: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <line x1="4" x2="20" y1="12" y2="12" />
-      <line x1="4" x2="20" y1="6" y2="6" />
-      <line x1="4" x2="20" y1="18" y2="18" />
-    </svg>
-  );
-}
-
-function IconClose({ className = "", size = 24 }: { className?: string; size?: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <path d="M18 6 6 18" />
-      <path d="m6 6 12 12" />
-    </svg>
-  );
-}
-
 /**
- * Animated drifting gradient background (21st.dev "Animated Gradient Background"
- * technique, reimplemented dependency-free). Brand-tinted blobs drift behind
- * the hero using the tailwind `blob` keyframes.
+ * Fixed ambient gradient background — single fixed element to avoid GPU
+ * repaints on scroll (per DOM Cost rule). Brand-only tones, no purple/emerald.
  */
-function AnimatedGradientBackground({ className = "" }: { className?: string }) {
+function AmbientBackground() {
   return (
-    <div aria-hidden="true" className={`pointer-events-none absolute inset-0 overflow-hidden ${className}`}>
-      <div className="absolute -left-24 -top-24 h-[28rem] w-[28rem] rounded-full bg-brand-400/30 blur-3xl animate-blob dark:bg-brand-500/20" />
-      <div className="absolute right-[-10%] top-10 h-[24rem] w-[24rem] rounded-full bg-purple-400/25 blur-3xl animate-blob-slow dark:bg-purple-500/15" />
-      <div className="absolute bottom-[-20%] left-1/3 h-[26rem] w-[26rem] rounded-full bg-emerald-400/20 blur-3xl animate-blob dark:bg-emerald-500/10" />
+    <div aria-hidden="true" className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+      <div className="absolute -left-24 -top-24 h-[28rem] w-[28rem] rounded-full bg-brand-400/25 blur-3xl animate-blob dark:bg-brand-500/15" />
+      <div className="absolute right-[-10%] top-1/3 h-[24rem] w-[24rem] rounded-full bg-brand-400/15 blur-3xl animate-blob-slow dark:bg-brand-500/10" />
+      <div className="absolute bottom-[-20%] left-1/3 h-[26rem] w-[26rem] rounded-full bg-brand-400/10 blur-3xl animate-blob dark:bg-brand-500/5" />
     </div>
   );
 }
@@ -104,24 +43,6 @@ function SpotlightBackground({ className = "" }: { className?: string }) {
           "radial-gradient(380px circle at var(--x, 50%) var(--y, 0%), rgba(99,102,241,0.12), transparent 70%)",
       }}
     />
-  );
-}
-
-/**
- * Animated gradient headline text (21st.dev "Animated Gradient Text" technique):
- * a wide multi-stop gradient swept via the tailwind `gradient-x` keyframe.
- */
-function GradientText({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return (
-    <span
-      className={`bg-[length:200%_auto] bg-clip-text text-transparent animate-gradient-x ${className}`}
-      style={{
-        backgroundImage:
-          "linear-gradient(90deg, #4f46e5 0%, #6366f1 25%, #8b5cf6 50%, #6366f1 75%, #4f46e5 100%)",
-      }}
-    >
-      {children}
-    </span>
   );
 }
 
@@ -219,7 +140,7 @@ function Navigation() {
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
         >
-          {open ? <IconClose size={22} /> : <IconMenu size={22} />}
+          {open ? <X size={22} /> : <List size={22} />}
         </button>
       </nav>
 
@@ -258,8 +179,6 @@ function Navigation() {
 function Hero() {
   return (
     <section className="relative overflow-hidden bg-surface-secondary px-5 pb-20 pt-28 dark:bg-dark lg:px-8 lg:pb-28 lg:pt-36">
-      <AnimatedGradientBackground />
-      <SpotlightBackground />
       <div className="relative mx-auto max-w-3xl text-center">
         <a
           href="#features"
@@ -270,13 +189,13 @@ function Hero() {
             <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
           </span>
           Job search tracker — built for serious applicants
-          <IconArrowRight size={12} className="text-brand-500" />
+          <ArrowRight size={12} className="text-brand-500" />
         </a>
 
         <h1 className="animate-float-up text-balance text-4xl font-bold leading-[1.1] tracking-tight text-ink dark:text-white/90 sm:text-5xl lg:text-6xl [animation-delay:80ms]">
           Track every job application
           <span className="mt-1 block">
-            <GradientText>from one dashboard</GradientText>
+            <span className="text-brand-600 dark:text-brand-400">from one dashboard</span>
           </span>
         </h1>
 
@@ -287,7 +206,7 @@ function Hero() {
 
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link to="/register">
-            <Button size="lg" icon={<IconArrowRight />}>
+            <Button size="lg" icon={<ArrowRight size={16} />}>
               Start Tracking Free
             </Button>
           </Link>
@@ -365,26 +284,20 @@ function Features() {
     {
       title: "Track Applications",
       body: "Log every job with company details, links, source, and status — all in one place.",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-      ),
+      icon: <FileText size={20} />,
       tint: "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
     },
     {
       title: "Visual Pipeline",
       body: "See progress at a glance with real-time metrics and clear status stages.",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      ),
-      tint: "bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400",
+      icon: <ChartBar size={20} />,
+      tint: "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
     },
     {
       title: "Private & Secure",
       body: "JWT auth, hashed passwords, and complete user isolation — your data stays yours.",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
-      ),
-      tint: "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400",
+      icon: <ShieldCheck size={20} />,
+      tint: "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
     },
   ];
 
@@ -406,9 +319,7 @@ function Features() {
               className="rounded-xl border border-slate-200 bg-surface-secondary p-5 transition-shadow hover:shadow-card-hover dark:border-dark-border dark:bg-dark"
             >
               <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${f.tint}`}>
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  {f.icon}
-                </svg>
+                {f.icon}
               </div>
               <h3 className="text-sm font-semibold text-ink dark:text-white/90">{f.title}</h3>
               <p className="mt-1.5 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
@@ -466,25 +377,19 @@ function HowItWorks() {
       n: "01",
       title: "Create your account",
       body: "Register securely with a hashed password and sign in with a JWT session.",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
-      ),
+      icon: <SignIn size={20} weight="bold" />,
     },
     {
       n: "02",
       title: "Add applications",
       body: "Log each role with company, link, source, date, status, and notes.",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-      ),
+      icon: <Plus size={20} weight="bold" />,
     },
     {
       n: "03",
       title: "Track & filter",
       body: "Watch your pipeline, view stats, and search or filter what matters.",
-      icon: (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-      ),
+      icon: <ChartBar size={20} weight="bold" />,
     },
   ];
   return (
@@ -508,9 +413,7 @@ function HowItWorks() {
                 {s.n}
               </span>
               <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  {s.icon}
-                </svg>
+                {s.icon}
               </div>
               <h3 className="mt-4 text-sm font-semibold text-ink dark:text-white/90">
                 {s.title}
@@ -560,7 +463,7 @@ function CtaFooter() {
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link to="/register">
-            <Button size="lg" icon={<IconArrowRight />}>
+            <Button size="lg" icon={<ArrowRight size={16} />}>
               Get Started Free
             </Button>
           </Link>
@@ -586,6 +489,7 @@ function CtaFooter() {
 export function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-surface-secondary text-ink dark:bg-dark dark:text-white">
+      <AmbientBackground />
       <Navigation />
       <main className="flex-1">
         <Hero />
