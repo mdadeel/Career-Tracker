@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { applicationService } from "../services/applicationService";
 import { useToast } from "../context/ToastContext";
 import { Button } from "../components/ui";
+import { ArrowLeft, Spinner, CheckCircle } from "@phosphor-icons/react";
 import { ApplicationFormFields } from "../components/ApplicationFormFields";
 import { createEmptyForm } from "../constants/applications";
 import type { ApplicationFormData } from "../types";
@@ -126,16 +127,14 @@ export function ApplicationFormPage() {
   }
 
   return (
-    <div className="py-5 lg:py-6">
+    <div className="mx-auto max-w-5xl py-5 lg:py-6">
       {/* Header */}
       <div className="mb-6">
         <button
           onClick={() => navigate("/applications")}
           className="inline-flex items-center gap-1 text-xs font-medium text-ink-tertiary dark:text-white/40 hover:text-ink-secondary dark:hover:text-white/60 transition-colors mb-3"
         >
-          <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
-          </svg>
+          <ArrowLeft size={14} />
           Back to applications
         </button>
         <div className="flex items-center gap-3">
@@ -150,14 +149,9 @@ export function ApplicationFormPage() {
           {!isEditing && draftStatus && (
             <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 animate-fade-in">
               {draftStatus === "saving" ? (
-                <svg className="h-3 w-3 animate-spin" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                </svg>
+                <Spinner size={12} className="animate-spin" />
               ) : (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+                <CheckCircle size={12} />
               )}
               Draft {draftStatus === "saving" ? "saving..." : "saved"}
             </span>

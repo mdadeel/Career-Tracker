@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button, EmptyState, Input, Dialog } from "../components/ui";
 import { formatDate } from "../utils/format";
+import { Plus, Bookmark, ArrowUpRight, Trash } from "@phosphor-icons/react";
 
 interface SavedJob {
   id: string;
@@ -64,7 +65,7 @@ export function SavedJobsPage() {
   };
 
   return (
-    <div className="py-5 lg:py-6 space-y-5">
+    <div className="mx-auto max-w-5xl py-5 lg:py-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -76,9 +77,7 @@ export function SavedJobsPage() {
         <Button
           size="sm"
           icon={
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-            </svg>
+            <Plus size={14} />
           }
           onClick={() => setShowForm(true)}
         >
@@ -116,9 +115,7 @@ export function SavedJobsPage() {
       {jobs.length === 0 ? (
         <EmptyState
           icon={
-            <svg className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0111.186 0z" />
-            </svg>
+            <Bookmark size={28} />
           }
           title="No saved jobs yet"
           description="Save job listings you're interested in and track them here"
@@ -161,9 +158,7 @@ export function SavedJobsPage() {
                     className="rounded-md p-1.5 text-ink-tertiary dark:text-white/30 hover:bg-surface-tertiary dark:hover:bg-white/5 transition-colors"
                     title="Open job posting"
                   >
-                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
-                    </svg>
+                    <ArrowUpRight size={16} />
                   </a>
                 )}
                 <button
@@ -171,9 +166,7 @@ export function SavedJobsPage() {
                   className="rounded-md p-1.5 text-ink-tertiary dark:text-white/30 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-500 transition-colors"
                   title="Remove"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
-                  </svg>
+                  <Trash size={16} />
                 </button>
               </div>
             </div>
