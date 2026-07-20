@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApplications } from "../hooks/useApplications";
 import { Skeleton } from "../components/ui";
+import { CaretLeft, CaretRight, Plus, Chats } from "@phosphor-icons/react";
 import type { Application } from "../types";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -89,7 +90,7 @@ export function CalendarPage() {
   if (isLoading) return <CalendarSkeleton />;
 
   return (
-    <div className="py-5 lg:py-6 space-y-5">
+    <div className="mx-auto max-w-5xl py-5 lg:py-6 space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -104,15 +105,11 @@ export function CalendarPage() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border">
             <button onClick={prevMonth} className="rounded-lg p-1 text-ink-tertiary dark:text-white/40 hover:bg-surface-tertiary dark:hover:bg-white/5 transition-colors">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-              </svg>
+              <CaretLeft size={16} />
             </button>
             <h2 className="text-sm font-semibold text-ink dark:text-white/85">{monthName}</h2>
             <button onClick={nextMonth} className="rounded-lg p-1 text-ink-tertiary dark:text-white/40 hover:bg-surface-tertiary dark:hover:bg-white/5 transition-colors">
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-              </svg>
+              <CaretRight size={16} />
             </button>
           </div>
 
@@ -185,18 +182,14 @@ export function CalendarPage() {
                 onClick={() => navigate("/applications/new")}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/[0.04] transition-colors"
               >
-                <svg className="h-4 w-4 text-brand-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                </svg>
+                <Plus size={16} className="text-brand-500" />
                 New Application
               </button>
               <button
                 onClick={() => navigate("/applications")}
                 className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/[0.04] transition-colors"
               >
-                <svg className="h-4 w-4 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155" />
-                </svg>
+                <Chats size={16} className="text-purple-500" />
                 View Applications
               </button>
             </div>
@@ -213,15 +206,15 @@ export function CalendarPage() {
                     onClick={() => navigate("/applications")}
                     className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.03]"
                   >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-purple-50 dark:bg-purple-500/10 text-[10px] font-bold text-purple-600 dark:text-purple-400">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-purple-50 dark:bg-purple-500/10 text-xs font-bold text-purple-600 dark:text-purple-400">
                       {app.companyName.charAt(0)}
                     </span>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-ink dark:text-white/85 truncate">{app.jobTitle}</p>
-                      <p className="text-[10px] text-ink-tertiary dark:text-white/40 truncate">{app.companyName}</p>
+                      <p className="text-xs text-ink-tertiary dark:text-white/40 truncate">{app.companyName}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <p className="text-[10px] font-semibold text-purple-600 dark:text-purple-400 tabular-nums">
+                      <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 tabular-nums">
                         {new Date(app.interviewDate!).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
                       </p>
                     </div>
