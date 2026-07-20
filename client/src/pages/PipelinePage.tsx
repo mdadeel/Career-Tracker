@@ -7,14 +7,17 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
+  useDroppable,
   type DragEndEvent,
   type DragStartEvent,
+  type DragOverEvent,
 } from "@dnd-kit/core";
 import { SortableContext, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { useApplications } from "../hooks/useApplications";
 import { Skeleton, Button } from "../components/ui";
 import { formatDate } from "../utils/format";
+import { Plus } from "@phosphor-icons/react";
 import type { Application, ApplicationStatus } from "../types";
 
 const PIPELINE_STAGES: { key: ApplicationStatus; label: string; color: string }[] = [
@@ -50,9 +53,9 @@ function PipelineCard({ app, isDragging }: { app: Application; isDragging?: bool
       <p className="text-xs font-medium text-ink dark:text-white/85 truncate">{app.jobTitle}</p>
       <p className="text-[11px] text-ink-secondary dark:text-white/50 mt-0.5 truncate">{app.companyName}</p>
       {app.location && (
-        <p className="text-[10px] text-ink-tertiary dark:text-white/40 mt-1 truncate">{app.location}</p>
+        <p className="text-xs text-ink-tertiary dark:text-white/40 mt-1 truncate">{app.location}</p>
       )}
-      <p className="text-[10px] text-ink-tertiary dark:text-white/40 mt-1 tabular-nums">{formatDate(app.applicationDate)}</p>
+      <p className="text-xs text-ink-tertiary dark:text-white/40 mt-1 tabular-nums">{formatDate(app.applicationDate)}</p>
     </div>
   );
 }
@@ -69,20 +72,32 @@ function DragPreview({ app }: { app: Application }) {
 
 /* ─── Column ─── */
 function PipelineColumn({
+  id,
   label,
   color,
   apps,
   onAdd,
+  isOver,
 }: {
+  id: string;
   label: string;
   color: string;
   apps: Application[];
   onAdd: () => void;
+  isOver: boolean;
 }) {
   const ids = apps.map((a) => a.id);
+  const { setNodeRef } = useDroppable({ id });
 
   return (
-    <div className="flex min-h-[300px] w-[200px] shrink-0 flex-col rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">
+    <div
+      ref={setNodeRef}
+      className={`flex min-h-[300px] w-[200px] shrink-0 flex-col rounded-xl border bg-slate-50/50 dark:bg-white/[0.02] transition-all duration-150 ${
+        isOver
+          ? "border-brand-400 dark:border-brand-400 bg-brand-50/50 dark:bg-brand-500/5 shadow-elevated"
+          : "border-slate-200 dark:border-dark-border"
+      }`}
+    >
       {/* Header */}
       <div className="flex items-center gap-2 px-3 py-2.5 border-b border-slate-200 dark:border-dark-border">
         <span className={`h-2 w-2 rounded-full ${color}`} />
@@ -144,6 +159,7 @@ export function PipelinePage() {
   const { applications, isLoading, updateApplication, refresh } = useApplications();
   const navigate = useNavigate();
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [overColumnId, setOverColumnId] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -170,8 +186,21 @@ export function PipelinePage() {
     setActiveId(event.active.id as string);
   };
 
+  const handleDragOver = (event: DragOverEvent) => {
+    const { over } = event;
+    if (over && PIPELINE_STAGES.some((s) => s.key === over.id)) {
+      setOverColumnId(over.id as string);
+    } else if (over) {
+      const overApp = applications.find((a) => a.id === over.id);
+      if (overApp) setOverColumnId(overApp.status);
+    } else {
+      setOverColumnId(null);
+    }
+  };
+
   const handleDragEnd = async (event: DragEndEvent) => {
     setActiveId(null);
+    setOverColumnId(null);
     const { active, over } = event;
     if (!over) return;
 
@@ -179,14 +208,12 @@ export function PipelinePage() {
     const app = applications.find((a) => a.id === appId);
     if (!app) return;
 
-    // Determine target stage from the droppable container
     const overId = over.id as string;
     let targetStage: ApplicationStatus | null = null;
 
     if (PIPELINE_STAGES.some((s) => s.key === overId)) {
       targetStage = overId as ApplicationStatus;
     } else {
-      // Dropped on another card — find its stage
       const overApp = applications.find((a) => a.id === overId);
       if (overApp) targetStage = overApp.status;
     }
@@ -202,7 +229,7 @@ export function PipelinePage() {
 
   if (isLoading) {
     return (
-      <div className="py-5 lg:py-6 space-y-4">
+      <div className="space-y-4">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-base font-semibold text-ink dark:text-white/90">Pipeline</h1>
@@ -215,8 +242,7 @@ export function PipelinePage() {
   }
 
   return (
-    <div className="py-5 lg:py-6 space-y-4">
-      {/* Header */}
+    <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-base font-semibold text-ink dark:text-white/90">Pipeline</h1>
@@ -234,11 +260,7 @@ export function PipelinePage() {
           </Button>
           <Button
             size="sm"
-            icon={
-              <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-              </svg>
-            }
+            icon={<Plus size={14} />}
             onClick={() => navigate("/applications/new")}
           >
             Add
@@ -246,41 +268,48 @@ export function PipelinePage() {
         </div>
       </div>
 
-      {/* Pipeline Board */}
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCorners}
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-      >
-        <div className="flex gap-3 overflow-x-auto pb-4">
-          {PIPELINE_STAGES.map((stage) => (
-            <PipelineColumn
-              key={stage.key}
-              label={stage.label}
-              color={stage.color}
-              apps={grouped[stage.key] || []}
-              onAdd={() => navigate(`/applications/new?status=${stage.key}`)}
-            />
-          ))}
-        </div>
+      {/* Pipeline Board — full width breakout */}
+      <div className="-mx-3 lg:-mx-4 max-w-none" style={{ width: 'calc(100vw - 12rem)' }}>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCorners}
+          onDragStart={handleDragStart}
+          onDragOver={handleDragOver}
+          onDragEnd={handleDragEnd}
+        >
+          <div className="flex gap-3 overflow-x-auto pb-4 px-3 lg:px-4">
+            {PIPELINE_STAGES.map((stage) => (
+              <PipelineColumn
+                key={stage.key}
+                id={stage.key}
+                label={stage.label}
+                color={stage.color}
+                apps={grouped[stage.key] || []}
+                onAdd={() => navigate(`/applications/new?status=${stage.key}`)}
+                isOver={overColumnId === stage.key}
+              />
+            ))}
+          </div>
 
-        <DragOverlay>
-          {activeApp && <DragPreview app={activeApp} />}
-        </DragOverlay>
-      </DndContext>
+          <DragOverlay>
+            {activeApp && <DragPreview app={activeApp} />}
+          </DragOverlay>
+        </DndContext>
+      </div>
 
       {/* Empty state */}
       {applications.length === 0 && (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-sm font-medium text-ink dark:text-white/80">No applications yet</p>
-          <p className="mt-1 text-xs text-ink-secondary dark:text-white/50">
-            Add your first application to start building your pipeline
-          </p>
-          <div className="mt-4">
-            <Button size="sm" onClick={() => navigate("/applications/new")}>
-              Add Application
-            </Button>
+        <div>
+          <div className="flex flex-col items-center justify-center py-12 text-center">
+            <p className="text-sm font-medium text-ink dark:text-white/80">No applications yet</p>
+            <p className="mt-1 text-xs text-ink-secondary dark:text-white/50">
+              Add your first application to start building your pipeline
+            </p>
+            <div className="mt-4">
+              <Button size="sm" onClick={() => navigate("/applications/new")}>
+                Add Application
+              </Button>
+            </div>
           </div>
         </div>
       )}
