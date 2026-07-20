@@ -5,8 +5,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', 'monospace'],
+        sans: ['Geist', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['Geist Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
         brand: {
@@ -71,8 +71,8 @@ export default {
         'slide-in-right': 'slideInRight 0.25s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
-        'gradient-x': 'gradientX 6s linear infinite',
         'blob': 'blob 18s ease-in-out infinite',
+        'blob-slow': 'blob 26s ease-in-out infinite',
         'blob-slow': 'blob 26s ease-in-out infinite',
         'shine': 'shine 2.5s linear infinite',
         'float-up': 'floatUp 0.6s ease-out both',
@@ -97,10 +97,6 @@ export default {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        gradientX: {
-          '0%, 100%': { backgroundPosition: '0% 50%' },
-          '50%': { backgroundPosition: '100% 50%' },
         },
         blob: {
           '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
