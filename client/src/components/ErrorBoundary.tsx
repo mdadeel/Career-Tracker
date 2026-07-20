@@ -1,4 +1,5 @@
 import { Component, createRef, type ReactNode, type ErrorInfo } from "react";
+import { WarningCircle } from "@phosphor-icons/react";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -46,9 +47,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           <div className="max-w-md rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 p-6 text-center">
             <div className="mb-3 flex justify-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-500/20">
-                <svg className="h-6 w-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
-                </svg>
+                <WarningCircle size={24} className="text-rose-500" />
               </div>
             </div>
             <h3 className="text-sm font-semibold text-rose-800 dark:text-rose-200">Something went wrong</h3>

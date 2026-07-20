@@ -48,9 +48,9 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={disabled || isLoading}
         className={`
           inline-flex items-center justify-center font-medium
-          rounded-lg transition-all duration-150
+          rounded-lg transition-all duration-150 active:scale-[0.97]
           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:ring-offset-2
-          disabled:cursor-not-allowed disabled:opacity-50
+          disabled:cursor-not-allowed disabled:opacity-50 disabled:active:scale-100
           ${variantStyles[variant]}
           ${sizeStyles[size]}
           ${className}
@@ -68,7 +68,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
           </svg>
         ) : icon ? (
-          <span className="h-4 w-4">{icon}</span>
+          <span className="flex shrink-0">{icon}</span>
         ) : null}
         {children && <span>{children}</span>}
       </button>

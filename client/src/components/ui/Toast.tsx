@@ -1,21 +1,10 @@
 import { useToast, type ToastType } from "../../context/ToastContext";
+import { CheckCircle, XCircle, Info, X } from "@phosphor-icons/react";
 
 const iconMap: Record<ToastType, JSX.Element> = {
-  success: (
-    <svg className="h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  error: (
-    <svg className="h-4 w-4 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-  ),
-  info: (
-    <svg className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
-    </svg>
-  ),
+  success: <CheckCircle size={16} className="text-emerald-500" weight="fill" />,
+  error: <XCircle size={16} className="text-rose-500" weight="fill" />,
+  info: <Info size={16} className="text-blue-500" weight="fill" />,
 };
 
 const borderMap: Record<ToastType, string> = {
@@ -46,9 +35,7 @@ export function ToastContainer() {
             className="shrink-0 rounded p-0.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
             aria-label="Dismiss"
           >
-            <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <X size={14} />
           </button>
         </div>
       ))}
