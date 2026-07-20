@@ -7,6 +7,8 @@ import dashboardRoutes from "./routes/dashboard-routes";
 import analyticsRoutes from "./routes/analytics-routes";
 import healthRoute from "./routes/health-route";
 import { errorHandler } from "./middlewares/error-handler";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/swagger";
 import { authLimiter, apiLimiter } from "./middlewares/rate-limiter";
 
 dotenv.config();
@@ -54,6 +56,13 @@ app.use(express.json({ limit: "1mb" }));
 // Rate limiting
 app.use("/api/auth", authLimiter);
 app.use("/api", apiLimiter);
+
+// Swagger UI
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customSiteTitle: "CareerTrack API Docs",
+  customCss: ".swagger-ui .topbar { display: none } .swagger-ui .info .description p { margin-top: 8px } .swagger-ui .info { margin: 20px 0 }",
+  customfavIcon: "/favicon.ico",
+}));
 
 // Routes
 app.use("/api/health", healthRoute);
