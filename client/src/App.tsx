@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, type ReactNode } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -55,6 +55,10 @@ function PageLoadingSpinner() {
   );
 }
 
+function LazyPage({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<PageLoadingSpinner />}>{children}</Suspense>;
+}
+
 function AppRoutes() {
   const { user, isLoading } = useAuth();
 
@@ -67,45 +71,43 @@ function AppRoutes() {
   }
 
   return (
-    <Suspense fallback={<PageLoadingSpinner />}>
-      <Routes>
-        {/* Public Routes */}
-        <Route
-          path="/"
-          element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
-        />
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/dashboard" replace /> : <LoginPage />}
-        />
-        <Route
-          path="/register"
-          element={user ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
-        />
+    <Routes>
+      {/* Public Routes */}
+      <Route
+        path="/"
+        element={user ? <Navigate to="/dashboard" replace /> : <LazyPage><LandingPage /></LazyPage>}
+      />
+      <Route
+        path="/login"
+        element={user ? <Navigate to="/dashboard" replace /> : <LazyPage><LoginPage /></LazyPage>}
+      />
+      <Route
+        path="/register"
+        element={user ? <Navigate to="/dashboard" replace /> : <LazyPage><RegisterPage /></LazyPage>}
+      />
 
-        {/* Protected Routes — wrapped in persistent SidebarLayout via layout route */}
-        <Route
-          element={
-            <ProtectedRoute>
-              <SidebarLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/pipeline" element={<PipelinePage />} />
-          <Route path="/applications" element={<ApplicationsPage />} />
-          <Route path="/applications/new" element={<ApplicationFormPage />} />
-          <Route path="/applications/:id/edit" element={<ApplicationFormPage />} />
-          <Route path="/analytics" element={<AnalyticsPage />} />
-          <Route path="/calendar" element={<CalendarPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/saved-jobs" element={<SavedJobsPage />} />
-        </Route>
+      {/* Protected Routes — wrapped in persistent SidebarLayout via layout route */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <SidebarLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route path="/dashboard" element={<DashboardPage />} />
+        <Route path="/pipeline" element={<PipelinePage />} />
+        <Route path="/applications" element={<ApplicationsPage />} />
+        <Route path="/applications/new" element={<ApplicationFormPage />} />
+        <Route path="/applications/:id/edit" element={<ApplicationFormPage />} />
+        <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/saved-jobs" element={<SavedJobsPage />} />
+      </Route>
 
-        {/* 404 */}
-        <Route path="*" element={<NotFoundPage />} />
-      </Routes>
-    </Suspense>
+      {/* 404 */}
+      <Route path="*" element={<LazyPage><NotFoundPage /></LazyPage>} />
+    </Routes>
   );
 }
 

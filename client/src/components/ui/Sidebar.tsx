@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, type ReactNode } from "react";
+import { useState, useRef, useEffect, Suspense, type ReactNode } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
@@ -222,7 +222,13 @@ export function SidebarLayout() {
         <main className="flex-1">
           <ErrorBoundary>
             <div className="px-3 py-5 lg:px-4 lg:py-6">
-              <Outlet />
+              <Suspense fallback={
+                <div className="flex min-h-[50vh] items-center justify-center">
+                  <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-600 border-t-transparent" />
+                </div>
+              }>
+                <Outlet />
+              </Suspense>
             </div>
           </ErrorBoundary>
         </main>
