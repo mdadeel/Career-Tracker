@@ -5,8 +5,8 @@ import { useDemoRateLimiter } from "../hooks/useDemoRateLimiter";
 import { Button, Input, LogoFull } from "../components/ui";
 import { Lightning, WarningCircle, Spinner } from "@phosphor-icons/react";
 
-const DEMO_EMAIL = "alex@example.com";
-const DEMO_PASSWORD = "password123";
+const DEMO_EMAIL = "demo@careertrack.app";
+const DEMO_PASSWORD = "demo@123";
 
 export function LoginPage() {
   const { login } = useAuth();

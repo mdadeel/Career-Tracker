@@ -25,7 +25,7 @@ function MetricCard({
   return (
     <button
       onClick={onClick}
-      className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4 text-left transition-all duration-150 hover:border-slate-300 dark:hover:border-white/15"
+      className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-card-hover active:scale-[0.98]"
     >
       <div className="flex items-center justify-between mb-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">
@@ -37,7 +37,7 @@ function MetricCard({
         <p className="text-xs text-ink-tertiary dark:text-white/40">No data yet</p>
       ) : (
         <>
-          <p className="text-2xl font-bold text-ink dark:text-white/90 tabular-nums">{value}</p>
+          <p className="text-2xl font-extrabold text-ink dark:text-white/90 tabular-nums">{value}</p>
           {sub && <p className="mt-0.5 text-xs text-ink-tertiary dark:text-white/40">{sub}</p>}
         </>
       )}

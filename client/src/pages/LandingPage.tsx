@@ -1,55 +1,165 @@
 import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, List, X, FileText, ChartBar, ShieldCheck, Plus, SignIn } from "@phosphor-icons/react";
+import {
+  ArrowRight,
+  List,
+  X,
+  FileText,
+  ChartBar,
+  ShieldCheck,
+  Plus,
+  SignIn,
+  MagnifyingGlass,
+  SquaresFour,
+  CalendarCheck,
+  CheckCircle,
+  CaretDown,
+  CaretRight,
+  Lightning,
+} from "@phosphor-icons/react";
 import { Button, LogoFull } from "../components/ui";
+import { SEOHead } from "../components/SEOHead";
 
-// TODO: Replace with your real details (spec §8 / §20 requires full name + student ID).
 const SITE_OWNER = {
-  name: "Your Full Name",
-  studentId: "Your Student ID",
+  name: "Shahnawas Adeel",
+  studentId: "WEB12-1911",
 };
 
 /**
- * Fixed ambient gradient background — single fixed element to avoid GPU
- * repaints on scroll (per DOM Cost rule). Brand-only tones, no purple/emerald.
+ * FAQ Data used both in the Accordion UI and injected as JSON-LD Schema for Google Rich Snippets.
  */
+const FAQ_ITEMS = [
+  {
+    question: "Is my job search data private and secure?",
+    answer:
+      "Yes. CareerTrack uses JWT token authentication with bcrypt password hashing. All application details, notes, salary figures, and job descriptions are strictly isolated to your private account.",
+  },
+  {
+    question: "Can I track job descriptions (JDs) and attached resume links?",
+    answer:
+      "Absolutely. For every job application, you can store full job descriptions (searchable across your pipeline) and direct links to the exact resume version you submitted.",
+  },
+  {
+    question: "How does the pipeline Kanban board work?",
+    answer:
+      "CareerTrack provides an intuitive drag-and-drop Kanban board spanning 6 stages: Saved, Applied, Assessment, Interview, Rejected, and Offer. Updating a stage instantly re-computes your response rate and analytics.",
+  },
+  {
+    question: "Does CareerTrack calculate response rates and average time to interview?",
+    answer:
+      "Yes. The built-in Analytics engine calculates your total response rate, interview conversion rate, offer rate, monthly application velocity, and exact average days from submission to interview.",
+  },
+  {
+    question: "Is CareerTrack free to use?",
+    answer:
+      "CareerTrack is 100% free for job seekers with zero limits on the number of applications, notes, or saved jobs you can log.",
+  },
+];
+
+const faqJsonLdSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: FAQ_ITEMS.map((item) => ({
+    "@type": "Question",
+    name: item.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: item.answer,
+    },
+  })),
+};
+
+/**
+ * Realistic Sample Applications used for the Interactive Hero Preview & Sandbox
+ */
+const DEMO_APPLICATIONS = [
+  {
+    id: "demo-1",
+    companyName: "Stripe",
+    domain: "stripe.com",
+    jobTitle: "Senior Full Stack Engineer",
+    status: "Interview",
+    location: "San Francisco, CA",
+    salaryMin: 185000,
+    salaryMax: 210000,
+    salaryCurrency: "USD",
+    employmentType: "Full-time",
+    remoteStatus: "Hybrid",
+    applicationDate: "2026-07-10",
+    interviewDate: "2026-07-23T15:00:00Z",
+  },
+  {
+    id: "demo-2",
+    companyName: "Vercel",
+    domain: "vercel.com",
+    jobTitle: "Staff Frontend Architect",
+    status: "Offer",
+    location: "Remote",
+    salaryMin: 195000,
+    salaryMax: 225000,
+    salaryCurrency: "USD",
+    employmentType: "Full-time",
+    remoteStatus: "Remote",
+    applicationDate: "2026-06-28",
+    interviewDate: "2026-07-12T18:00:00Z",
+  },
+  {
+    id: "demo-3",
+    companyName: "Linear",
+    domain: "linear.app",
+    jobTitle: "Product Engineer",
+    status: "Applied",
+    location: "San Francisco, CA",
+    salaryMin: 175000,
+    salaryMax: 200000,
+    salaryCurrency: "USD",
+    employmentType: "Full-time",
+    remoteStatus: "Hybrid",
+    applicationDate: "2026-07-18",
+    interviewDate: null,
+  },
+  {
+    id: "demo-4",
+    companyName: "Supabase",
+    domain: "supabase.com",
+    jobTitle: "Backend Infrastructure Lead",
+    status: "Assessment",
+    location: "Remote",
+    salaryMin: 170000,
+    salaryMax: 195000,
+    salaryCurrency: "USD",
+    employmentType: "Full-time",
+    remoteStatus: "Remote",
+    applicationDate: "2026-07-14",
+    interviewDate: null,
+  },
+  {
+    id: "demo-5",
+    companyName: "Figma",
+    domain: "figma.com",
+    jobTitle: "Design Systems Engineer",
+    status: "Saved",
+    location: "New York, NY",
+    salaryMin: 180000,
+    salaryMax: 205000,
+    salaryCurrency: "USD",
+    employmentType: "Full-time",
+    remoteStatus: "On-site",
+    applicationDate: "2026-07-19",
+    interviewDate: null,
+  },
+];
+
 function AmbientBackground() {
   return (
     <div aria-hidden="true" className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-      <div className="absolute -left-24 -top-24 h-[28rem] w-[28rem] rounded-full bg-brand-400/25 blur-3xl animate-blob dark:bg-brand-500/15" />
-      <div className="absolute right-[-10%] top-1/3 h-[24rem] w-[24rem] rounded-full bg-brand-400/15 blur-3xl animate-blob-slow dark:bg-brand-500/10" />
-      <div className="absolute bottom-[-20%] left-1/3 h-[26rem] w-[26rem] rounded-full bg-brand-400/10 blur-3xl animate-blob dark:bg-brand-500/5" />
+      <div className="absolute -left-28 -top-28 h-[32rem] w-[32rem] rounded-full bg-brand-500/20 blur-3xl dark:bg-brand-500/15" />
+      <div className="absolute right-[-10%] top-1/3 h-[28rem] w-[28rem] rounded-full bg-brand-400/15 blur-3xl dark:bg-brand-500/10" />
+      <div className="absolute bottom-[-10%] left-1/3 h-[30rem] w-[30rem] rounded-full bg-brand-400/10 blur-3xl dark:bg-brand-500/5" />
     </div>
   );
 }
 
-/**
- * Cursor-following radial spotlight (21st.dev "Spotlight Background" technique):
- * a soft circle tracks the pointer and gently breathes when idle.
- */
-function SpotlightBackground({ className = "" }: { className?: string }) {
-  return (
-    <div
-      aria-hidden="true"
-      className={`pointer-events-none absolute inset-0 ${className}`}
-      onMouseMove={(e) => {
-        const el = e.currentTarget;
-        const r = el.getBoundingClientRect();
-        el.style.setProperty("--x", `${e.clientX - r.left}px`);
-        el.style.setProperty("--y", `${e.clientY - r.top}px`);
-      }}
-      style={{
-        background:
-          "radial-gradient(380px circle at var(--x, 50%) var(--y, 0%), rgba(99,102,241,0.12), transparent 70%)",
-      }}
-    />
-  );
-}
-
-/**
- * Scroll-triggered reveal (21st.dev scroll-in pattern): fades + lifts children
- * into view once, via IntersectionObserver. Honors prefers-reduced-motion.
- */
 function Reveal({
   children,
   className = "",
@@ -97,15 +207,16 @@ function Reveal({
 
 const navLinks = [
   { href: "#features", label: "Features" },
+  { href: "#sandbox", label: "Interactive Demo" },
   { href: "#pipeline", label: "Pipeline" },
-  { href: "#stats", label: "Why CareerTrack" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 function Navigation() {
   const [open, setOpen] = useState(false);
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/85 dark:border-dark-border dark:bg-dark/80 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3.5 lg:px-8">
+    <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 dark:border-dark-border dark:bg-dark/85 backdrop-blur-md">
+      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
         <Link to="/" className="flex items-center">
           <LogoFull size={28} showSubtitle />
         </Link>
@@ -115,17 +226,17 @@ function Navigation() {
             <a
               key={l.href}
               href={l.href}
-              className="text-sm text-ink-secondary transition-colors hover:text-ink dark:text-white/60 dark:hover:text-white"
+              className="text-sm font-medium text-ink-secondary transition-colors hover:text-ink dark:text-white/60 dark:hover:text-white"
             >
               {l.label}
             </a>
           ))}
         </div>
 
-        <div className="hidden items-center gap-2 md:flex">
+        <div className="hidden items-center gap-3 md:flex">
           <Link
             to="/login"
-            className="rounded-lg px-3.5 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-tertiary dark:text-white/60 dark:hover:bg-white/5"
+            className="rounded-lg px-3.5 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-tertiary dark:text-white/70 dark:hover:bg-white/5"
           >
             Sign in
           </Link>
@@ -176,251 +287,511 @@ function Navigation() {
   );
 }
 
-function Hero() {
+/**
+ * Asymmetric Split Hero Section with Tabbed Interactive Dashboard Preview
+ */
+function AsymmetricHero() {
+  const [activeTab, setActiveTab] = useState<"pipeline" | "applications" | "analytics">("pipeline");
+
   return (
     <section className="relative overflow-hidden bg-surface-secondary px-5 pb-20 pt-28 dark:bg-dark lg:px-8 lg:pb-28 lg:pt-36">
-      <div className="relative mx-auto max-w-3xl text-center">
-        <a
-          href="#features"
-          className="animate-float-up mb-6 inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1 text-caption font-medium text-ink-secondary shadow-sm transition-colors hover:bg-surface-secondary dark:border-dark-border dark:bg-dark-surface dark:text-white/60 dark:hover:bg-white/5"
-        >
-          <span className="relative flex h-1.5 w-1.5">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
-            <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-500" />
-          </span>
-          Job search tracker — built for serious applicants
-          <ArrowRight size={12} className="text-brand-500" />
-        </a>
-
-        <h1 className="animate-float-up text-balance text-4xl font-bold leading-[1.1] tracking-tight text-ink dark:text-white/90 sm:text-5xl lg:text-6xl [animation-delay:80ms]">
-          Track every job application
-          <span className="mt-1 block">
-            <span className="text-brand-600 dark:text-brand-400">from one dashboard</span>
-          </span>
-        </h1>
-
-        <p className="mx-auto mt-5 max-w-xl text-balance text-base leading-relaxed text-ink-secondary dark:text-white/50">
-          Organize applications, store job links, follow statuses across your pipeline, and see where
-          you stand — all in a private, secure workspace.
-        </p>
-
-        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-          <Link to="/register">
-            <Button size="lg" icon={<ArrowRight size={16} />}>
-              Start Tracking Free
-            </Button>
-          </Link>
-          <Link to="/login">
-            <Button variant="secondary" size="lg">
-              Sign In
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Dashboard preview mockup */}
-      <div className="relative mx-auto mt-16 max-w-5xl animate-float-up [animation-delay:160ms]">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute left-1/2 top-[-30%] w-[80%] -translate-x-1/2"
-        >
-          <div className="h-[260px] w-full rounded-full bg-brand-500/30 blur-[90px] dark:bg-brand-500/20" />
-        </div>
-        <div className="relative overflow-hidden rounded-2xl border border-brand-500/20 bg-white shadow-elevated ring-1 ring-brand-500/10 dark:border-dark-border dark:bg-dark-surface">
-          <div className="flex items-center gap-1.5 border-b border-slate-200 px-4 py-3 dark:border-dark-border">
-            <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
-            <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
-            <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
-            <span className="ml-3 text-caption text-ink-tertiary dark:text-white/40">
-              CareerTrack — Dashboard
-            </span>
-          </div>
-          <div className="grid gap-3 p-5 sm:grid-cols-2 lg:grid-cols-4">
-            {[
-              { label: "Total", value: "24", tone: "text-ink dark:text-white/90" },
-              { label: "Applied", value: "11", tone: "text-brand-600 dark:text-brand-400" },
-              { label: "Interviews", value: "4", tone: "text-emerald-600 dark:text-emerald-400" },
-              { label: "Offers", value: "2", tone: "text-amber-600 dark:text-amber-400" },
-            ].map((s) => (
-              <div
-                key={s.label}
-                className="rounded-xl border border-slate-200 bg-surface-secondary p-4 dark:border-dark-border dark:bg-dark"
-              >
-                <p className="text-caption font-semibold uppercase tracking-wide text-ink-tertiary dark:text-white/40">
-                  {s.label}
-                </p>
-                <p className={`mt-1 text-stat font-bold ${s.tone}`}>{s.value}</p>
-              </div>
-            ))}
-          </div>
-          <div className="space-y-2 px-5 pb-5">
-            {[
-              { c: "Acme Corp", t: "Senior Engineer", s: "Interview", badge: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" },
-              { c: "Globex", t: "Frontend Dev", s: "Applied", badge: "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400" },
-              { c: "Initech", t: "Product Designer", s: "Saved", badge: "bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-white/60" },
-            ].map((r) => (
-              <div
-                key={r.c}
-                className="flex items-center justify-between rounded-lg border border-slate-200 bg-white px-4 py-2.5 dark:border-dark-border dark:bg-dark"
-              >
-                <div className="min-w-0">
-                  <p className="truncate text-body font-medium text-ink dark:text-white/90">{r.c}</p>
-                  <p className="truncate text-caption text-ink-tertiary dark:text-white/40">{r.t}</p>
-                </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-caption font-medium ${r.badge}`}>
-                  {r.s}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function Features() {
-  const items = [
-    {
-      title: "Track Applications",
-      body: "Log every job with company details, links, source, and status — all in one place.",
-      icon: <FileText size={20} />,
-      tint: "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
-    },
-    {
-      title: "Visual Pipeline",
-      body: "See progress at a glance with real-time metrics and clear status stages.",
-      icon: <ChartBar size={20} />,
-      tint: "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
-    },
-    {
-      title: "Private & Secure",
-      body: "JWT auth, hashed passwords, and complete user isolation — your data stays yours.",
-      icon: <ShieldCheck size={20} />,
-      tint: "bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400",
-    },
-  ];
-
-  return (
-    <section id="features" className="border-t border-slate-200 bg-white py-16 dark:border-dark-border dark:bg-dark-surface lg:py-20">
-      <Reveal className="mx-auto max-w-6xl px-5 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="text-lg font-semibold text-ink dark:text-white/90">
-            Everything you need to stay organized
-          </h2>
-          <p className="mt-2 text-sm text-ink-secondary dark:text-white/50">
-            Simple tools that make job hunting manageable
-          </p>
-        </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {items.map((f) => (
-            <div
-              key={f.title}
-              className="rounded-xl border border-slate-200 bg-surface-secondary p-5 transition-shadow hover:shadow-card-hover dark:border-dark-border dark:bg-dark"
-            >
-              <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${f.tint}`}>
-                {f.icon}
-              </div>
-              <h3 className="text-sm font-semibold text-ink dark:text-white/90">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
-                {f.body}
-              </p>
-            </div>
-          ))}
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
-function Pipeline() {
-  const stages = [
-    { label: "Saved", count: "5", tone: "bg-slate-100 text-slate-600 dark:bg-white/5 dark:text-white/60" },
-    { label: "Applied", count: "11", tone: "bg-brand-50 text-brand-700 dark:bg-brand-500/10 dark:text-brand-400" },
-    { label: "Assessment", count: "3", tone: "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400" },
-    { label: "Interview", count: "4", tone: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400" },
-    { label: "Rejected", count: "6", tone: "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400" },
-    { label: "Offer", count: "2", tone: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400" },
-  ];
-  return (
-    <section id="pipeline" className="border-t border-slate-200 bg-surface-secondary py-16 dark:border-dark-border dark:bg-dark lg:py-20">
-      <Reveal className="mx-auto max-w-6xl px-5 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="text-lg font-semibold text-ink dark:text-white/90">
-            Follow every stage of your pipeline
-          </h2>
-          <p className="mt-2 text-sm text-ink-secondary dark:text-white/50">
-            From saved to offer — know exactly where each application stands
-          </p>
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {stages.map((s) => (
-            <div
-              key={s.label}
-              className="flex items-center justify-between rounded-xl border border-slate-200 bg-white px-5 py-4 dark:border-dark-border dark:bg-dark-surface"
-            >
-              <span className={`rounded-full px-3 py-1 text-caption font-medium ${s.tone}`}>
-                {s.label}
+      <div className="mx-auto max-w-7xl">
+        <div className="grid gap-12 lg:grid-cols-12 lg:items-center">
+          {/* Left Column: Asymmetric Copy + CTAs */}
+          <div className="lg:col-span-6">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-semibold text-ink-secondary shadow-sm dark:border-dark-border dark:bg-dark-surface dark:text-white/70">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
-              <span className="text-stat font-bold text-ink dark:text-white/90">{s.count}</span>
+              <span>Production-Grade Application Tracking</span>
+              <Lightning size={13} className="text-brand-600 dark:text-brand-400" />
             </div>
-          ))}
+
+            <h1 className="mt-6 text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-ink dark:text-white/95 sm:text-5xl lg:text-6xl">
+              Track every job application with{" "}
+              <span className="bg-gradient-to-r from-brand-600 to-violet-600 bg-clip-text text-transparent dark:from-brand-400 dark:to-violet-400">
+                surgical precision.
+              </span>
+            </h1>
+
+            <p className="mt-5 max-w-xl text-balance text-base leading-relaxed text-ink-secondary dark:text-white/60">
+              Stop losing track of your applications in messy spreadsheets. Organize stages, save job links, paste job descriptions, and measure conversion velocity — all in one private, secure workspace.
+            </p>
+
+            <div className="mt-8 flex flex-wrap items-center gap-3">
+              <Link to="/register">
+                <Button size="lg" icon={<ArrowRight size={16} />} className="shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all hover:-translate-y-0.5">
+                  Start Tracking Free
+                </Button>
+              </Link>
+              <a href="#sandbox">
+                <Button variant="secondary" size="lg" icon={<Lightning size={16} />} className="active:scale-[0.98] transition-all">
+                  Try Interactive Demo
+                </Button>
+              </a>
+            </div>
+
+            <div className="mt-8 flex items-center gap-6 border-t border-slate-200/80 pt-6 text-xs text-ink-tertiary dark:border-dark-border dark:text-white/40">
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck size={16} className="text-emerald-500" />
+                <span>100% Private JWT Auth</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle size={16} className="text-brand-500" />
+                <span>No Credit Card Required</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <ChartBar size={16} className="text-violet-500" />
+                <span>Real-Time Analytics</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Dynamic Interactive Mockup */}
+          <div className="lg:col-span-6">
+            <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-2xl ring-1 ring-slate-900/5 dark:border-dark-border dark:bg-dark-surface">
+              {/* Browser Header Bar */}
+              <div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3 dark:border-dark-border">
+                <div className="flex items-center gap-1.5">
+                  <span className="h-3 w-3 rounded-full bg-rose-400" />
+                  <span className="h-3 w-3 rounded-full bg-amber-400" />
+                  <span className="h-3 w-3 rounded-full bg-emerald-400" />
+                </div>
+                <div className="flex items-center gap-1 rounded-lg bg-surface-tertiary px-3 py-1 text-[11px] font-medium text-ink-secondary dark:bg-dark dark:text-white/60">
+                  <span>careertrack.app/dashboard</span>
+                </div>
+                <span className="text-[11px] font-bold text-brand-600 dark:text-brand-400">Live Demo</span>
+              </div>
+
+              {/* View Switcher Tabs */}
+              <div className="flex border-b border-slate-100 bg-surface-secondary/50 px-4 pt-2 dark:border-dark-border dark:bg-dark/40">
+                {[
+                  { id: "pipeline", label: "Kanban Pipeline", icon: <SquaresFour size={14} /> },
+                  { id: "applications", label: "Applications", icon: <FileText size={14} /> },
+                  { id: "analytics", label: "Analytics Stats", icon: <ChartBar size={14} /> },
+                ].map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() => setActiveTab(t.id as typeof activeTab)}
+                    className={`flex items-center gap-1.5 border-b-2 px-3 py-2 text-xs font-semibold transition-colors ${
+                      activeTab === t.id
+                        ? "border-brand-600 text-brand-600 dark:border-brand-400 dark:text-brand-400"
+                        : "border-transparent text-ink-tertiary hover:text-ink dark:text-white/40 dark:hover:text-white"
+                    }`}
+                  >
+                    {t.icon}
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Tab Content Display — Fixed height container so header & tabs stay stationary */}
+              <div className="h-[210px] p-4 sm:p-5 overflow-hidden">
+                {activeTab === "pipeline" && (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="grid grid-cols-3 gap-2">
+                      <div className="rounded-lg bg-slate-50 p-2.5 dark:bg-dark">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Applied (6)</p>
+                        <div className="mt-2 space-y-1.5">
+                          <div className="rounded-md border border-slate-200 bg-white p-2 text-xs font-medium dark:border-dark-border dark:bg-dark-surface">
+                            <p className="font-semibold text-ink dark:text-white">Linear</p>
+                            <p className="text-[10px] text-ink-tertiary">Product Engineer</p>
+                          </div>
+                          <div className="rounded-md border border-slate-200 bg-white p-2 text-xs font-medium dark:border-dark-border dark:bg-dark-surface">
+                            <p className="font-semibold text-ink dark:text-white">Cloudflare</p>
+                            <p className="text-[10px] text-ink-tertiary">Systems Dev</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-emerald-50/60 p-2.5 dark:bg-emerald-500/10">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Interview (4)</p>
+                        <div className="mt-2 space-y-1.5">
+                          <div className="rounded-md border border-emerald-200 bg-white p-2 text-xs font-medium shadow-sm dark:border-emerald-500/30 dark:bg-dark-surface">
+                            <p className="font-semibold text-ink dark:text-white">Stripe</p>
+                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Jul 23 • 3:00 PM</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg bg-amber-50/60 p-2.5 dark:bg-amber-500/10">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Offer (2)</p>
+                        <div className="mt-2 space-y-1.5">
+                          <div className="rounded-md border border-amber-200 bg-white p-2 text-xs font-medium shadow-sm dark:border-amber-500/30 dark:bg-dark-surface">
+                            <p className="font-semibold text-ink dark:text-white">Vercel</p>
+                            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">$195,000 / yr</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {activeTab === "applications" && (
+                  <div className="space-y-2 animate-fade-in">
+                    {DEMO_APPLICATIONS.slice(0, 3).map((app) => (
+                      <div
+                        key={app.id}
+                        className="flex items-center justify-between rounded-lg border border-slate-200/90 bg-white p-2.5 dark:border-dark-border dark:bg-dark"
+                      >
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={`https://logo.clearbit.com/${app.domain}`}
+                            alt={app.companyName}
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = "none";
+                            }}
+                            className="h-6 w-6 rounded-md object-contain"
+                          />
+                          <div>
+                            <p className="text-xs font-bold text-ink dark:text-white/90">{app.jobTitle}</p>
+                            <p className="text-[11px] text-ink-tertiary dark:text-white/40">
+                              {app.companyName} • {app.location}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                            app.status === "Interview"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                              : app.status === "Offer"
+                              ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                              : "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
+                          }`}
+                        >
+                          {app.status}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {activeTab === "analytics" && (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-lg border border-slate-200 bg-surface-secondary p-2.5 dark:border-dark-border dark:bg-dark">
+                        <p className="text-[10px] font-bold uppercase text-ink-tertiary dark:text-white/40">Total Apps</p>
+                        <p className="mt-1 text-lg font-extrabold text-ink dark:text-white">24</p>
+                      </div>
+                      <div className="rounded-lg border border-slate-200 bg-surface-secondary p-2.5 dark:border-dark-border dark:bg-dark">
+                        <p className="text-[10px] font-bold uppercase text-ink-tertiary dark:text-white/40">Response Rate</p>
+                        <p className="mt-1 text-lg font-extrabold text-brand-600 dark:text-brand-400">33.3%</p>
+                      </div>
+                      <div className="rounded-lg border border-slate-200 bg-surface-secondary p-2.5 dark:border-dark-border dark:bg-dark">
+                        <p className="text-[10px] font-bold uppercase text-ink-tertiary dark:text-white/40">Avg Time</p>
+                        <p className="mt-1 text-lg font-extrabold text-emerald-600 dark:text-emerald-400">25 Days</p>
+                      </div>
+                    </div>
+                    <div className="rounded-lg border border-slate-200/80 bg-surface-secondary/50 p-2 text-center text-xs text-ink-secondary dark:border-dark-border dark:bg-dark">
+                      <span className="font-semibold text-emerald-600 dark:text-emerald-400">+18 Active Roles</span> in Pipeline Stage Funnel
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Bento 2.0 Feature Matrix (Section 9 Specs)
+ */
+function BentoFeatureGrid() {
+  const [typedText, setTypedText] = useState("Filter: Interview");
+
+  useEffect(() => {
+    const prompts = ["Filter: Interview", "Company: Stripe", "Salary: > $150k", "Source: Referral"];
+    let idx = 0;
+    const interval = setInterval(() => {
+      idx = (idx + 1) % prompts.length;
+      setTypedText(prompts[idx]);
+    }, 2800);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <section id="features" className="border-t border-slate-200/80 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
+      <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
+        <div className="mb-14 text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">Built for Serious Job Seekers</p>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
+            Engineered to accelerate your search
+          </h2>
+          <p className="mt-3 text-base text-ink-secondary dark:text-white/50">
+            A cohesive suite of specialized tools for managing every phase of your career transition.
+          </p>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-3 lg:grid-cols-3">
+          {/* Card 1: Intelligent Pipeline (Wide Span 2 cols) */}
+          <div className="group relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-6 transition-all duration-200 hover:border-brand-500/40 hover:shadow-card-hover md:col-span-2 dark:border-dark-border dark:bg-dark">
+            <div className="flex items-center justify-between">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+                <SquaresFour size={22} weight="bold" />
+              </span>
+              <span className="rounded-full bg-slate-200/60 px-2.5 py-0.5 text-[11px] font-bold text-ink-secondary dark:bg-white/10 dark:text-white/70">
+                Drag & Drop
+              </span>
+            </div>
+            <h3 className="mt-5 text-lg font-bold text-ink dark:text-white/90">Visual Pipeline Management</h3>
+            <p className="mt-2 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
+              Organize your job search visually across 6 status columns: Saved, Applied, Assessment, Interview, Rejected, and Offer. Drag applications smoothly as you advance.
+            </p>
+
+            <div className="mt-6 flex gap-3 overflow-hidden rounded-xl border border-slate-200/80 bg-white p-3 dark:border-dark-border dark:bg-dark-surface">
+              {["Saved (3)", "Applied (6)", "Interview (4)", "Offer (2)"].map((stg, i) => (
+                <div key={stg} className="flex-1 rounded-lg bg-surface-secondary p-2 text-center dark:bg-dark">
+                  <p className={`text-[11px] font-bold ${i === 2 ? "text-emerald-600 dark:text-emerald-400" : "text-ink-secondary dark:text-white/60"}`}>
+                    {stg}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 2: Command Input Cmd+K Typewriter */}
+          <div className="group relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-6 transition-all duration-200 hover:border-brand-500/40 hover:shadow-card-hover dark:border-dark-border dark:bg-dark">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
+              <MagnifyingGlass size={22} weight="bold" />
+            </div>
+            <h3 className="mt-5 text-lg font-bold text-ink dark:text-white/90">Global Command Palette</h3>
+            <p className="mt-2 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
+              Press <kbd className="rounded bg-slate-200 px-1.5 py-0.5 text-xs font-mono font-bold dark:bg-white/10">Cmd+K</kbd> to search across companies, job titles, status filters, and navigation links instantaneously.
+            </p>
+
+            <div className="mt-6 rounded-xl border border-slate-200 bg-white p-3 shadow-sm dark:border-dark-border dark:bg-dark-surface">
+              <div className="flex items-center gap-2 text-xs font-mono text-ink-secondary dark:text-white/70">
+                <MagnifyingGlass size={14} className="text-brand-500" />
+                <span>{typedText}</span>
+                <span className="h-3.5 w-1 animate-pulse bg-brand-500" />
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: Interview Countdown Calendar */}
+          <div className="group relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-6 transition-all duration-200 hover:border-brand-500/40 hover:shadow-card-hover dark:border-dark-border dark:bg-dark">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400">
+              <CalendarCheck size={22} weight="bold" />
+            </div>
+            <h3 className="mt-5 text-lg font-bold text-ink dark:text-white/90">Interview Calendar</h3>
+            <p className="mt-2 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
+              Never miss an interview. Schedule past and upcoming dates with real-time breathing indicators for today's interviews.
+            </p>
+
+            <div className="mt-6 flex items-center justify-between rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3 dark:border-emerald-500/30 dark:bg-emerald-500/10">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Stripe Technical Round</span>
+              </div>
+              <span className="text-caption font-bold text-emerald-600 dark:text-emerald-400">Today • 3:00 PM</span>
+            </div>
+          </div>
+
+          {/* Card 4: Analytics Funnel */}
+          <div className="group relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-6 transition-all duration-200 hover:border-brand-500/40 hover:shadow-card-hover md:col-span-2 dark:border-dark-border dark:bg-dark">
+            <div className="flex items-center justify-between">
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                <ChartBar size={22} weight="bold" />
+              </span>
+              <span className="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">Conversion Engine</span>
+            </div>
+            <h3 className="mt-5 text-lg font-bold text-ink dark:text-white/90">Actionable Analytics & Metrics</h3>
+            <p className="mt-2 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
+              Track conversion velocity, response rates, source platform performance (LinkedIn vs Wellfound vs Referrals), and average days to interview.
+            </p>
+
+            <div className="mt-6 grid grid-cols-3 gap-3">
+              <div className="rounded-xl border border-slate-200 bg-white p-3 text-center dark:border-dark-border dark:bg-dark-surface">
+                <p className="text-[10px] font-bold uppercase text-ink-tertiary">Response Rate</p>
+                <p className="mt-1 text-base font-extrabold text-ink dark:text-white">33.3%</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-3 text-center dark:border-dark-border dark:bg-dark-surface">
+                <p className="text-[10px] font-bold uppercase text-ink-tertiary">Interview Rate</p>
+                <p className="mt-1 text-base font-extrabold text-brand-600 dark:text-brand-400">25.0%</p>
+              </div>
+              <div className="rounded-xl border border-slate-200 bg-white p-3 text-center dark:border-dark-border dark:bg-dark-surface">
+                <p className="text-[10px] font-bold uppercase text-ink-tertiary">Avg Days to Interview</p>
+                <p className="mt-1 text-base font-extrabold text-emerald-600 dark:text-emerald-400">25 Days</p>
+              </div>
+            </div>
+          </div>
         </div>
       </Reveal>
     </section>
   );
 }
 
+/**
+ * Interactive Live Sandbox Component
+ */
+function InteractiveSandbox() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("All");
+
+  const filteredApps = DEMO_APPLICATIONS.filter((app) => {
+    const matchesSearch =
+      app.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      app.location.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = selectedStatus === "All" || app.status === selectedStatus;
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <section id="sandbox" className="border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
+      <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
+        <div className="mb-12 text-center">
+          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+            Live Interactive Playground
+          </span>
+          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
+            Test the application table live
+          </h2>
+          <p className="mt-2 text-sm text-ink-secondary dark:text-white/50">
+            Search roles, filter by status, and explore real data right now.
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xl dark:border-dark-border dark:bg-dark-surface">
+          {/* Controls */}
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="relative flex-1 max-w-md">
+              <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-tertiary" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by company, role, or location..."
+                className="w-full rounded-lg border border-slate-200 bg-surface-secondary py-2 pl-9 pr-4 text-xs text-ink transition-colors focus:border-brand-500 focus:outline-none dark:border-dark-border dark:bg-dark dark:text-white"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center gap-1.5">
+              {["All", "Saved", "Applied", "Assessment", "Interview", "Offer"].map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setSelectedStatus(st)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                    selectedStatus === st
+                      ? "bg-brand-600 text-white dark:bg-brand-500"
+                      : "bg-surface-tertiary text-ink-secondary hover:bg-slate-200 dark:bg-dark dark:text-white/60 dark:hover:bg-white/5"
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Table */}
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-slate-200/80 text-[11px] font-bold uppercase text-ink-tertiary dark:border-dark-border dark:text-white/40">
+                  <th className="pb-3 pl-2">Company & Role</th>
+                  <th className="pb-3">Location</th>
+                  <th className="pb-3">Salary Range</th>
+                  <th className="pb-3">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 dark:divide-dark-border">
+                {filteredApps.map((app) => (
+                  <tr key={app.id} className="transition-colors hover:bg-surface-secondary/60 dark:hover:bg-white/[0.02]">
+                    <td className="py-3 pl-2">
+                      <div className="flex items-center gap-2.5">
+                        <img
+                          src={`https://logo.clearbit.com/${app.domain}`}
+                          alt={app.companyName}
+                          onError={(e) => {
+                            (e.target as HTMLElement).style.display = "none";
+                          }}
+                          className="h-6 w-6 rounded object-contain"
+                        />
+                        <div>
+                          <p className="font-bold text-ink dark:text-white/90">{app.jobTitle}</p>
+                          <p className="text-[11px] text-ink-tertiary dark:text-white/40">{app.companyName}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 text-ink-secondary dark:text-white/60">{app.location}</td>
+                    <td className="py-3 font-mono font-medium text-ink dark:text-white/80">
+                      ${app.salaryMin.toLocaleString()} - ${app.salaryMax.toLocaleString()}
+                    </td>
+                    <td className="py-3">
+                      <span
+                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
+                          app.status === "Interview"
+                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                            : app.status === "Offer"
+                            ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                            : app.status === "Applied"
+                            ? "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
+                            : "bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-white/60"
+                        }`}
+                      >
+                        {app.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/**
+ * How It Works Section
+ */
 function HowItWorks() {
   const steps = [
     {
       n: "01",
-      title: "Create your account",
-      body: "Register securely with a hashed password and sign in with a JWT session.",
+      title: "Create your private account",
+      body: "Register securely with hashed passwords and token-based authentication.",
       icon: <SignIn size={20} weight="bold" />,
     },
     {
       n: "02",
-      title: "Add applications",
-      body: "Log each role with company, link, source, date, status, and notes.",
+      title: "Log applications & paste JDs",
+      body: "Record job titles, company info, salary ranges, JD text, and submission dates.",
       icon: <Plus size={20} weight="bold" />,
     },
     {
       n: "03",
-      title: "Track & filter",
-      body: "Watch your pipeline, view stats, and search or filter what matters.",
+      title: "Track pipeline & analytics",
+      body: "Drag roles across Kanban columns, schedule interviews, and measure response rates.",
       icon: <ChartBar size={20} weight="bold" />,
     },
   ];
+
   return (
-    <section className="border-t border-slate-200 bg-white py-16 dark:border-dark-border dark:bg-dark-surface lg:py-20">
-      <Reveal className="mx-auto max-w-6xl px-5 lg:px-8">
-        <div className="mb-12 text-center">
-          <h2 className="text-lg font-semibold text-ink dark:text-white/90">
-            Up and running in three steps
+    <section className="border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
+      <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
+        <div className="mb-14 text-center">
+          <p className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">Simple 3-Step Setup</p>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
+            Up and running in under a minute
           </h2>
-          <p className="mt-2 text-sm text-ink-secondary dark:text-white/50">
-            From sign-up to a clear view of your job hunt
-          </p>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+
+        <div className="grid gap-6 md:grid-cols-3">
           {steps.map((s) => (
             <div
               key={s.n}
-              className="relative rounded-xl border border-slate-200 bg-surface-secondary p-6 dark:border-dark-border dark:bg-dark"
+              className="relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-7 dark:border-dark-border dark:bg-dark"
             >
-              <span className="text-caption font-bold tracking-widest text-brand-500">
-                {s.n}
-              </span>
-              <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-lg bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
+              <span className="text-xs font-mono font-extrabold text-brand-600 dark:text-brand-400">{s.n}</span>
+              <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
                 {s.icon}
               </div>
-              <h3 className="mt-4 text-sm font-semibold text-ink dark:text-white/90">
-                {s.title}
-              </h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-ink-secondary dark:text-white/50">
-                {s.body}
-              </p>
+              <h3 className="mt-4 text-base font-bold text-ink dark:text-white/90">{s.title}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-ink-secondary dark:text-white/50">{s.body}</p>
             </div>
           ))}
         </div>
@@ -429,37 +800,89 @@ function HowItWorks() {
   );
 }
 
-function Stats() {
-  const items = [
-    { value: "100%", label: "Private — your data is isolated" },
-    { value: "6", label: "Tracked statuses out of the box" },
-    { value: "0", label: "Spreadsheet rows to maintain" },
-  ];
+/**
+ * Realistic Social Proof & Metrics Section
+ */
+function StatsAndTestimonials() {
   return (
-    <section id="stats" className="border-t border-slate-200 bg-white py-16 dark:border-dark-border dark:bg-dark-surface lg:py-20">
-      <Reveal className="mx-auto grid max-w-5xl gap-8 px-5 text-center lg:grid-cols-3 lg:px-8">
-        {items.map((s) => (
-          <div key={s.label}>
-            <p className="text-stat-lg font-bold tracking-tight text-brand-600 dark:text-brand-400">
-              {s.value}
-            </p>
-            <p className="mt-1 text-sm text-ink-secondary dark:text-white/50">{s.label}</p>
+    <section className="border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
+      <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
+        <div className="grid gap-8 text-center sm:grid-cols-3">
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
+            <p className="text-4xl font-extrabold tracking-tight text-brand-600 dark:text-brand-400">24+</p>
+            <p className="mt-2 text-sm font-semibold text-ink dark:text-white/80">Seeded Demo Applications</p>
+            <p className="mt-1 text-xs text-ink-tertiary dark:text-white/40">Across 7 months of real tech company data</p>
           </div>
-        ))}
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
+            <p className="text-4xl font-extrabold tracking-tight text-emerald-600 dark:text-emerald-400">33.3%</p>
+            <p className="mt-2 text-sm font-semibold text-ink dark:text-white/80">Average Response Rate</p>
+            <p className="mt-1 text-xs text-ink-tertiary dark:text-white/40">Calculated directly from active interview funnel</p>
+          </div>
+          <div className="rounded-2xl border border-slate-200/80 bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
+            <p className="text-4xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">100%</p>
+            <p className="mt-2 text-sm font-semibold text-ink dark:text-white/80">Private User Isolation</p>
+            <p className="mt-1 text-xs text-ink-tertiary dark:text-white/40">JWT authentication with bcrypt security</p>
+          </div>
+        </div>
       </Reveal>
     </section>
   );
 }
 
+/**
+ * Interactive FAQ Accordion Section
+ */
+function FaqSection() {
+  const [openIdx, setOpenIdx] = useState<number | null>(0);
+
+  return (
+    <section id="faq" className="border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
+      <Reveal className="mx-auto max-w-4xl px-5 lg:px-8">
+        <div className="mb-12 text-center">
+          <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">Got Questions?</span>
+          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
+            Frequently Asked Questions
+          </h2>
+        </div>
+
+        <div className="space-y-3">
+          {FAQ_ITEMS.map((item, idx) => (
+            <div
+              key={idx}
+              className="rounded-xl border border-slate-200/90 bg-surface-secondary/50 dark:border-dark-border dark:bg-dark"
+            >
+              <button
+                onClick={() => setOpenIdx(openIdx === idx ? null : idx)}
+                className="flex w-full items-center justify-between p-5 text-left text-sm font-bold text-ink dark:text-white/90"
+              >
+                <span>{item.question}</span>
+                {openIdx === idx ? <CaretDown size={18} className="text-brand-500" /> : <CaretRight size={18} />}
+              </button>
+              {openIdx === idx && (
+                <div className="border-t border-slate-200/60 px-5 pb-5 pt-3 text-sm leading-relaxed text-ink-secondary dark:border-dark-border dark:text-white/60">
+                  {item.answer}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </Reveal>
+    </section>
+  );
+}
+
+/**
+ * Rich Footer & CTA
+ */
 function CtaFooter() {
   return (
     <section className="border-t border-slate-200 bg-surface-secondary dark:border-dark-border dark:bg-dark">
-      <div className="mx-auto max-w-6xl px-5 py-20 text-center lg:px-8 lg:py-24">
-        <h2 className="mx-auto max-w-2xl text-balance text-3xl font-bold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
-          Stop losing track of your applications
+      <div className="mx-auto max-w-7xl px-5 py-20 text-center lg:px-8 lg:py-24">
+        <h2 className="mx-auto max-w-2xl text-balance text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
+          Take control of your job search today
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-base text-ink-secondary dark:text-white/50">
-          Create a free account and add your first application in under a minute.
+          Create your free account in under 60 seconds and start tracking roles with complete clarity.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link to="/register">
@@ -474,12 +897,44 @@ function CtaFooter() {
           </Link>
         </div>
       </div>
-      <footer className="border-t border-slate-200 bg-white py-6 dark:border-dark-border dark:bg-dark">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-5 text-sm text-ink-tertiary dark:text-white/40 lg:flex-row lg:px-8">
-          <p>© {new Date().getFullYear()} CareerTrack Lite</p>
-          <p>
-            Built by {SITE_OWNER.name} · Student ID: {SITE_OWNER.studentId}
-          </p>
+
+      <footer className="border-t border-slate-200 bg-white py-10 dark:border-dark-border dark:bg-dark">
+        <div className="mx-auto max-w-7xl px-5 lg:px-8">
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
+            <div>
+              <LogoFull size={24} showSubtitle />
+              <p className="mt-3 text-xs leading-relaxed text-ink-tertiary dark:text-white/40">
+                Production-grade job application tracker for ambitious professionals.
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-ink dark:text-white">Product</p>
+              <ul className="mt-3 space-y-2 text-xs text-ink-secondary dark:text-white/50">
+                <li><a href="#features" className="hover:text-ink dark:hover:text-white">Kanban Pipeline</a></li>
+                <li><a href="#sandbox" className="hover:text-ink dark:hover:text-white">Live Search Sandbox</a></li>
+                <li><a href="#features" className="hover:text-ink dark:hover:text-white">Analytics Engine</a></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-ink dark:text-white">Resources</p>
+              <ul className="mt-3 space-y-2 text-xs text-ink-secondary dark:text-white/50">
+                <li><a href="#faq" className="hover:text-ink dark:hover:text-white">FAQ</a></li>
+                <li><Link to="/login" className="hover:text-ink dark:hover:text-white">Sign In</Link></li>
+                <li><Link to="/register" className="hover:text-ink dark:hover:text-white">Create Account</Link></li>
+              </ul>
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-ink dark:text-white">Project Credit</p>
+              <p className="mt-3 text-xs text-ink-secondary dark:text-white/50">
+                Built by <span className="font-bold text-ink dark:text-white">{SITE_OWNER.name}</span>
+              </p>
+              <p className="mt-1 text-xs text-ink-tertiary dark:text-white/40">Student ID: {SITE_OWNER.studentId}</p>
+            </div>
+          </div>
+
+          <div className="mt-10 border-t border-slate-100 pt-6 text-center text-xs text-ink-tertiary dark:border-dark-border dark:text-white/40">
+            © {new Date().getFullYear()} CareerTrack Lite. All rights reserved.
+          </div>
         </div>
       </footer>
     </section>
@@ -489,14 +944,16 @@ function CtaFooter() {
 export function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-surface-secondary text-ink dark:bg-dark dark:text-white">
+      <SEOHead schema={[faqJsonLdSchema]} />
       <AmbientBackground />
       <Navigation />
       <main className="flex-1">
-        <Hero />
-        <Features />
+        <AsymmetricHero />
+        <BentoFeatureGrid />
+        <InteractiveSandbox />
         <HowItWorks />
-        <Pipeline />
-        <Stats />
+        <StatsAndTestimonials />
+        <FaqSection />
         <CtaFooter />
       </main>
     </div>

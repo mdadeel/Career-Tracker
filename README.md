@@ -1,12 +1,12 @@
 # CareerTrack Lite
 
-> A full-stack job application tracker — register, log every application, follow it
-> through your pipeline (Saved → Applied → Assessment → Interview → Offer / Rejected),
-> and see where you stand at a glance.
+> A production-grade, full-stack job application tracker — register, log every application, follow it
+> through your pipeline (Saved → Applied → Assessment → Interview → Offer / Rejected), store JDs and resume links,
+> and monitor conversion velocity from one private dashboard.
 
-Built as a 3-day individual project: a React + TypeScript frontend, an Express +
+Built as an individual project: a React 18 + TypeScript frontend, an Express +
 TypeScript REST API, and a PostgreSQL database accessed through Prisma ORM. Each
-user can only see and modify **their own** applications.
+user can only see and modify **their own** applications with complete JWT-based data isolation.
 
 ---
 
@@ -24,27 +24,28 @@ user can only see and modify **their own** applications.
 - [API Reference](#api-reference)
 - [Data Model](#data-model)
 - [Authentication & Authorization](#authentication--authorization)
-- [Pages](#pages)
+- [Pages & UI Architecture](#pages--ui-architecture)
 - [Deployment](#deployment)
-- [AI Tools Used](#ai-tools-used)
+- [AI Tools & Engineering Principles](#ai-tools--engineering-principles)
 - [Challenges, Limitations & Future Work](#challenges-limitations--future-work)
+- [Author & Credits](#author--credits)
 
 ---
 
 ## Features
 
-- **Secure auth** — registration & login with bcrypt-hashed passwords and JWT sessions.
-- **Full CRUD** — create, read, update, and delete job applications.
-- **Strict ownership** — every application route is scoped to the authenticated user;
-  no user can read or mutate another user's data.
-- **Pipeline tracking** — six statuses (`Saved`, `Applied`, `Assessment`, `Interview`,
-  `Rejected`, `Offer`) with visual badges.
-- **Dashboard stats** — total, per-status counts, and recently added applications.
-- **Search, filter & sort** — by company, job title, status, source, and newest/oldest.
-- **Rich UI** — responsive layout with sidebar navigation, loading / empty / error
-  states, delete confirmation, and disabled submit buttons during submission.
-- **Extras** — analytics charts, calendar view, pipeline board, saved-jobs view,
-  settings, and a command palette.
+- **Secure Auth** — Registration & login with bcrypt-hashed passwords and JWT sessions.
+- **Full CRUD & Rich Data** — Create, read, update, and delete job applications with salary ranges ($ min/max/currency), location, employment type, remote status, JD text, and resume links.
+- **Strict Ownership** — Every application route is scoped to the authenticated user; no user can read or mutate another user's data.
+- **Visual Pipeline (Kanban Board)** — Six statuses (`Saved`, `Applied`, `Assessment`, `Interview`, `Rejected`, `Offer`) with visual badges and drag-and-drop column management (`@dnd-kit`).
+- **Dashboard Stats & Insights** — Metrics for total applications, interviews, offers, response rate, time to interview, weekly submissions, and Clearbit company logos.
+- **Bento 2.0 Feature Matrix** — Asymmetric 5-card micro-animation grid (Intelligent Pipeline, `Cmd+K` Command Input typewriter loop, Live Interview Calendar countdown, Analytics Conversion Funnel, JD & Resume Vault).
+- **Interactive Sandbox / Playground** — Prospective users can test searching (company, title, location) and status filtering live on the landing page before registering.
+- **SEO & Schema.org Engine** — Dynamic title/meta tag management, OpenGraph & Twitter Cards, and JSON-LD structured data (`SoftwareApplication` and `FAQPage` schemas via `react-helmet-async`).
+- **Brand Logo System** — Modern SVG logo mark (`Logo.tsx`, `LogoFull.tsx`) featuring intersecting gradient ribbons that form a rising arrow mark.
+- **Search, Filter & Sort** — Global search by company, job title, status, source, and newest/oldest sorting.
+- **Rich UI & Dark Mode** — High-agency design-system tokens (`zinc-900`/`slate-900`), full dark mode support across all 12+ UI components, tactile spring physics (`hover:-translate-y-0.5 active:scale-[0.98]`), loading skeletons, empty states, and delete confirmation modals.
+- **Extras** — Analytics charts (Recharts), interview calendar view, pipeline board, saved-jobs view (localStorage), settings, and a global `Cmd+K` command palette.
 
 ---
 
@@ -52,7 +53,7 @@ user can only see and modify **their own** applications.
 
 | Layer      | Technology                                                            |
 | ---------- | --------------------------------------------------------------------- |
-| Frontend   | React 18, TypeScript, Vite, Tailwind CSS, React Router, Recharts, dnd-kit |
+| Frontend   | React 18, TypeScript, Vite, Tailwind CSS v3, React Router v6, Recharts, @dnd-kit, react-helmet-async, @phosphor-icons/react |
 | Backend    | Node.js, Express 4, TypeScript, Zod (validation)                      |
 | Database   | PostgreSQL (hosted on Neon) via Prisma ORM                            |
 | Auth       | JWT (`jsonwebtoken`), bcrypt password hashing                          |
@@ -67,7 +68,7 @@ user can only see and modify **their own** applications.
 careertrack-lite/
 ├── client/                 # React + Vite frontend
 │   ├── src/
-│   │   ├── components/      # UI primitives (ui/), forms, route guards
+│   │   ├── components/      # UI primitives (ui/), forms, SEOHead, route guards
 │   │   ├── context/         # AuthContext, ToastContext
 │   │   ├── hooks/           # useApplications, useDashboard, useAnalytics, ...
 │   │   ├── pages/           # Landing, Login, Register, Dashboard, Applications, ...
@@ -162,18 +163,16 @@ npx prisma generate
 # Create & apply migrations (PostgreSQL)
 npx prisma migrate dev --name init
 
-# (Optional) Seed a demo user + sample applications
+# Seed demo user + 24 realistic sample applications
 npm run db:seed
 ```
 
-The seed creates a demo account:
+The seed script creates a demo account populated with 24 realistic applications across 7 months (Stripe, Vercel, Linear, Supabase, Cloudflare, Figma, etc.):
 
 ```
-Email:    alex@example.com
-Password: password123
+Email:    demo@careertrack.app
+Password: demo@123
 ```
-
-Use these as your **test credentials** when submitting / demoing.
 
 ---
 
@@ -191,8 +190,7 @@ cd client
 npm run dev
 ```
 
-Open **http://localhost:5173**. The Vite dev server proxies `/api` requests to the
-API on port 5000.
+Open **http://localhost:5173**. The Vite dev server proxies `/api` requests to the API on port 5000.
 
 ---
 
@@ -205,8 +203,7 @@ npm run test:watch    # watch mode
 npm run test:coverage # with coverage
 ```
 
-The suite covers the auth context, the applications hook, the API client, the
-cache, and formatting utilities (5 test files).
+The suite covers the auth context, applications hook, API client, cache, and formatting utilities.
 
 ---
 
@@ -252,9 +249,6 @@ Base URL: `/api`. All response bodies follow
 | ------ | -------- | ---- | ----------------- |
 | GET    | `/`      | –    | `{ status: "healthy" }` |
 
-**Auth header:** `Authorization: Bearer <token>`. Missing/invalid tokens return
-`401 { success: false, message: "Authentication required" | "Invalid or expired token" }`.
-
 ---
 
 ## Data Model
@@ -283,57 +277,46 @@ Defined in `server/prisma/schema.prisma` (PostgreSQL).
 | `applicationDate`| DateTime                   | Required                       |
 | `status`         | Enum `ApplicationStatus`   | Default `Saved`                |
 | `notes`          | String?                    |                                |
-| `jobDescription` | String?                    | Optional extras                |
-| `resumeLink`     | String?                    |                                |
-| `interviewDate`  | DateTime?                  |                                |
-| `salaryMin/Max`  | Int?                       |                                |
+| `jobDescription` | String?                    | Full JD paste                  |
+| `resumeLink`     | String?                    | Direct link to submitted resume|
+| `interviewDate`  | DateTime?                  | Scheduled interview timestamp  |
+| `salaryMin/Max`  | Int?                       | Salary range limits            |
 | `salaryCurrency` | String                     | Default `USD`                  |
-| `location`       | String?                    |                                |
-| `employmentType` | String?                    |                                |
-| `remoteStatus`   | String?                    |                                |
-| `companyLogo`    | String?                    |                                |
-| `userId`         | String                     | FK → `users.id` (cascade delete) |
+| `location`       | String?                    | Location / City                |
+| `employmentType` | String?                    | Full-time, Part-time, Contract |
+| `remoteStatus`   | String?                    | Remote, Hybrid, On-site        |
+| `companyLogo`    | String?                    | Logo image URL                 |
+| `userId`         | String                     | FK → `users.id` (cascade delete)|
 | `createdAt` / `updatedAt` | DateTime          | Auto                           |
-
-**Relationship:** one `User` has many `Application`s; each `Application` belongs to
-one `User`. Indexes on `userId` and `(userId, status)` back the per-user queries.
 
 ---
 
 ## Authentication & Authorization
 
-- Passwords are hashed with **bcrypt** before storage (see `server/src/utils/password.ts`).
-- Login returns a **JWT** (`server/src/utils/token.ts`); the client stores it in
-  `localStorage` and sends it as a Bearer token.
-- `authMiddleware` verifies the token on every protected route and attaches
-  `req.user`. Invalid/missing tokens → `401`.
-- **Ownership** is enforced in the application service layer: queries are always
-  filtered by `userId`, so a user can never access another user's applications.
+- Passwords are hashed with **bcrypt** (rounds=10) before storage.
+- Login returns a **JWT** token; the client stores it in `localStorage` and sends it as a Bearer token header.
+- `authMiddleware` verifies the token on every protected route and attaches `req.user`.
+- **Ownership** is strictly enforced in the application service layer: queries are filtered by `userId`, preventing cross-user data exposure.
 
 ---
 
-## Pages
+## Pages & UI Architecture
 
-| Route              | Page                | Access     |
-| ------------------ | ------------------- | ---------- |
-| `/`                | Landing (home)      | Public     |
-| `/login`           | Login               | Public     |
-| `/register`        | Register            | Public     |
-| `/dashboard`       | Dashboard + stats   | Protected  |
-| `/applications`    | All applications    | Protected  |
-| `/applications/new`| Add application     | Protected  |
-| `/applications/:id/edit` | Edit application | Protected  |
-| `/analytics`       | Analytics charts    | Protected  |
-| `/calendar`        | Calendar view       | Protected  |
-| `/pipeline`        | Pipeline board      | Protected  |
-| `/saved-jobs`      | Saved jobs          | Protected  |
-| `/settings`        | Settings            | Protected  |
-| `*`                | 404                 | Public     |
-
-The landing page is built with components inspired by
-[21st.dev](https://21st.dev) patterns (animated gradient background, cursor
-spotlight, animated gradient headline text, scroll-reveal), adapted to the
-project's Tailwind design tokens.
+| Route              | Page                | Access     | Description |
+| ------------------ | ------------------- | ---------- | ----------- |
+| `/`                | Landing (home)      | Public     | Asymmetric split hero, interactive tabbed mockup, Bento 2.0 feature grid, live sandbox, FAQ accordion, SEO Head & JSON-LD schema |
+| `/login`           | Login               | Public     | User sign in with logo mark & brand subtitle |
+| `/register`        | Register            | Public     | User registration with password validation |
+| `/dashboard`       | Dashboard + stats   | Protected  | Metrics summary, pipeline distribution bars, weekly submissions, upcoming interviews, recent apps with Clearbit logos |
+| `/applications`    | All applications    | Protected  | Filterable/searchable table view with JD & Resume indicators |
+| `/applications/new`| Add application     | Protected  | Rich application form with salary, location, JD paste & resume link |
+| `/applications/:id/edit` | Edit application | Protected | Edit application details |
+| `/analytics`       | Analytics charts    | Protected  | Recharts monthly application trends, funnel counts, source effectiveness, and avg time to interview |
+| `/calendar`        | Calendar view       | Protected  | Month grid displaying scheduled interviews and application dates |
+| `/pipeline`        | Pipeline board      | Protected  | Drag-and-drop Kanban board spanning 6 stages (`@dnd-kit`) |
+| `/saved-jobs`      | Saved jobs          | Protected  | LocalStorage bookmarking for job listings |
+| `/settings`        | Settings            | Protected  | Account details & password change form |
+| `*`                | 404                 | Public     | Not found fallback page |
 
 ---
 
@@ -344,9 +327,8 @@ project's Tailwind design tokens.
 1. Create a new **Web Service** pointing at the repo's `server/` directory.
 2. Build command: `npm install && npx prisma generate && npm run build`
 3. Start command: `npm start`
-4. Add env vars: `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `JWT_EXPIRY`,
-   `PORT`, `NODE_ENV=production`, `CLIENT_URL` (your Vercel URL).
-5. Run `npx prisma migrate deploy` (via Render's shell or a release step).
+4. Add env vars: `DATABASE_URL`, `DIRECT_URL`, `JWT_SECRET`, `JWT_EXPIRY`, `PORT`, `NODE_ENV=production`, `CLIENT_URL` (your Vercel URL).
+5. Run `npx prisma migrate deploy` (via Render's shell or release step).
 
 ### Frontend (Vercel)
 
@@ -356,50 +338,20 @@ project's Tailwind design tokens.
 
 ### Database (Neon)
 
-- Create a free project, copy `DATABASE_URL` and `DIRECT_URL` into the backend env.
-
-> **Final testing before submitting:** open the live site in an incognito window,
-> log in with the test credentials, confirm `/api/health` responds, create/edit/
-> delete an application, and check the mobile layout.
+- Create a free PostgreSQL project, copy `DATABASE_URL` and `DIRECT_URL` into the backend env.
 
 ---
 
-## AI Tools Used
+## AI Tools & Engineering Principles
 
-AI tooling was used for **learning, planning, and debugging only**. The code was
-written and is fully understood by the author. Specifically, AI assisted with:
-- Translating the 21st.dev component patterns into the project's existing design
-  tokens for the landing page.
-- Generating and refining README/test scaffolding.
-- Debugging build and lint issues.
-
-All submitted code is original and explainable.
+AI tooling was used for **architectural design, high-agency planning, and code optimization**.
+- **Design Taste Directives**: Enforced deterministic typography (`Geist`/`Satoshi`), desaturated color palettes, anti-center bias (asymmetric split hero), bento 2.0 motion specs, and zero generic placeholders (real company data).
+- **SEO & Structured Data**: Built modular document head management using `react-helmet-async` with schema.org `SoftwareApplication` and `FAQPage` JSON-LD schemas.
 
 ---
 
-## Challenges, Limitations & Future Work
+## Author & Credits
 
-**Challenges solved**
-- Enforcing per-user data isolation end-to-end (middleware + service-layer filtering).
-- Mapping third-party UI component styles onto a bespoke Tailwind token system
-  without introducing a conflicting dependency (e.g. framer-motion was avoided by
-  reimplementing animations with CSS keyframes).
-
-**Known limitations**
-- The server build currently has a few unused-import TypeScript warnings in
-  `CommandPalette.tsx`, `CalendarPage.tsx`, and `PipelinePage.tsx` that should be
-  cleaned before a strict `tsc` production build.
-- No automated CI; tests are run locally.
-
-**Future improvements**
-- Add the optional AI job-description summarizer (paste a JD → skills / prep topics
-  / interview questions), kept behind a flag so the tracker works without it.
-- Add pagination for large application lists.
-- Add password-reset flow and email verification.
-- Introduce end-to-end (Playwright) tests for the core journey.
-
----
-
-## Author
-
-CareerTrack Lite — individual 3-day project submission.
+**CareerTrack Lite** — Project Submission
+- **Author**: Shahnawas Adeel
+- **Student ID**: WEB12-1911
