@@ -22,7 +22,7 @@ pid.txt
 
 # ── Agent memory & project docs (not source) ──
 .ai/
-docs/
+/docs/
 CLAUDE.md
 CareerTrack_Lite_3-Day_Project_Task_8_Pages.docx
 
