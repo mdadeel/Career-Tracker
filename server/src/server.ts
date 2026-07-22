@@ -76,6 +76,15 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customfavIcon: "/favicon.ico",
 }));
 
+// Root endpoint
+app.get("/", (_req, res) => {
+  res.json({
+    message: "CareerTrack Lite API Server is running",
+    docs: "/api-docs",
+    health: "/api/health",
+  });
+});
+
 // Routes
 app.use("/api/health", healthRoute);
 app.use("/api/auth", authRoutes);
