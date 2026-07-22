@@ -102,6 +102,7 @@ export const applicationService = {
           notes: true,
           jobDescription: true,
           resumeLink: true,
+          interviewDate: true,
           salaryMin: true,
           salaryMax: true,
           salaryCurrency: true,
@@ -196,16 +197,18 @@ export const applicationService = {
   },
 
   async remove(id: string, userId: string) {
-    const existing = await prisma.application.findUnique({ where: { id } });
+    // Single atomic delete query scoped by id and userId
+    const result = await prisma.application.deleteMany({
+      where: { id, userId },
+    });
 
-    if (!existing) {
-      throw new AppError("Application not found", 404);
-    }
-
-    if (existing.userId !== userId) {
+    if (result.count === 0) {
+      const exists = await prisma.application.findUnique({ where: { id } });
+      if (!exists) {
+        throw new AppError("Application not found", 404);
+      }
       throw new AppError("You do not have permission to delete this application", 403);
     }
-
-    await prisma.application.delete({ where: { id } });
   },
 };
+

@@ -3,6 +3,20 @@ import { getCached, setCache, invalidateCache } from "./cache";
 const API_BASE = "/api";
 const MAX_RETRIES = 2;
 
+type UnauthorizedCallback = () => void;
+const unauthorizedListeners: Set<UnauthorizedCallback> = new Set();
+
+export function onUnauthorized(callback: UnauthorizedCallback): () => void {
+  unauthorizedListeners.add(callback);
+  return () => {
+    unauthorizedListeners.delete(callback);
+  };
+}
+
+function notifyUnauthorized() {
+  unauthorizedListeners.forEach((cb) => cb());
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -18,8 +32,11 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Exponential backoff: only retry on network errors (TypeError from fetch),
-  // not on HTTP errors (4xx/5xx) which are handled by the response.ok check
+  // Always invalidate client cache on any mutation attempt (POST, PATCH, DELETE)
+  if (options.method && options.method !== "GET") {
+    invalidateCache();
+  }
+
   let lastError: unknown;
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
@@ -29,15 +46,14 @@ async function request<T>(
         headers,
       });
 
+      if (response.status === 401) {
+        notifyUnauthorized();
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
         throw new Error(data.message || "Something went wrong");
-      }
-
-      // Invalidate entire cache on any mutation (POST, PATCH, DELETE)
-      if (options.method && options.method !== "GET") {
-        invalidateCache();
       }
 
       return data.data;
@@ -85,3 +101,4 @@ export const api = {
       method: "DELETE",
     }),
 };
+

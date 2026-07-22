@@ -132,9 +132,30 @@ export const analyticsService = {
       return Math.round(totalDays / appsWithInterviews.length);
     })();
 
+    // ── Weekly trends (last 8 weeks) ──
+    const weeklyMap = new Map<string, number>();
+    for (let i = 7; i >= 0; i--) {
+      const d = new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000);
+      const weekLabel = `W${getWeekNumber(d)}`;
+      weeklyMap.set(weekLabel, 0);
+    }
+    for (const app of applications) {
+      const diffDays = Math.floor((now.getTime() - app.applicationDate.getTime()) / (1000 * 60 * 60 * 24));
+      if (diffDays >= 0 && diffDays < 56) {
+        const weekLabel = `W${getWeekNumber(app.applicationDate)}`;
+        if (weeklyMap.has(weekLabel)) {
+          weeklyMap.set(weekLabel, (weeklyMap.get(weekLabel) || 0) + 1);
+        }
+      }
+    }
+    const weeklyTrends = Array.from(weeklyMap.entries()).map(([week, count]) => ({
+      week,
+      count,
+    }));
+
     return {
       monthlyTrends,
-      weeklyTrends: [], // simplified — monthly is sufficient
+      weeklyTrends,
       funnel,
       sourceEffectiveness,
       summary: {
@@ -153,3 +174,16 @@ export const analyticsService = {
     };
   },
 };
+
+function getWeekNumber(d: Date): number {
+  const target = new Date(d.valueOf());
+  const dayNr = (d.getDay() + 6) % 7;
+  target.setDate(target.getDate() - dayNr + 3);
+  const firstThursday = target.valueOf();
+  target.setMonth(0, 1);
+  if (target.getDay() !== 4) {
+    target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+  }
+  return 1 + Math.ceil((firstThursday - target.valueOf()) / 604800000);
+}
+

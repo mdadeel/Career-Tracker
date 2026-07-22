@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { authService } from "../services/authService";
+import { onUnauthorized } from "../services/api";
 import type { User } from "../types";
 
 interface AuthContextType {
@@ -20,6 +21,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
   const [isLoading, setIsLoading] = useState(true);
 
+  const logout = () => {
+    localStorage.removeItem("token");
+    setToken(null);
+    setUser(null);
+  };
+
+  useEffect(() => {
+    const unsubscribe = onUnauthorized(() => {
+      logout();
+    });
+    return unsubscribe;
+  }, []);
+
   useEffect(() => {
     if (token) {
       authService
@@ -28,9 +42,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setUser(userData);
         })
         .catch(() => {
-          localStorage.removeItem("token");
-          setToken(null);
-          setUser(null);
+          logout();
         })
         .finally(() => setIsLoading(false));
     } else {
@@ -52,11 +64,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(response.user);
   };
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
-    setUser(null);
-  };
 
   return (
     <AuthContext.Provider

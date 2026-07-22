@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { z } from "zod";
 
 export class AppError extends Error {
   public statusCode: number;
@@ -16,6 +17,15 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
+  if (err instanceof z.ZodError) {
+    res.status(400).json({
+      success: false,
+      message: err.errors[0]?.message || "Validation failed",
+      errors: err.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
+    });
+    return;
+  }
+
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       success: false,
@@ -34,3 +44,4 @@ export function errorHandler(
         : err.message,
   });
 }
+

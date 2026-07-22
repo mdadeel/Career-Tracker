@@ -35,6 +35,7 @@ export async function register(
       res.status(400).json({
         success: false,
         message: error.errors[0]?.message || "Validation failed",
+        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
       });
       return;
     }
@@ -61,6 +62,7 @@ export async function login(
       res.status(400).json({
         success: false,
         message: error.errors[0]?.message || "Validation failed",
+        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
       });
       return;
     }
@@ -108,6 +110,7 @@ export async function changePassword(
       res.status(400).json({
         success: false,
         message: error.errors[0]?.message || "Validation failed",
+        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
       });
       return;
     }
