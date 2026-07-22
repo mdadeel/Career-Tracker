@@ -1,6 +1,7 @@
 import { getCached, setCache, invalidateCache } from "./cache";
 
-const API_BASE = "/api";
+const envApiUrl = import.meta.env.VITE_API_URL;
+const API_BASE = envApiUrl ? `${envApiUrl.replace(/\/$/, "")}/api` : "/api";
 const MAX_RETRIES = 2;
 
 type UnauthorizedCallback = () => void;

@@ -29,7 +29,12 @@ if (missing.length > 0) {
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const CLIENT_URL = process.env.CLIENT_URL || "http://localhost:5173";
+const rawClientUrl = process.env.CLIENT_URL;
+const allowedOrigins = ["http://localhost:5173", "http://localhost:3000"];
+if (rawClientUrl) {
+  const cleanUrl = rawClientUrl.replace(/\/$/, "");
+  allowedOrigins.push(cleanUrl);
+}
 
 // Security headers
 app.use((_req, res, next) => {
@@ -44,9 +49,16 @@ app.use((_req, res, next) => {
 // CORS
 app.use(
   cors({
-    origin: CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      const cleanOrigin = origin.replace(/\/$/, "");
+      if (allowedOrigins.includes(cleanOrigin) || cleanOrigin.endsWith(".vercel.app")) {
+        return callback(null, true);
+      }
+      return callback(null, true);
+    },
     credentials: true,
-    methods: ["GET", "POST", "PATCH", "DELETE"],
+    methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );

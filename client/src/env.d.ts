@@ -1,3 +1,5 @@
+/// <reference types="vite/client" />
+
 declare module "@phosphor-icons/react" {
   import type { FC, SVGProps } from "react";
   interface IconProps extends SVGProps<SVGSVGElement> {
