@@ -53,7 +53,7 @@
 *   **📅 Interview Calendar** — Comprehensive month-view grid displaying scheduled interviews and application dates.
 *   **🛠️ Bento 2.0 Feature Matrix** — An asymmetric layout with micro-animations showing dynamic features (Intelligent Pipeline, `Cmd+K` Command typewriter, Interview countdowns, Analytics funnels, and JD Vaults).
 *   **🎮 Live Sandbox Mode** — Allows visitors on the landing page to experience search and status filters on real-world mock data before registering.
-*   **⚡ Premium User Experience** — Global keyboard shortcuts, Ctrl+K command palette, debounced inputs, local storage drafts, 30s TTL in-memory caching, responsive navigation (sidebar/mobile drawer), and full dark mode.
+*   **⚡ Premium User Experience** — Ctrl+K command palette, debounced inputs, local storage drafts, 30s TTL in-memory caching, responsive navigation (sidebar/mobile drawer), and full dark mode.
 *   **🔍 SEO & Structured Metadata** — Helmet-driven document titles, OpenGraph tags, and JSON-LD structured data (`SoftwareApplication` and `FAQPage` schemas).
 
 ---
@@ -105,7 +105,7 @@ graph LR
     subgraph Frontend
         Pages[Pages<br/>Landing · Login · Dashboard<br/>Applications · Analytics]
         Components[Components<br/>Navbar · AppTable · AppForm<br/>Dialog · CommandPalette]
-        Hooks[Hooks<br/>useAuth · useApplications<br/>useKeyboardShortcuts]
+        Hooks[Hooks<br/>useAuth · useApplications]
         Services[API Service Layer<br/>api.ts · authService.ts<br/>appService.ts · aiService.ts]
     end
 
@@ -149,14 +149,7 @@ To reduce network load, the API service layer [api.ts](file:///home/adeel/Docume
 *   Any write operation (POST, PATCH, DELETE) automatically invalidates relevant cache entries.
 *   Reduces database query load and ensures instant navigation between dashboard, pipeline, and calendar pages.
 
-### 3. Keyboard Shortcuts Engine
-The [useKeyboardShortcuts.ts](file:///home/adeel/Documents/projects/task/client/src/hooks/useKeyboardShortcuts.ts) hook provides a global keyboard listener:
-*   Supports single-key triggers (`n` for new application, `/` to focus search).
-*   Supports sequential key combinations (`g` then `d` to go to dashboard, `g` then `a` to go to applications page).
-*   Supports modifier key combos (Ctrl+K / Cmd+K to launch the Command Palette).
-*   Intelligently ignores triggers when keyboard focus is inside inputs, textareas, or selectable dropdowns.
-
-### 4. Form Draft Auto-Save
+### 3. Form Draft Auto-Save
 Form components save unfinished data drafts to browser `localStorage` using a 1.5-second debounced function:
 *   Protects users from losing long job descriptions or notes on accidental tab closes or navigation changes.
 *   Drafts automatically expire after 24 hours to prevent stale data conflicts.
@@ -555,4 +548,4 @@ erDiagram
 
 *   **Project Name:** CareerTrack Lite
 *   **Author:** Shahnawas Adeel
-*   **Student ID:** WEB12-1911
+
