@@ -29,7 +29,7 @@ const statusVariantMap: Record<string, BadgeVariant> = {
 
 export { statusVariantMap };
 
-export function Badge({ children, variant = "default", dot = true, className = "" }: BadgeProps) {
+export function Badge({ children, variant = "default", dot = false, className = "" }: BadgeProps) {
   const styles = variantStyles[variant];
 
   return (

@@ -85,12 +85,15 @@ app.get("/", (_req, res) => {
   });
 });
 
+import aiRoutes from "./routes/ai.routes";
+
 // Routes
 app.use("/api/health", healthRoute);
 app.use("/api/auth", authRoutes);
 app.use("/api/applications", applicationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/ai", aiRoutes);
 
 // Error handling
 app.use(errorHandler);

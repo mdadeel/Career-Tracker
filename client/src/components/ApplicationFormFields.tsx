@@ -8,6 +8,9 @@ import {
   SALARY_CURRENCY_OPTIONS,
 } from "../constants/applications";
 
+import { AiJdParserBox } from "./AiJdParserBox";
+import type { ParsedJd } from "../services/ai.service";
+
 interface ApplicationFormFieldsProps {
   formData: ApplicationFormData;
   onChange: <K extends keyof ApplicationFormData>(key: K, value: ApplicationFormData[K]) => void;
@@ -27,7 +30,20 @@ export function ApplicationFormFields({
   errors,
   wideLayout = false,
 }: ApplicationFormFieldsProps) {
-  const getError = (field: string) => errors?.[field];
+  const getError = (field: string) =>
+    errors && Object.prototype.hasOwnProperty.call(errors, field) ? errors[field] : undefined;
+
+  const handleAiParsed = (parsed: ParsedJd, rawJd: string) => {
+    if (parsed.companyName && parsed.companyName !== "Unknown") onChange("companyName", parsed.companyName);
+    if (parsed.jobTitle && parsed.jobTitle !== "Unknown") onChange("jobTitle", parsed.jobTitle);
+    if (parsed.location) onChange("location", parsed.location);
+    if (parsed.salaryMin) onChange("salaryMin", String(parsed.salaryMin));
+    if (parsed.salaryMax) onChange("salaryMax", String(parsed.salaryMax));
+    if (parsed.salaryCurrency) onChange("salaryCurrency", parsed.salaryCurrency);
+    if (parsed.employmentType) onChange("employmentType", parsed.employmentType);
+    if (parsed.remoteStatus) onChange("remoteStatus", parsed.remoteStatus);
+    if (rawJd) onChange("jobDescription", rawJd);
+  };
 
   const fields = (
     <>
@@ -155,7 +171,15 @@ export function ApplicationFormFields({
         value={formData.jobDescription}
         onChange={(e) => onChange("jobDescription", e.target.value)}
         placeholder="Paste the full job description here..."
-        rows={wideLayout ? 6 : 4}
+        rows={wideLayout ? 5 : 4}
+        showCharCount
+      />
+      <Textarea
+        label="Custom Resume Text (Optional)"
+        value={formData.resumeText}
+        onChange={(e) => onChange("resumeText", e.target.value)}
+        placeholder="Paste custom resume text tailored for this role (overrides default profile)..."
+        rows={wideLayout ? 4 : 3}
         showCharCount
       />
       <Input
@@ -209,6 +233,7 @@ export function ApplicationFormFields({
   if (wideLayout) {
     return (
       <>
+        <AiJdParserBox onParsed={handleAiParsed} />
         {/* Basic Information + Documents — side by side */}
         <div className="grid gap-5 lg:grid-cols-2">
           <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface">

@@ -26,6 +26,7 @@ export interface Application {
   notes: string | null;
   jobDescription: string | null;
   resumeLink: string | null;
+  resumeText?: string | null;
   interviewDate: string | null;
   salaryMin: number | null;
   salaryMax: number | null;
@@ -34,6 +35,8 @@ export interface Application {
   employmentType: string | null;
   remoteStatus: string | null;
   companyLogo: string | null;
+  aiMatchScore?: number | null;
+  aiAnalysis?: any;
   createdAt: string;
   updatedAt: string;
 }
@@ -42,6 +45,12 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  resumeText?: string | null;
+  skills?: string[];
+  aiProvider?: string | null;
+  aiApiKey?: string | null;
+  aiBaseUrl?: string | null;
+  aiModel?: string | null;
   createdAt: string;
 }
 
@@ -113,6 +122,7 @@ export interface ApplicationFormData {
   notes: string;
   jobDescription: string;
   resumeLink: string;
+  resumeText?: string;
   interviewDate: string;
   salaryMin: string;
   salaryMax: string;

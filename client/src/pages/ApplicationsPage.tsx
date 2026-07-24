@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { useApplications } from "../hooks/useApplications";
 import { useToast } from "../context/ToastContext";
 import {
@@ -12,6 +12,9 @@ import {
 } from "../components/ui";
 import { ApplicationRow } from "../components/ApplicationRow";
 import { ApplicationFormFields } from "../components/ApplicationFormFields";
+import { AiAssistantDrawer } from "../components/AiAssistantDrawer";
+import { PipelinePage } from "./PipelinePage";
+import { aiService } from "../services/ai.service";
 import { formatDate, formatSalary, formatLocation } from "../utils/format";
 import {
   createEmptyForm,
@@ -32,6 +35,9 @@ import {
   CalendarBlank,
   Spinner,
   CheckCircle,
+  List,
+  SquaresFour,
+  Bookmark,
 } from "@phosphor-icons/react";
 
 const MODAL_DRAFT_KEY = "app-form-modal-draft";
@@ -56,8 +62,14 @@ function ApplicationsSkeleton() {
 }
 
 export function ApplicationsPage() {
-  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const statusFromUrl = searchParams.get("status") || "All";
+  const viewFromUrl = searchParams.get("view") || "list";
+
+  const [activeView, setActiveView] = useState<"list" | "board" | "saved">(
+    viewFromUrl === "board" ? "board" : statusFromUrl === "Saved" ? "saved" : "list"
+  );
 
   const {
     applications,
@@ -95,13 +107,50 @@ export function ApplicationsPage() {
   const [modalDraftStatus, setModalDraftStatus] = useState<"saving" | "saved" | null>(null);
   const modalSaveTimerRef = useRef<ReturnType<typeof setTimeout>>();
 
-  // Sync URL params to filter state
+  // Auto-open application if ?id=... is present in URL query string
   useEffect(() => {
-    const status = searchParams.get("status");
-    if (status && status !== statusFilter) {
-      setStatusFilter(status);
+    const appId = searchParams.get("id") || searchParams.get("appId");
+    if (appId && applications.length > 0) {
+      const found = applications.find((a) => a.id === appId);
+      if (found) {
+        setSelectedApp(found);
+      }
     }
-  }, [searchParams, statusFilter, setStatusFilter]);
+  }, [searchParams, applications]);
+
+  // Sync URL params to filter & view state
+  useEffect(() => {
+    const viewParam = searchParams.get("view");
+    const statusParam = searchParams.get("status");
+
+    if (viewParam === "board") {
+      setActiveView("board");
+    } else if (statusParam === "Saved") {
+      setActiveView("saved");
+      if (statusFilter !== "Saved") setStatusFilter("Saved");
+    } else if (!viewParam && statusParam !== "Saved") {
+      setActiveView("list");
+      if (statusFilter === "Saved") setStatusFilter("All");
+    }
+  }, [searchParams]);
+
+  const handleSwitchView = (newView: "list" | "board" | "saved") => {
+    setActiveView(newView);
+    const newParams = new URLSearchParams(searchParams);
+    if (newView === "board") {
+      newParams.set("view", "board");
+      newParams.delete("status");
+    } else if (newView === "saved") {
+      newParams.delete("view");
+      newParams.set("status", "Saved");
+      setStatusFilter("Saved");
+    } else {
+      newParams.delete("view");
+      newParams.delete("status");
+      setStatusFilter("All");
+    }
+    setSearchParams(newParams);
+  };
 
   // Restore draft when opening modal for new application
   useEffect(() => {
@@ -153,6 +202,7 @@ export function ApplicationsPage() {
         notes: app.notes || "",
         jobDescription: app.jobDescription || "",
         resumeLink: app.resumeLink || "",
+        resumeText: app.resumeText || "",
         interviewDate: app.interviewDate ? app.interviewDate.slice(0, 16) : "",
         salaryMin: app.salaryMin ? String(app.salaryMin) : "",
         salaryMax: app.salaryMax ? String(app.salaryMax) : "",
@@ -227,14 +277,50 @@ export function ApplicationsPage() {
       {/* Header row */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-base font-semibold text-ink dark:text-white/90">Applications</h1>
+          <h1 className="text-base font-semibold text-ink dark:text-white/90">Applications Hub</h1>
           <p className="mt-0.5 text-sm text-ink-secondary dark:text-white/50">{total} application{total !== 1 ? "s" : ""} tracked</p>
         </div>
+
+        {/* View Switcher Pills */}
+        <div className="flex items-center gap-1.5 bg-slate-200/70 dark:bg-zinc-800/90 p-1.5 rounded-2xl border border-slate-300/80 dark:border-white/10 text-xs font-semibold shadow-inner backdrop-blur-sm">
+          <button
+            onClick={() => handleSwitchView("list")}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
+              activeView === "list"
+                ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-white shadow-md scale-[1.02]"
+                : "text-slate-600 dark:text-slate-400 hover:text-ink dark:hover:text-white hover:bg-white/50 dark:hover:bg-zinc-700/50"
+            }`}
+          >
+            <List size={16} weight={activeView === "list" ? "bold" : "regular"} />
+            <span>List View</span>
+          </button>
+          <button
+            onClick={() => handleSwitchView("board")}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
+              activeView === "board"
+                ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-white shadow-md scale-[1.02]"
+                : "text-slate-600 dark:text-slate-400 hover:text-ink dark:hover:text-white hover:bg-white/50 dark:hover:bg-zinc-700/50"
+            }`}
+          >
+            <SquaresFour size={16} weight={activeView === "board" ? "bold" : "regular"} />
+            <span>Kanban Board</span>
+          </button>
+          <button
+            onClick={() => handleSwitchView("saved")}
+            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
+              activeView === "saved"
+                ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-white shadow-md scale-[1.02]"
+                : "text-slate-600 dark:text-slate-400 hover:text-ink dark:hover:text-white hover:bg-white/50 dark:hover:bg-zinc-700/50"
+            }`}
+          >
+            <Bookmark size={16} weight={activeView === "saved" ? "bold" : "regular"} />
+            <span>Saved Jobs</span>
+          </button>
+        </div>
+
         <Button
           size="sm"
-          icon={
-            <Plus size={14} />
-          }
+          icon={<Plus size={14} />}
           onClick={() => openFormModal()}
         >
           New Application
@@ -314,8 +400,10 @@ export function ApplicationsPage() {
         </div>
       )}
 
-      {/* Loading State */}
-      {isLoading ? (
+      {/* Board / Kanban View */}
+      {activeView === "board" ? (
+        <PipelinePage />
+      ) : isLoading ? (
         <ApplicationsSkeleton />
       ) : applications.length === 0 ? (
         <EmptyState
@@ -345,13 +433,23 @@ export function ApplicationsPage() {
               onView={() => setSelectedApp(app)}
               onEdit={() => openFormModal(app)}
               onDelete={() => setDeleteTarget(app)}
+              onAnalyzeMatch={async () => {
+                try {
+                  addToast("Analyzing AI match score in background...", "info");
+                  await aiService.analyzeMatch(app.id);
+                  addToast("Match score updated!", "success");
+                  refresh();
+                } catch (err: any) {
+                  addToast(err?.message || "Failed to analyze match score.", "error");
+                }
+              }}
             />
           ))}
         </div>
       )}
 
       {/* Pagination */}
-      {!isLoading && totalPages > 1 && (
+      {activeView !== "board" && !isLoading && totalPages > 1 && (
         <div className="flex items-center justify-between pt-1">
           <p className="text-xs text-ink-tertiary dark:text-white/40">
             Page {page} of {totalPages}
@@ -536,19 +634,36 @@ export function ApplicationsPage() {
                 </div>
               )}
 
+              {/* AI Assistant Drawer */}
+              <AiAssistantDrawer
+                applicationId={selectedApp.id}
+                jobTitle={selectedApp.jobTitle}
+                companyName={selectedApp.companyName}
+              />
+
               <p className="text-xs text-ink-tertiary dark:text-white/40 pt-2 border-t border-slate-100 dark:border-dark-border">
                 Created {formatDate(selectedApp.createdAt)}
               </p>
             </div>
 
             {/* Footer actions */}
-            <div className="sticky bottom-0 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-surface px-5 py-3 flex items-center justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => { const app = selectedApp; setSelectedApp(null); openFormModal(app); }}>
-                Edit
+            <div className="sticky bottom-0 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-surface px-5 py-3 flex items-center justify-between gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => { const id = selectedApp.id; setSelectedApp(null); navigate(`/applications/${id}/copilot`); }}
+                className="text-indigo-600 dark:text-indigo-400 gap-1.5"
+              >
+                ✨ Open Full AI Workspace
               </Button>
-              <Button variant="danger" size="sm" onClick={() => { setDeleteTarget(selectedApp); setSelectedApp(null); }}>
-                Delete
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => { const app = selectedApp; setSelectedApp(null); openFormModal(app); }}>
+                  Edit
+                </Button>
+                <Button variant="danger" size="sm" onClick={() => { setDeleteTarget(selectedApp); setSelectedApp(null); }}>
+                  Delete
+                </Button>
+              </div>
             </div>
           </div>
         </div>

@@ -2,8 +2,6 @@ import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   ArrowRight,
-  List,
-  X,
   FileText,
   ChartBar,
   ShieldCheck,
@@ -18,7 +16,9 @@ import {
   Lightning,
 } from "@phosphor-icons/react";
 import { Button, LogoFull } from "../components/ui";
+import { Navigation } from "../components/Navigation";
 import { SEOHead } from "../components/SEOHead";
+
 
 const SITE_OWNER = {
   name: "Shahnawas Adeel",
@@ -205,88 +205,6 @@ function Reveal({
   );
 }
 
-const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#sandbox", label: "Interactive Demo" },
-  { href: "#pipeline", label: "Pipeline" },
-  { href: "#faq", label: "FAQ" },
-];
-
-function Navigation() {
-  const [open, setOpen] = useState(false);
-  return (
-    <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 dark:border-dark-border dark:bg-dark/85 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
-        <Link to="/" className="flex items-center">
-          <LogoFull size={28} showSubtitle />
-        </Link>
-
-        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
-          {navLinks.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              className="text-sm font-medium text-ink-secondary transition-colors hover:text-ink dark:text-white/60 dark:hover:text-white"
-            >
-              {l.label}
-            </a>
-          ))}
-        </div>
-
-        <div className="hidden items-center gap-3 md:flex">
-          <Link
-            to="/login"
-            className="rounded-lg px-3.5 py-1.5 text-sm font-medium text-ink-secondary transition-colors hover:bg-surface-tertiary dark:text-white/70 dark:hover:bg-white/5"
-          >
-            Sign in
-          </Link>
-          <Link to="/register">
-            <Button size="sm">Get Started Free</Button>
-          </Link>
-        </div>
-
-        <button
-          type="button"
-          className="text-ink dark:text-white/80 md:hidden"
-          onClick={() => setOpen((v) => !v)}
-          aria-label="Toggle menu"
-        >
-          {open ? <X size={22} /> : <List size={22} />}
-        </button>
-      </nav>
-
-      {open && (
-        <div className="animate-fade-in border-t border-slate-200 bg-white px-5 py-4 md:hidden dark:border-dark-border dark:bg-dark">
-          <div className="flex flex-col gap-1">
-            {navLinks.map((l) => (
-              <a
-                key={l.href}
-                href={l.href}
-                onClick={() => setOpen(false)}
-                className="rounded-lg px-3 py-2 text-sm text-ink-secondary transition-colors hover:bg-surface-tertiary dark:text-white/60 dark:hover:bg-white/5"
-              >
-                {l.label}
-              </a>
-            ))}
-            <div className="mt-2 flex flex-col gap-2 border-t border-slate-200 pt-3 dark:border-dark-border">
-              <Link to="/login" onClick={() => setOpen(false)}>
-                <Button variant="ghost" size="sm" className="w-full justify-center">
-                  Sign in
-                </Button>
-              </Link>
-              <Link to="/register" onClick={() => setOpen(false)}>
-                <Button size="sm" className="w-full justify-center">
-                  Get Started Free
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
-    </header>
-  );
-}
-
 /**
  * Asymmetric Split Hero Section with Tabbed Interactive Dashboard Preview
  */
@@ -332,20 +250,6 @@ function AsymmetricHero() {
               </a>
             </div>
 
-            <div className="mt-8 flex items-center gap-6 border-t border-slate-200/80 pt-6 text-xs text-ink-tertiary dark:border-dark-border dark:text-white/40">
-              <div className="flex items-center gap-1.5">
-                <ShieldCheck size={16} className="text-emerald-500" />
-                <span>100% Private JWT Auth</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <CheckCircle size={16} className="text-brand-500" />
-                <span>No Credit Card Required</span>
-              </div>
-              <div className="flex items-center gap-1.5">
-                <ChartBar size={16} className="text-violet-500" />
-                <span>Real-Time Analytics</span>
-              </div>
-            </div>
           </div>
 
           {/* Right Column: Dynamic Interactive Mockup */}
@@ -489,6 +393,30 @@ function AsymmetricHero() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/**
+ * Trust bar — moved out of hero into its own compact section
+ */
+function TrustBar() {
+  return (
+    <section className="border-t border-slate-200/80 bg-white dark:border-dark-border dark:bg-dark-surface">
+      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-2 px-5 py-4 text-xs text-ink-tertiary dark:text-white/40 lg:px-8">
+        <div className="flex items-center gap-1.5">
+          <ShieldCheck size={16} className="text-emerald-500" />
+          <span>100% Private JWT Auth</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <CheckCircle size={16} className="text-brand-500" />
+          <span>No Credit Card Required</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <ChartBar size={16} className="text-violet-500" />
+          <span>Real-Time Analytics</span>
         </div>
       </div>
     </section>
@@ -640,7 +568,7 @@ function InteractiveSandbox() {
   });
 
   return (
-    <section id="sandbox" className="border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
+    <section id="sandbox" className="scroll-mt-14 border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
       <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="mb-12 text-center">
           <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
@@ -771,7 +699,7 @@ function HowItWorks() {
   ];
 
   return (
-    <section className="border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
+    <section id="how-it-works" className="scroll-mt-14 border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
       <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="mb-14 text-center">
           <p className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">Simple 3-Step Setup</p>
@@ -805,7 +733,7 @@ function HowItWorks() {
  */
 function StatsAndTestimonials() {
   return (
-    <section className="border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
+    <section id="stats" className="scroll-mt-14 border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
       <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
         <div className="grid gap-8 text-center sm:grid-cols-3">
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
@@ -836,7 +764,7 @@ function FaqSection() {
   const [openIdx, setOpenIdx] = useState<number | null>(0);
 
   return (
-    <section id="faq" className="border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
+    <section id="faq" className="scroll-mt-14 border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
       <Reveal className="mx-auto max-w-4xl px-5 lg:px-8">
         <div className="mb-12 text-center">
           <span className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">Got Questions?</span>
@@ -949,6 +877,7 @@ export function LandingPage() {
       <Navigation />
       <main className="flex-1">
         <AsymmetricHero />
+        <TrustBar />
         <BentoFeatureGrid />
         <InteractiveSandbox />
         <HowItWorks />

@@ -31,6 +31,7 @@ const PIPELINE_STAGES: { key: ApplicationStatus; label: string; color: string }[
 
 /* ─── Sortable Card ─── */
 function PipelineCard({ app, isDragging }: { app: Application; isDragging?: boolean }) {
+  const navigate = useNavigate();
   const { attributes, listeners, setNodeRef, transform, transition, isDragging: isSortDragging } =
     useSortable({ id: app.id });
 
@@ -46,16 +47,23 @@ function PipelineCard({ app, isDragging }: { app: Application; isDragging?: bool
       style={style}
       {...attributes}
       {...listeners}
-      className={`rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-3 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-sm ${
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate(`/applications?id=${app.id}`);
+      }}
+      className={`rounded-xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5 cursor-grab active:cursor-grabbing transition-all hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md hover:-translate-y-0.5 ${
         isDragging ? "shadow-elevated ring-2 ring-brand-500/30" : ""
       }`}
     >
-      <p className="text-xs font-medium text-ink dark:text-white/85 truncate">{app.jobTitle}</p>
-      <p className="text-[11px] text-ink-secondary dark:text-white/50 mt-0.5 truncate">{app.companyName}</p>
+      <p className="text-xs font-semibold text-ink dark:text-white/90 truncate">{app.jobTitle}</p>
+      <p className="text-[11px] font-medium text-ink-secondary dark:text-white/50 mt-0.5 truncate">{app.companyName}</p>
       {app.location && (
         <p className="text-xs text-ink-tertiary dark:text-white/40 mt-1 truncate">{app.location}</p>
       )}
-      <p className="text-xs text-ink-tertiary dark:text-white/40 mt-1 tabular-nums">{formatDate(app.applicationDate)}</p>
+      <div className="flex items-center justify-between mt-2 pt-2 border-t border-slate-100 dark:border-white/5 text-[10px] text-ink-tertiary dark:text-white/40">
+        <span>{app.source}</span>
+        <span className="tabular-nums font-mono">{formatDate(app.applicationDate)}</span>
+      </div>
     </div>
   );
 }
@@ -63,9 +71,9 @@ function PipelineCard({ app, isDragging }: { app: Application; isDragging?: bool
 /* ─── Drag Preview ─── */
 function DragPreview({ app }: { app: Application }) {
   return (
-    <div className="rounded-lg border border-brand-300 dark:border-brand-500/40 bg-white dark:bg-dark-surface p-3 shadow-elevated ring-2 ring-brand-500/30 max-w-[240px]">
-      <p className="text-xs font-medium text-ink dark:text-white/85">{app.jobTitle}</p>
-      <p className="text-[11px] text-ink-secondary dark:text-white/50 mt-0.5">{app.companyName}</p>
+    <div className="rounded-xl border border-brand-300 dark:border-brand-500/40 bg-white dark:bg-dark-surface p-3.5 shadow-xl ring-2 ring-brand-500/30 max-w-[250px]">
+      <p className="text-xs font-bold text-ink dark:text-white/90">{app.jobTitle}</p>
+      <p className="text-[11px] font-medium text-ink-secondary dark:text-white/50 mt-0.5">{app.companyName}</p>
     </div>
   );
 }
@@ -92,25 +100,27 @@ function PipelineColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex min-h-[300px] w-[200px] shrink-0 flex-col rounded-xl border bg-slate-50/50 dark:bg-white/[0.02] transition-all duration-150 ${
+      className={`flex h-[calc(100vh-230px)] min-h-[460px] max-h-[720px] w-[260px] shrink-0 flex-col rounded-2xl border transition-all duration-150 shadow-sm ${
         isOver
-          ? "border-brand-400 dark:border-brand-400 bg-brand-50/50 dark:bg-brand-500/5 shadow-elevated"
-          : "border-slate-200 dark:border-dark-border"
+          ? "border-brand-500 dark:border-brand-400 bg-brand-50/60 dark:bg-brand-500/10 shadow-md ring-2 ring-brand-500/20"
+          : "border-slate-200/80 dark:border-dark-border bg-slate-50/70 dark:bg-white/[0.02]"
       }`}
     >
       {/* Header */}
-      <div className="flex items-center gap-2 px-3 py-2.5 border-b border-slate-200 dark:border-dark-border">
-        <span className={`h-2 w-2 rounded-full ${color}`} />
-        <span className="text-xs font-semibold text-ink dark:text-white/85 flex-1">{label}</span>
-        <span className="text-[11px] font-semibold text-ink-tertiary dark:text-white/40 tabular-nums">{apps.length}</span>
+      <div className="flex items-center gap-2 px-3.5 py-3 border-b border-slate-200/80 dark:border-dark-border/80 bg-white/50 dark:bg-white/[0.02] rounded-t-2xl">
+        <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
+        <span className="text-xs font-bold text-ink dark:text-white/90 flex-1">{label}</span>
+        <span className="text-[11px] font-bold text-slate-500 dark:text-white/40 tabular-nums bg-slate-200/60 dark:bg-white/10 px-2 py-0.5 rounded-full">
+          {apps.length}
+        </span>
       </div>
 
       {/* Cards */}
       <SortableContext items={ids} strategy={verticalListSortingStrategy}>
-        <div className="flex-1 space-y-2 p-2 overflow-y-auto">
+        <div className="flex-1 space-y-2.5 p-2.5 overflow-y-auto min-h-[120px]">
           {apps.length === 0 ? (
-            <div className="flex items-center justify-center py-8">
-              <p className="text-[11px] text-ink-tertiary dark:text-white/30">Drop here</p>
+            <div className="flex flex-col items-center justify-center h-full min-h-[120px] rounded-xl border-2 border-dashed border-slate-200 dark:border-white/10 p-4 text-center">
+              <p className="text-xs font-medium text-slate-400 dark:text-white/30">Drop cards here</p>
             </div>
           ) : (
             apps.map((app) => <PipelineCard key={app.id} app={app} />)
@@ -119,12 +129,13 @@ function PipelineColumn({
       </SortableContext>
 
       {/* Add button */}
-      <div className="p-2 border-t border-slate-200 dark:border-dark-border">
+      <div className="p-2 border-t border-slate-200/80 dark:border-dark-border/80 bg-white/30 dark:bg-white/[0.01] rounded-b-2xl">
         <button
           onClick={onAdd}
-          className="w-full rounded-md py-1.5 text-[11px] font-medium text-ink-tertiary dark:text-white/40 hover:text-ink-secondary dark:hover:text-white/60 hover:bg-surface-tertiary dark:hover:bg-white/[0.04] transition-colors"
+          className="w-full rounded-xl py-1.5 text-xs font-semibold text-slate-500 dark:text-white/50 hover:text-indigo-600 dark:hover:text-white hover:bg-white dark:hover:bg-white/10 transition-all flex items-center justify-center gap-1 cursor-pointer"
         >
-          + Add
+          <Plus size={14} />
+          <span>Add Job</span>
         </button>
       </div>
     </div>
@@ -134,22 +145,24 @@ function PipelineColumn({
 /* ─── Skeleton ─── */
 function PipelineSkeleton() {
   return (
-    <div className="flex gap-3 overflow-x-auto pb-4">
-      {PIPELINE_STAGES.map((stage) => (
-        <div key={stage.key} className="flex min-h-[300px] w-[200px] shrink-0 flex-col rounded-xl border border-slate-200 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">
-          <div className="px-3 py-2.5 border-b border-slate-200 dark:border-dark-border">
-            <Skeleton width={60} height={14} />
+    <div className="w-full overflow-x-auto pb-4 pt-1">
+      <div className="flex gap-3.5 min-w-max pb-2">
+        {PIPELINE_STAGES.map((stage) => (
+          <div key={stage.key} className="flex h-[460px] w-[260px] shrink-0 flex-col rounded-2xl border border-slate-200 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">
+            <div className="px-3.5 py-3 border-b border-slate-200 dark:border-dark-border">
+              <Skeleton width={80} height={14} />
+            </div>
+            <div className="p-2.5 space-y-2.5">
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5 space-y-2">
+                  <Skeleton width="80%" height={12} />
+                  <Skeleton width="60%" height={10} />
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="p-2 space-y-2">
-            {Array.from({ length: 2 }).map((_, i) => (
-              <div key={i} className="rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-3 space-y-2">
-                <Skeleton width="80%" height={10} />
-                <Skeleton width="60%" height={8} />
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
@@ -243,33 +256,8 @@ export function PipelinePage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-base font-semibold text-ink dark:text-white/90">Pipeline</h1>
-          <p className="mt-0.5 text-sm text-ink-secondary dark:text-white/50">
-            Drag applications between stages to update their status
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => navigate("/applications")}
-          >
-            List View
-          </Button>
-          <Button
-            size="sm"
-            icon={<Plus size={14} />}
-            onClick={() => navigate("/applications/new")}
-          >
-            Add
-          </Button>
-        </div>
-      </div>
-
-      {/* Pipeline Board — full width breakout */}
-      <div className="-mx-3 lg:-mx-4 max-w-none" style={{ width: 'calc(100vw - 12rem)' }}>
+      {/* Pipeline Board — full width smooth horizontal scroll container */}
+      <div className="w-full overflow-x-auto pb-4 pt-1 touch-pan-x">
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}
@@ -277,7 +265,7 @@ export function PipelinePage() {
           onDragOver={handleDragOver}
           onDragEnd={handleDragEnd}
         >
-          <div className="flex gap-3 overflow-x-auto pb-4 px-3 lg:px-4">
+          <div className="flex gap-3.5 min-w-max pb-2">
             {PIPELINE_STAGES.map((stage) => (
               <PipelineColumn
                 key={stage.key}
@@ -316,3 +304,4 @@ export function PipelinePage() {
     </div>
   );
 }
+

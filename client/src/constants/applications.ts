@@ -82,6 +82,7 @@ export function createEmptyForm(): ApplicationFormData {
     notes: "",
     jobDescription: "",
     resumeLink: "",
+    resumeText: "",
     interviewDate: "",
     salaryMin: "",
     salaryMax: "",

@@ -77,6 +77,7 @@ export function ApplicationFormPage() {
             notes: app.notes || "",
             jobDescription: app.jobDescription || "",
             resumeLink: app.resumeLink || "",
+            resumeText: app.resumeText || "",
             interviewDate: app.interviewDate ? app.interviewDate.slice(0, 16) : "",
             salaryMin: app.salaryMin ? String(app.salaryMin) : "",
             salaryMax: app.salaryMax ? String(app.salaryMax) : "",

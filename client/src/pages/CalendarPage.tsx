@@ -151,7 +151,7 @@ export function CalendarPage() {
                       {apps.slice(0, 2).map((app) => (
                         <button
                           key={app.id}
-                          onClick={() => navigate("/applications")}
+                          onClick={() => navigate(`/applications?id=${app.id}`)}
                           className={`w-full truncate rounded px-1 py-0.5 text-[9px] font-medium text-left transition-colors ${
                             app.status === "Interview"
                               ? "bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-500/30"
@@ -203,7 +203,7 @@ export function CalendarPage() {
                 {upcomingEvents.map((app) => (
                   <button
                     key={app.id}
-                    onClick={() => navigate("/applications")}
+                    onClick={() => navigate(`/applications?id=${app.id}`)}
                     className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.03]"
                   >
                     <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-purple-50 dark:bg-purple-500/10 text-xs font-bold text-purple-600 dark:text-purple-400">

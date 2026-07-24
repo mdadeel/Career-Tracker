@@ -12,4 +12,10 @@ export const authService = {
 
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.patch<{ message: string }>("/auth/password", data),
+
+  updateResume: (resumeText: string) =>
+    api.patch<User>("/auth/resume", { resumeText }),
+
+  updateAiConfig: (data: { aiProvider: string; aiApiKey?: string; aiBaseUrl?: string; aiModel?: string }) =>
+    api.patch<User>("/auth/ai-config", data),
 };

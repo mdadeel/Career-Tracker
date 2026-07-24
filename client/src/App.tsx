@@ -28,6 +28,9 @@ const ApplicationsPage = lazy(() =>
 const ApplicationFormPage = lazy(() =>
   import("./pages/ApplicationFormPage").then((m) => ({ default: m.ApplicationFormPage }))
 );
+const ApplicationAiDetailPage = lazy(() =>
+  import("./pages/ApplicationAiDetailPage").then((m) => ({ default: m.ApplicationAiDetailPage }))
+);
 const AnalyticsPage = lazy(() =>
   import("./pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage }))
 );
@@ -36,12 +39,6 @@ const CalendarPage = lazy(() =>
 );
 const SettingsPage = lazy(() =>
   import("./pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
-);
-const PipelinePage = lazy(() =>
-  import("./pages/PipelinePage").then((m) => ({ default: m.PipelinePage }))
-);
-const SavedJobsPage = lazy(() =>
-  import("./pages/SavedJobsPage").then((m) => ({ default: m.SavedJobsPage }))
 );
 const NotFoundPage = lazy(() =>
   import("./pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage }))
@@ -75,7 +72,7 @@ function AppRoutes() {
       {/* Public Routes */}
       <Route
         path="/"
-        element={user ? <Navigate to="/dashboard" replace /> : <LazyPage><LandingPage /></LazyPage>}
+        element={<LazyPage><LandingPage /></LazyPage>}
       />
       <Route
         path="/login"
@@ -95,14 +92,15 @@ function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/pipeline" element={<PipelinePage />} />
+        <Route path="/pipeline" element={<Navigate to="/applications?view=board" replace />} />
         <Route path="/applications" element={<ApplicationsPage />} />
         <Route path="/applications/new" element={<ApplicationFormPage />} />
         <Route path="/applications/:id/edit" element={<ApplicationFormPage />} />
+        <Route path="/applications/:id/copilot" element={<LazyPage><ApplicationAiDetailPage /></LazyPage>} />
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/settings" element={<SettingsPage />} />
-        <Route path="/saved-jobs" element={<SavedJobsPage />} />
+        <Route path="/saved-jobs" element={<Navigate to="/applications?status=Saved" replace />} />
       </Route>
 
       {/* 404 */}

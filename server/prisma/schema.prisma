@@ -32,6 +32,12 @@ model User {
   name         String
   email        String        @unique
   passwordHash String
+  resumeText   String?
+  skills       String[]
+  aiProvider   String        @default("system_default")
+  aiApiKey     String?
+  aiBaseUrl    String?
+  aiModel      String?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   applications Application[]
@@ -50,6 +56,7 @@ model Application {
   notes           String?
   jobDescription  String?
   resumeLink      String?
+  resumeText      String?
   interviewDate   DateTime?
   salaryMin       Int?
   salaryMax       Int?
@@ -58,6 +65,8 @@ model Application {
   employmentType  String?
   remoteStatus    String?
   companyLogo     String?
+  aiMatchScore    Int?
+  aiAnalysis      Json?
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
   userId          String

@@ -121,3 +121,33 @@ export async function changePassword(
     next(error);
   }
 }
+
+export async function updateResume(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+    const { resumeText } = req.body;
+    const user = await authService.updateResume(userId, resumeText);
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function updateAiConfig(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): Promise<void> {
+  try {
+    const userId = req.user!.userId;
+    const { aiProvider, aiApiKey, aiBaseUrl, aiModel } = req.body;
+    const user = await authService.updateAiConfig(userId, { aiProvider, aiApiKey, aiBaseUrl, aiModel });
+    res.status(200).json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+}

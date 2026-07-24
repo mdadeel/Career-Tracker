@@ -6,8 +6,8 @@ import { ErrorBoundary } from "../ErrorBoundary";
 import { CommandPalette } from "../CommandPalette";
 import { LogoFull } from "./Logo";
 import {
-  SquaresFour, TrendUp, StackSimple, ChartBar, Calendar,
-  Bookmark, Gear, SignOut, Sun, Moon, CaretDown, List,
+  SquaresFour, StackSimple, ChartBar, Calendar,
+  Gear, SignOut, Sun, Moon, CaretDown, List,
 } from "@phosphor-icons/react";
 
 
@@ -25,13 +25,8 @@ const primaryNav: NavItem[] = [
     icon: <SquaresFour size={16} />,
   },
   {
-    path: "/pipeline",
-    label: "Pipeline",
-    icon: <TrendUp size={16} />,
-  },
-  {
     path: "/applications",
-    label: "Applications",
+    label: "Applications Hub",
     icon: <StackSimple size={16} />,
   },
   {
@@ -43,6 +38,11 @@ const primaryNav: NavItem[] = [
     path: "/calendar",
     label: "Calendar",
     icon: <Calendar size={16} />,
+  },
+  {
+    path: "/settings",
+    label: "Settings",
+    icon: <Gear size={16} />,
   },
 ];
 
@@ -86,17 +86,30 @@ export function SidebarLayout() {
           isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
       >
-        {/* Header: Logo + Theme Toggle */}
+        {/* Header: Logo + Theme Toggle Switch */}
         <div className="flex h-12 items-center gap-2 px-3 border-b border-white/[0.06]">
-          <Link to="/dashboard" className="flex items-center gap-2 flex-1 min-w-0">
+          <Link to="/" className="flex items-center gap-2 flex-1 min-w-0">
             <LogoFull size={24} textClassName="text-white/85" />
           </Link>
           <button
             onClick={toggleTheme}
-            className="shrink-0 rounded-md p-1.5 text-white/40 hover:text-white/70 hover:bg-white/[0.06] transition-all"
-            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            className="relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-white/20 bg-white/10 transition-colors duration-200 ease-in-out focus:outline-none hover:bg-white/20"
+            role="switch"
+            aria-checked={theme === "dark"}
+            aria-label="Toggle dark mode"
+            title={theme === "dark" ? "Switch to Light mode" : "Switch to Dark mode"}
           >
-            {theme === "dark" ? <Sun size={14} /> : <Moon size={14} />}
+            <span
+              className={`pointer-events-none inline-flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white shadow-sm ring-0 transition-transform duration-200 ${
+                theme === "dark" ? "translate-x-[18px]" : "translate-x-[2px]"
+              }`}
+            >
+              {theme === "dark" ? (
+                <Sun size={9} className="text-amber-500" />
+              ) : (
+                <Moon size={9} className="text-slate-700" />
+              )}
+            </span>
           </button>
         </div>
 
@@ -134,35 +147,6 @@ export function SidebarLayout() {
                 </Link>
               );
             })}
-          </div>
-
-          <div className="my-3 mx-2 h-px bg-white/[0.06]" />
-
-          <div className="space-y-0.5">
-            <Link
-              to="/saved-jobs"
-              onClick={() => setIsMobileOpen(false)}
-              className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium transition-all duration-150 ${
-                location.pathname.startsWith("/saved-jobs")
-                  ? "bg-brand-500/10 text-brand-400"
-                  : "text-white/60 hover:text-white/85 hover:bg-white/[0.05]"
-              }`}
-            >
-              <Bookmark size={16} />
-              <span className="flex-1">Saved Jobs</span>
-            </Link>
-            <Link
-              to="/settings"
-              onClick={() => setIsMobileOpen(false)}
-              className={`flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium transition-all duration-150 ${
-                location.pathname.startsWith("/settings")
-                  ? "bg-brand-500/10 text-brand-400"
-                  : "text-white/60 hover:text-white/85 hover:bg-white/[0.05]"
-              }`}
-            >
-              <Gear size={16} />
-              <span className="flex-1">Settings</span>
-            </Link>
           </div>
         </div>
 

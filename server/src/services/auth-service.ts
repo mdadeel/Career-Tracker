@@ -67,8 +67,14 @@ export const authService = {
         id: true,
         name: true,
         email: true,
+        resumeText: true,
+        skills: true,
+        aiProvider: true,
+        aiApiKey: true,
+        aiBaseUrl: true,
+        aiModel: true,
         createdAt: true,
-      },
+      } as any,
     });
 
     if (!user) {
@@ -101,5 +107,50 @@ export const authService = {
     });
 
     return { message: "Password changed successfully" };
+  },
+
+  async updateResume(userId: string, resumeText: string) {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: { resumeText } as any,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        resumeText: true,
+        skills: true,
+        aiProvider: true,
+        aiApiKey: true,
+        aiBaseUrl: true,
+        aiModel: true,
+        createdAt: true,
+      } as any,
+    });
+    return user;
+  },
+
+  async updateAiConfig(userId: string, data: { aiProvider: string; aiApiKey?: string; aiBaseUrl?: string; aiModel?: string }) {
+    const user = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        aiProvider: data.aiProvider,
+        aiApiKey: data.aiApiKey ?? null,
+        aiBaseUrl: data.aiBaseUrl ?? null,
+        aiModel: data.aiModel ?? null,
+      } as any,
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        resumeText: true,
+        skills: true,
+        aiProvider: true,
+        aiApiKey: true,
+        aiBaseUrl: true,
+        aiModel: true,
+        createdAt: true,
+      } as any,
+    });
+    return user;
   },
 };

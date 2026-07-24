@@ -7,6 +7,14 @@ import {
   TrashSimple,
 } from "@phosphor-icons/react";
 
+function SparkleIcon({ className = "w-3 h-3" }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z" />
+    </svg>
+  );
+}
+
 /* ─── Constants ─── */
 
 const statusConfig: Record<ApplicationStatus, { border: string; label: string }> = {
@@ -69,9 +77,13 @@ function CompanyAvatar({ companyName }: { companyName: string }) {
 /* ─── StatusBadge ─── */
 
 function StatusBadge({ status }: { status: ApplicationStatus }) {
+  const pillClass =
+    Object.prototype.hasOwnProperty.call(statusPill, status)
+      ? statusPill[status]
+      : statusPill.Saved;
   return (
     <span
-      className={`inline-flex items-center rounded-md px-1.5 py-[3px] text-[11px] font-medium leading-none ${statusPill[status]}`}
+      className={`inline-flex items-center rounded-md px-1.5 py-[3px] text-[11px] font-medium leading-none ${pillClass}`}
     >
       {status}
     </span>
@@ -124,6 +136,7 @@ interface ApplicationRowProps {
   onView: () => void;
   onEdit: () => void;
   onDelete: () => void;
+  onAnalyzeMatch?: () => void;
 }
 
 export const ApplicationRow = memo(function ApplicationRow({
@@ -131,8 +144,13 @@ export const ApplicationRow = memo(function ApplicationRow({
   onView,
   onEdit,
   onDelete,
+  onAnalyzeMatch,
 }: ApplicationRowProps) {
-  const { border } = statusConfig[application.status];
+  const config =
+    Object.prototype.hasOwnProperty.call(statusConfig, application.status)
+      ? statusConfig[application.status]
+      : statusConfig.Saved;
+  const border = config.border;
   const hasResume = !!application.resumeLink;
 
   return (
@@ -159,19 +177,40 @@ export const ApplicationRow = memo(function ApplicationRow({
           </p>
         </div>
 
-        <StatusBadge status={application.status} />
+        <div className="w-24 shrink-0 flex items-center justify-start">
+          <StatusBadge status={application.status} />
+        </div>
 
-        <span className="text-xs text-ink-tertiary dark:text-white/40 w-16 truncate">
+        <span className="text-xs text-ink-tertiary dark:text-white/40 w-20 shrink-0 truncate">
           {application.source}
         </span>
 
-        {hasResume && (
-          <span className="text-[11px] text-ink-tertiary dark:text-white/40 w-14 truncate">
-            Resume
-          </span>
-        )}
+        <div className="w-28 shrink-0 flex items-center justify-center">
+          {application.aiMatchScore !== undefined && application.aiMatchScore !== null ? (
+            <span className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
+              <SparkleIcon className="w-3 h-3 text-indigo-500" />
+              <span>{application.aiMatchScore}%</span>
+            </span>
+          ) : (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (onAnalyzeMatch) onAnalyzeMatch();
+              }}
+              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-[11px] font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-sm hover:shadow-indigo-500/20 active:scale-95 transition-all duration-150 cursor-pointer"
+              title="Analyze AI Match Score directly"
+            >
+              <SparkleIcon className="w-3 h-3 text-amber-300 animate-pulse" />
+              <span>Analyze</span>
+            </button>
+          )}
+        </div>
 
-        <span className="text-[11px] text-ink-tertiary dark:text-white/40 whitespace-nowrap">
+        <span className="text-[11px] text-ink-tertiary dark:text-white/40 w-16 shrink-0 truncate">
+          {hasResume ? "Resume" : ""}
+        </span>
+
+        <span className="text-[11px] text-ink-tertiary dark:text-white/40 w-20 shrink-0 whitespace-nowrap text-right">
           {formatDate(application.applicationDate)}
         </span>
 
