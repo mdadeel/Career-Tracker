@@ -23,6 +23,8 @@ export interface CreateData {
   notes?: string;
   jobDescription?: string;
   resumeLink?: string;
+  resumeText?: string;
+  resumeId?: string | null;
   interviewDate?: string | null;
   salaryMin?: number | null;
   salaryMax?: number | null;
@@ -43,6 +45,8 @@ export interface UpdateData {
   notes?: string;
   jobDescription?: string;
   resumeLink?: string;
+  resumeText?: string;
+  resumeId?: string | null;
   interviewDate?: string | null;
   salaryMin?: number | null;
   salaryMax?: number | null;
@@ -99,9 +103,8 @@ export const applicationService = {
           source: true,
           applicationDate: true,
           status: true,
-          notes: true,
-          jobDescription: true,
           resumeLink: true,
+          resumeId: true,
           interviewDate: true,
           salaryMin: true,
           salaryMax: true,
@@ -110,6 +113,7 @@ export const applicationService = {
           employmentType: true,
           remoteStatus: true,
           companyLogo: true,
+          aiMatchScore: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -147,6 +151,8 @@ export const applicationService = {
         notes: data.notes || null,
         jobDescription: data.jobDescription || null,
         resumeLink: data.resumeLink || null,
+        resumeText: data.resumeText || null,
+        resumeId: data.resumeId || null,
         interviewDate: data.interviewDate ? new Date(data.interviewDate) : null,
         salaryMin: data.salaryMin ?? null,
         salaryMax: data.salaryMax ?? null,
@@ -162,17 +168,7 @@ export const applicationService = {
   },
 
   async update(id: string, userId: string, data: UpdateData) {
-    const existing = await prisma.application.findUnique({ where: { id } });
-
-    if (!existing) {
-      throw new AppError("Application not found", 404);
-    }
-
-    if (existing.userId !== userId) {
-      throw new AppError("You do not have permission to modify this application", 403);
-    }
-
-    const updateData: Prisma.ApplicationUpdateInput = {};
+    const updateData: Record<string, unknown> = {};
     if (data.companyName !== undefined) updateData.companyName = data.companyName;
     if (data.jobTitle !== undefined) updateData.jobTitle = data.jobTitle;
     if (data.jobUrl !== undefined) updateData.jobUrl = data.jobUrl || null;
@@ -182,6 +178,8 @@ export const applicationService = {
     if (data.notes !== undefined) updateData.notes = data.notes || null;
     if (data.jobDescription !== undefined) updateData.jobDescription = data.jobDescription || null;
     if (data.resumeLink !== undefined) updateData.resumeLink = data.resumeLink || null;
+    if (data.resumeText !== undefined) updateData.resumeText = data.resumeText || null;
+    if (data.resumeId !== undefined) updateData.resumeId = data.resumeId || null;
     if (data.interviewDate !== undefined) {
       updateData.interviewDate = data.interviewDate ? new Date(data.interviewDate) : null;
     }
@@ -193,7 +191,22 @@ export const applicationService = {
     if (data.remoteStatus !== undefined) updateData.remoteStatus = data.remoteStatus || null;
     if (data.companyLogo !== undefined) updateData.companyLogo = data.companyLogo || null;
 
-    return prisma.application.update({ where: { id }, data: updateData });
+    // Atomic: update only if both id and userId match — no TOCTOU
+    const result = await prisma.application.updateMany({
+      where: { id, userId },
+      data: updateData as Prisma.ApplicationUpdateManyMutationInput,
+    });
+
+    if (result.count === 0) {
+      const exists = await prisma.application.findUnique({ where: { id } });
+      if (!exists) {
+        throw new AppError("Application not found", 404);
+      }
+      throw new AppError("You do not have permission to modify this application", 403);
+    }
+
+    // Return the updated record
+    return prisma.application.findUnique({ where: { id } });
   },
 
   async remove(id: string, userId: string) {

@@ -1,7 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { generateToken, verifyToken } from "../utils/token";
 
 describe("Token utility", () => {
+  beforeAll(() => {
+    process.env.JWT_SECRET = "test-secret-for-token-tests";
+  });
   it("generates and verifies a valid JWT token", () => {
     const payload = { userId: "test-user-123", email: "alex@example.com" };
     const token = generateToken(payload);

@@ -7,10 +7,10 @@ export interface TokenPayload {
 
 function getSecret(): string {
   const secret = process.env.JWT_SECRET;
-  if (!secret && process.env.NODE_ENV === "production") {
+  if (!secret) {
     throw new Error("CRITICAL: JWT_SECRET environment variable is missing!");
   }
-  return secret || "dev-secret-change-in-production";
+  return secret;
 }
 
 function getExpiry(): string {

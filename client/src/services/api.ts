@@ -33,9 +33,10 @@ async function request<T>(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
-  // Always invalidate client cache on any mutation attempt (POST, PATCH, DELETE)
+  // Invalidate affected cache entries on any mutation (POST, PATCH, DELETE)
   if (options.method && options.method !== "GET") {
-    invalidateCache();
+    const resource = endpoint.split('/').filter(Boolean).slice(0, 1).join('/');
+    invalidateCache(resource ? `/${resource}` : undefined);
   }
 
   let lastError: unknown;
