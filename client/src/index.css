@@ -44,7 +44,7 @@
   }
 
   body {
-    background-color: #f8fafc;
+    background-color: #f8f9fb;
     color: #0f172a;
   }
 
@@ -113,5 +113,9 @@
   .transition-default {
     transition-duration: 150ms;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .font-display {
+    font-family: 'Inter', 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   }
 }

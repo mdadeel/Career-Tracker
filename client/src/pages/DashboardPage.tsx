@@ -5,6 +5,20 @@ import type { ReactNode } from "react";
 import { Badge, statusVariantMap, Button, Skeleton } from "../components/ui";
 import { StackSimple, ChatCircle, CheckCircle, ChartBar, Plus, ArrowUp, XCircle, CalendarCheck, WarningCircle } from "@phosphor-icons/react";
 import { formatDate } from "../utils/format";
+import { Info } from "@phosphor-icons/react";
+import { useCountUp } from "../hooks/useCountUp";
+
+/* ─── Tooltip ─── */
+function InfoTooltip({ text }: { text: string }) {
+  return (
+    <span className="group relative inline-flex items-center">
+      <Info size={12} className="text-ink-tertiary dark:text-white/40 cursor-help" />
+      <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:block z-10 whitespace-nowrap rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface px-2.5 py-1.5 text-[11px] text-ink dark:text-white/80 shadow-elevated">
+        {text}
+      </span>
+    </span>
+  );
+}
 
 /* ─── Metric Card ─── */
 function MetricCard({
@@ -14,14 +28,19 @@ function MetricCard({
   icon,
   onClick,
   empty,
+  valueSuffix,
 }: {
-  label: string;
-  value: number;
+  label: ReactNode;
+  value: number | string;
   sub?: string;
   icon: ReactNode;
   onClick?: () => void;
   empty?: boolean;
+  valueSuffix?: string;
 }) {
+  const numVal = typeof value === "number" ? value : parseInt(value, 10);
+  const counted = useCountUp(isNaN(numVal) ? 0 : numVal, 1000, !empty && !isNaN(numVal));
+  const displayVal = typeof value === "number" ? counted : value;
   return (
     <button
       onClick={onClick}
@@ -37,7 +56,7 @@ function MetricCard({
         <p className="text-xs text-ink-tertiary dark:text-white/40">No data yet</p>
       ) : (
         <>
-          <p className="text-2xl font-extrabold text-ink dark:text-white/90 tabular-nums">{value}</p>
+          <p className="text-2xl font-extrabold text-ink dark:text-white/90 tabular-nums">{displayVal}{valueSuffix}</p>
           {sub && <p className="mt-0.5 text-xs text-ink-tertiary dark:text-white/40">{sub}</p>}
         </>
       )}
@@ -52,7 +71,7 @@ function StageBar({ label, count, total, color }: { label: string; count: number
     <div className="flex items-center gap-3">
       <span className="w-20 shrink-0 text-xs text-ink-secondary dark:text-white/50">{label}</span>
       <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-500 ${color}`} style={{ width: `${pct}%` }} />
+        <div className={`h-full rounded-full transition-all duration-500 ${color} hover:scale-y-125 hover:opacity-80`} style={{ width: `${pct}%` }} />
       </div>
       <span className="w-6 text-right text-xs font-semibold text-ink dark:text-white/70 tabular-nums">{count}</span>
     </div>
@@ -164,16 +183,25 @@ export function DashboardPage() {
       }).length
     : 0;
 
-  // Upcoming interviews (with interviewDate, sorted by date ascending)
+  // TODO: Backend needs to distinguish between status=Interview and has_scheduled_date=true
+  // For now, frontend filters to only show interviews with a future date
   const upcomingInterviews = hasData
     ? stats!.recentApplications
-        .filter((a) => a.status === "Interview" && a.interviewDate)
+        .filter((a) => {
+          if (a.status !== "Interview" || !a.interviewDate) return false;
+          return new Date(a.interviewDate) > new Date();
+        })
         .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime())
         .slice(0, 5)
     : [];
 
   const interviewsWithoutDate = hasData
     ? stats!.recentApplications.filter((a) => a.status === "Interview" && !a.interviewDate).length
+    : 0;
+
+  // Frontend-only count of interviews with a future date (from recentApplications subset)
+  const futureInterviewCount = hasData
+    ? stats!.recentApplications.filter((a) => a.status === "Interview" && a.interviewDate && new Date(a.interviewDate) > new Date()).length
     : 0;
 
   // Pipeline stages in order
@@ -232,8 +260,14 @@ export function DashboardPage() {
           onClick={() => navigate("/applications?status=Offer")}
         />
         <MetricCard
-          label="Response Rate"
+          label={
+            <span className="inline-flex items-center gap-1">
+              Response Rate
+              <InfoTooltip text="Responses (interviews + offers + rejections) ÷ Total applications" />
+            </span>
+          }
           value={hasData ? stats!.responseRate : 0}
+          valueSuffix={hasData ? "%" : ""}
           sub={hasData ? `${stats!.interview + stats!.offer} of ${stats!.total} applications` : undefined}
           icon={<ChartBar size={16} />}
           empty={!hasData}
@@ -284,14 +318,14 @@ export function DashboardPage() {
                     <p className="text-xs text-ink-tertiary dark:text-white/40">This week</p>
                   </div>
                 </div>
-                {stats!.interview > 0 && (
+                {futureInterviewCount > 0 && (
                   <div className="flex items-center gap-3">
                     <span className="flex h-7 w-7 items-center justify-center rounded-md bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400">
                       <CalendarCheck size={14} />
                     </span>
                     <div>
-                      <p className="text-sm font-medium text-ink dark:text-white/85">{stats!.interview} interview{stats!.interview !== 1 ? "s" : ""} scheduled</p>
-                      <p className="text-xs text-ink-tertiary dark:text-white/40">In your pipeline</p>
+                      <p className="text-sm font-medium text-ink dark:text-white/85">{futureInterviewCount} interview{futureInterviewCount !== 1 ? "s" : ""} scheduled</p>
+                      <p className="text-xs text-ink-tertiary dark:text-white/40">With upcoming dates</p>
                     </div>
                   </div>
                 )}
@@ -354,9 +388,19 @@ export function DashboardPage() {
                 )}
               </div>
             ) : (
-              <div className="py-4 text-center">
-                <p className="text-xs text-ink-tertiary dark:text-white/40">No upcoming interviews</p>
-                <p className="text-[11px] text-ink-tertiary dark:text-white/30 mt-1">Set an interview date to see it here</p>
+              <div className="py-6 text-center">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 dark:bg-white/[0.06] mb-3">
+                  <CalendarCheck size={20} className="text-ink-tertiary dark:text-white/40" />
+                </div>
+                <p className="text-xs font-medium text-ink dark:text-white/70">No upcoming interviews</p>
+                <p className="text-[11px] text-ink-tertiary dark:text-white/40 mt-1">Schedule an interview with a company</p>
+                <button
+                  onClick={() => navigate("/applications")}
+                  className="mt-3 inline-flex items-center gap-1 rounded-lg bg-brand-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors"
+                >
+                  <CalendarCheck size={12} />
+                  Schedule an interview
+                </button>
               </div>
             )}
           </Widget>

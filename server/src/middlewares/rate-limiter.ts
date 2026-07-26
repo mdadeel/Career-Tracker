@@ -35,3 +35,27 @@ export const passwordLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+// AI endpoint rate limit (20 requests per minute per IP)
+export const aiLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: process.env.NODE_ENV === "production" ? 20 : 100,
+  message: {
+    success: false,
+    message: "Too many AI requests. Please slow down and try again in a minute.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Resume upload rate limit (10 uploads per hour per IP)
+export const resumeLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: process.env.NODE_ENV === "production" ? 10 : 50,
+  message: {
+    success: false,
+    message: "Too many resume uploads. Please try again in an hour.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

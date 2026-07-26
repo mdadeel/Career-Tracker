@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from "../types";
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email format"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 const loginSchema = z.object({
@@ -17,7 +17,20 @@ const loginSchema = z.object({
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string().min(6, "New password must be at least 6 characters"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+});
+
+const updateResumeSchema = z.object({
+  resumeText: z.string().max(50000, "Resume text too long (max 50,000 characters)"),
+});
+
+const updateAiConfigSchema = z.object({
+  aiProvider: z.enum(["system_default", "google", "openai", "openrouter", "custom"], {
+    errorMap: () => ({ message: "Invalid AI provider" }),
+  }),
+  aiApiKey: z.string().max(500).optional(),
+  aiBaseUrl: z.string().url("Invalid base URL").max(500).optional().or(z.literal("")),
+  aiModel: z.string().max(200).optional(),
 });
 
 export async function register(
@@ -129,10 +142,18 @@ export async function updateResume(
 ): Promise<void> {
   try {
     const userId = req.user!.userId;
-    const { resumeText } = req.body;
+    const { resumeText } = updateResumeSchema.parse(req.body);
     const user = await authService.updateResume(userId, resumeText);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        success: false,
+        message: error.errors[0]?.message || "Validation failed",
+        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
+      });
+      return;
+    }
     next(error);
   }
 }
@@ -144,10 +165,18 @@ export async function updateAiConfig(
 ): Promise<void> {
   try {
     const userId = req.user!.userId;
-    const { aiProvider, aiApiKey, aiBaseUrl, aiModel } = req.body;
-    const user = await authService.updateAiConfig(userId, { aiProvider, aiApiKey, aiBaseUrl, aiModel });
+    const data = updateAiConfigSchema.parse(req.body);
+    const user = await authService.updateAiConfig(userId, data);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
+    if (error instanceof z.ZodError) {
+      res.status(400).json({
+        success: false,
+        message: error.errors[0]?.message || "Validation failed",
+        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
+      });
+      return;
+    }
     next(error);
   }
 }

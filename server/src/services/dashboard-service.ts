@@ -4,6 +4,7 @@ export const dashboardService = {
   async getStats(userId: string) {
     const applications = await prisma.application.findMany({
       where: { userId },
+      take: 10000, // Safety cap — prevents unbounded memory usage
       select: {
         id: true,
         status: true,
@@ -12,6 +13,12 @@ export const dashboardService = {
         jobTitle: true,
         applicationDate: true,
         interviewDate: true,
+        salaryMin: true,
+        salaryMax: true,
+        salaryCurrency: true,
+        location: true,
+        employmentType: true,
+        remoteStatus: true,
         createdAt: true,
       },
       orderBy: { createdAt: "desc" },
@@ -64,6 +71,13 @@ export const dashboardService = {
       jobTitle: a.jobTitle,
       status: a.status,
       applicationDate: a.applicationDate,
+      interviewDate: a.interviewDate,
+      salaryMin: a.salaryMin,
+      salaryMax: a.salaryMax,
+      salaryCurrency: a.salaryCurrency,
+      location: a.location,
+      employmentType: a.employmentType,
+      remoteStatus: a.remoteStatus,
       createdAt: a.createdAt,
     }));
 

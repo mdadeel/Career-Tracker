@@ -12,4 +12,5 @@ export { Dialog } from "./Dialog";
 export { SidebarLayout } from "./Sidebar";
 export { ToastContainer } from "./Toast";
 export { Logo, LogoFull } from "./Logo";
+export { SparkleIcon } from "./SparkleIcon";
 

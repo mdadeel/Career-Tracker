@@ -40,6 +40,9 @@ const CalendarPage = lazy(() =>
 const SettingsPage = lazy(() =>
   import("./pages/SettingsPage").then((m) => ({ default: m.SettingsPage }))
 );
+const ResumesPage = lazy(() =>
+  import("./pages/ResumesPage").then((m) => ({ default: m.ResumesPage }))
+);
 const NotFoundPage = lazy(() =>
   import("./pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage }))
 );
@@ -100,6 +103,7 @@ function AppRoutes() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/resumes" element={<ResumesPage />} />
         <Route path="/saved-jobs" element={<Navigate to="/applications?status=Saved" replace />} />
       </Route>
 

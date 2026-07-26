@@ -2,10 +2,19 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApplications } from "../hooks/useApplications";
 import { Skeleton } from "../components/ui";
-import { CaretLeft, CaretRight, Plus, Chats } from "@phosphor-icons/react";
+import { CaretLeft, CaretRight, Plus, Chats, Bookmark, ArrowUp, PencilLine, ChatCircle, XCircle, CheckCircle } from "@phosphor-icons/react";
 import type { Application } from "../types";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const STATUS_PILL_STYLES: Record<string, string> = {
+  Saved: "bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-500/30",
+  Applied: "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-500/30",
+  Assessment: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-500/30",
+  Interview: "bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-500/30",
+  Rejected: "bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-500/30",
+  Offer: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30",
+};
 
 function getMonthGrid(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay();
@@ -87,6 +96,37 @@ export function CalendarPage() {
       .sort((a, b) => new Date(a.interviewDate!).getTime() - new Date(b.interviewDate!).getTime());
   }, [applications]);
 
+  // All events in current month view (for agenda)
+  const allMonthEvents = useMemo(() => {
+    const events: Application[] = [];
+    for (const [, apps] of appsByDate) {
+      apps.forEach((a) => {
+        if (!events.find((e) => e.id === a.id)) events.push(a);
+      });
+    }
+    return events.sort((a, b) => new Date(a.applicationDate).getTime() - new Date(b.applicationDate).getTime());
+  }, [appsByDate]);
+
+  const [calendarView, setCalendarView] = useState<"month" | "agenda">("month");
+  const goToToday = () => setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
+
+  const getEventIcon = (status: string) => {
+    switch (status) {
+      case "Saved": return <Bookmark size={10} weight="fill" />;
+      case "Applied": return <ArrowUp size={10} weight="fill" />;
+      case "Assessment": return <PencilLine size={10} weight="fill" />;
+      case "Interview": return <ChatCircle size={10} weight="fill" />;
+      case "Rejected": return <XCircle size={10} weight="fill" />;
+      case "Offer": return <CheckCircle size={10} weight="fill" />;
+      default: return (
+        <svg className="h-2.5 w-2.5 text-ink-tertiary dark:text-white/40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      );
+    }
+  };
+
   if (isLoading) return <CalendarSkeleton />;
 
   return (
@@ -96,6 +136,29 @@ export function CalendarPage() {
         <div>
           <h1 className="text-base font-semibold text-ink dark:text-white/90">Calendar</h1>
           <p className="mt-0.5 text-sm text-ink-secondary dark:text-white/50">Your interview schedule and deadlines</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={goToToday}
+            className="rounded-lg border border-slate-200 dark:border-dark-border px-3 py-1.5 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/5 transition-colors"
+          >
+            Today
+          </button>
+          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 dark:border-dark-border p-0.5">
+            {(["month", "agenda"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => setCalendarView(v)}
+                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+                  calendarView === v
+                    ? "bg-brand-600 text-white shadow-sm"
+                    : "text-ink-tertiary dark:text-white/40 hover:text-ink dark:hover:text-white/70"
+                }`}
+              >
+                {v === "month" ? "Month" : "Agenda"}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -113,6 +176,16 @@ export function CalendarPage() {
             </button>
           </div>
 
+          {/* Color legend */}
+          <div className="flex flex-wrap gap-3 px-4 py-2 border-b border-slate-100 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">
+            {Object.entries(STATUS_PILL_STYLES).map(([status]) => (
+              <span key={status} className="inline-flex items-center gap-1 text-[10px] text-ink-tertiary dark:text-white/50">
+                <span className={`h-2 w-2 rounded-full ${STATUS_PILL_STYLES[status].split(" ")[0]}`} />
+                {status}
+              </span>
+            ))}
+          </div>
+
           {/* Weekday headers */}
           <div className="grid grid-cols-7 border-b border-slate-100 dark:border-dark-border">
             {WEEKDAYS.map((d) => (
@@ -128,18 +201,21 @@ export function CalendarPage() {
               if (day === null) return <div key={`e-${i}`} className="aspect-square" />;
               const apps = appsByDate.get(day) || [];
               const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
+              const isPast = new Date(year, month, day) < new Date(new Date().toDateString());
               return (
                 <div
                   key={day}
                   className={`aspect-square border-b border-r border-slate-100 dark:border-dark-border p-1 transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.02] ${
                     isToday ? "bg-brand-50 dark:bg-brand-500/10" : ""
-                  }`}
+                  } ${isPast ? "opacity-40" : ""}`}
                 >
                   <div className="flex items-center justify-center">
                     <span
                       className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
                         isToday
                           ? "bg-brand-600 text-white font-semibold"
+                          : isPast
+                          ? "text-slate-300 dark:text-white/30"
                           : "text-ink dark:text-white/70"
                       }`}
                     >
@@ -148,19 +224,21 @@ export function CalendarPage() {
                   </div>
                   {apps.length > 0 && (
                     <div className="mt-0.5 space-y-0.5">
-                      {apps.slice(0, 2).map((app) => (
-                        <button
-                          key={app.id}
-                          onClick={() => navigate(`/applications?id=${app.id}`)}
-                          className={`w-full truncate rounded px-1 py-0.5 text-[9px] font-medium text-left transition-colors ${
-                            app.status === "Interview"
-                              ? "bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-500/30"
-                              : "bg-blue-50 dark:bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-500/20"
-                          }`}
-                        >
-                          {app.companyName}
-                        </button>
-                      ))}
+                      {apps.slice(0, 2).map((app) => {
+                    const isPast = new Date(app.interviewDate || app.applicationDate) < new Date(new Date().toDateString());
+                    return (
+                      <button
+                        key={app.id}
+                        onClick={() => navigate(`/applications?id=${app.id}`)}
+                        className={`w-full truncate rounded px-1 py-0.5 text-[9px] font-medium text-left transition-colors flex items-center gap-1 ${
+                          STATUS_PILL_STYLES[app.status] || STATUS_PILL_STYLES.Saved
+                        } ${isPast ? "opacity-50" : ""}`}
+                      >
+                        <span className="shrink-0">{getEventIcon(app.status)}</span>
+                        <span className="truncate">{app.companyName}</span>
+                      </button>
+                    );
+                  })}
                       {apps.length > 2 && (
                         <p className="text-[9px] text-ink-tertiary dark:text-white/40 pl-1">+{apps.length - 2} more</p>
                       )}
@@ -174,58 +252,88 @@ export function CalendarPage() {
 
         {/* Sidebar: Upcoming Events */}
         <div className="space-y-4">
-          {/* Quick actions */}
+          {/* Agenda list */}
           <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4">
-            <h3 className="text-xs font-semibold text-ink dark:text-white/85 mb-3">Quick Actions</h3>
-            <div className="space-y-2">
-              <button
-                onClick={() => navigate("/applications/new")}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/[0.04] transition-colors"
-              >
-                <Plus size={16} className="text-brand-500" />
-                New Application
-              </button>
-              <button
-                onClick={() => navigate("/applications")}
-                className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/[0.04] transition-colors"
-              >
-                <Chats size={16} className="text-purple-500" />
-                View Applications
-              </button>
-            </div>
-          </div>
-
-          {/* Upcoming events */}
-          <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4">
-            <h3 className="text-xs font-semibold text-ink dark:text-white/85 mb-3">Next 7 Days</h3>
-            {upcomingEvents.length > 0 ? (
-              <div className="space-y-2">
-                {upcomingEvents.map((app) => (
-                  <button
-                    key={app.id}
-                    onClick={() => navigate(`/applications?id=${app.id}`)}
-                    className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.03]"
-                  >
-                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-purple-50 dark:bg-purple-500/10 text-xs font-bold text-purple-600 dark:text-purple-400">
-                      {app.companyName.charAt(0)}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-xs font-medium text-ink dark:text-white/85 truncate">{app.jobTitle}</p>
-                      <p className="text-xs text-ink-tertiary dark:text-white/40 truncate">{app.companyName}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 tabular-nums">
-                        {new Date(app.interviewDate!).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
-                      </p>
-                    </div>
-                  </button>
-                ))}
+            <h3 className="text-xs font-semibold text-ink dark:text-white/85 mb-3">Agenda</h3>
+            {calendarView === "agenda" ? (
+              <div className="space-y-2 max-h-[500px] overflow-y-auto">
+                {allMonthEvents.length > 0 ? (
+                  allMonthEvents.map((app) => {
+                    const date = app.status === "Interview" && app.interviewDate ? new Date(app.interviewDate) : new Date(app.applicationDate);
+                    return (
+                      <button
+                        key={app.id}
+                        onClick={() => navigate(`/applications?id=${app.id}`)}
+                        className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.03]"
+                      >
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-brand-50 dark:bg-brand-500/10 text-xs font-bold text-brand-600 dark:text-brand-400">
+                          {app.companyName.charAt(0)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium text-ink dark:text-white/85 truncate">{app.jobTitle}</p>
+                          <p className="text-xs text-ink-tertiary dark:text-white/40 truncate">{app.companyName}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-[11px] font-semibold text-ink dark:text-white/70 tabular-nums">
+                            {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                          </p>
+                          <p className="text-[10px] text-ink-tertiary dark:text-white/40">{app.status}</p>
+                        </div>
+                      </button>
+                    );
+                  })
+                ) : (
+                  <p className="text-xs text-ink-tertiary dark:text-white/40 py-4 text-center">No events this month</p>
+                )}
               </div>
             ) : (
-              <div className="py-6 text-center">
-                <p className="text-xs text-ink-tertiary dark:text-white/40">No upcoming events</p>
-                <p className="text-[11px] text-ink-tertiary dark:text-white/30 mt-1">Schedule an interview to see it here</p>
-              </div>
+              <>
+                <h4 className="text-[11px] font-semibold text-ink-tertiary dark:text-white/50 mb-2">Upcoming Interviews</h4>
+                {upcomingEvents.length > 0 ? (
+                  <div className="space-y-2">
+                    {upcomingEvents.map((app) => (
+                      <button
+                        key={app.id}
+                        onClick={() => navigate(`/applications?id=${app.id}`)}
+                        className="flex w-full items-center gap-2 rounded-lg p-2 text-left transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.03]"
+                      >
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-purple-50 dark:bg-purple-500/10 text-xs font-bold text-purple-600 dark:text-purple-400">
+                          {app.companyName.charAt(0)}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium text-ink dark:text-white/85 truncate">{app.jobTitle}</p>
+                          <p className="text-xs text-ink-tertiary dark:text-white/40 truncate">{app.companyName}</p>
+                        </div>
+                        <div className="text-right shrink-0">
+                          <p className="text-xs font-semibold text-purple-600 dark:text-purple-400 tabular-nums">
+                            {new Date(app.interviewDate!).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" })}
+                          </p>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-4 text-center">
+                    <p className="text-xs text-ink-tertiary dark:text-white/40">No upcoming interviews</p>
+                  </div>
+                )}
+                <div className="mt-3 pt-3 border-t border-slate-100 dark:border-dark-border">
+                  <button
+                    onClick={() => navigate("/applications/new")}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/[0.04] transition-colors"
+                  >
+                    <Plus size={16} className="text-brand-500" />
+                    New Application
+                  </button>
+                  <button
+                    onClick={() => navigate("/applications")}
+                    className="flex w-full items-center gap-2 rounded-lg px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-surface-secondary dark:hover:bg-white/[0.04] transition-colors"
+                  >
+                    <Chats size={16} className="text-purple-500" />
+                    View Applications
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </div>

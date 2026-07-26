@@ -29,6 +29,15 @@ const PIPELINE_STAGES: { key: ApplicationStatus; label: string; color: string }[
   { key: "Offer", label: "Offer", color: "bg-emerald-500" },
 ];
 
+const statusColors: Record<string, string> = {
+  Saved: "bg-slate-400",
+  Applied: "bg-blue-500",
+  Assessment: "bg-amber-500",
+  Interview: "bg-purple-500",
+  Rejected: "bg-rose-500",
+  Offer: "bg-emerald-500",
+};
+
 /* ─── Sortable Card ─── */
 function PipelineCard({ app, isDragging }: { app: Application; isDragging?: boolean }) {
   const navigate = useNavigate();
@@ -51,10 +60,12 @@ function PipelineCard({ app, isDragging }: { app: Application; isDragging?: bool
         e.stopPropagation();
         navigate(`/applications?id=${app.id}`);
       }}
-      className={`rounded-xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5 cursor-grab active:cursor-grabbing transition-all hover:border-slate-300 dark:hover:border-white/20 hover:shadow-md hover:-translate-y-0.5 ${
+      className={`rounded-xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5 cursor-grab active:cursor-grabbing transition-all hover:border-slate-300 dark:hover:border-white/20 hover:shadow-card-hover hover:-translate-y-0.5 ${
         isDragging ? "shadow-elevated ring-2 ring-brand-500/30" : ""
       }`}
     >
+      {/* Status color accent bar */}
+      <div className={`h-1 w-8 rounded-full mb-2 ${statusColors[app.status] || "bg-slate-400"}`} />
       <p className="text-xs font-semibold text-ink dark:text-white/90 truncate">{app.jobTitle}</p>
       <p className="text-[11px] font-medium text-ink-secondary dark:text-white/50 mt-0.5 truncate">{app.companyName}</p>
       {app.location && (
@@ -106,8 +117,8 @@ function PipelineColumn({
           : "border-slate-200/80 dark:border-dark-border bg-slate-50/70 dark:bg-white/[0.02]"
       }`}
     >
-      {/* Header */}
-      <div className="flex items-center gap-2 px-3.5 py-3 border-b border-slate-200/80 dark:border-dark-border/80 bg-white/50 dark:bg-white/[0.02] rounded-t-2xl">
+      {/* Header - sticky */}
+      <div className="sticky top-0 z-10 flex items-center gap-2 px-3.5 py-3 border-b border-slate-200/80 dark:border-dark-border/80 bg-white/80 dark:bg-dark-surface/80 backdrop-blur-sm rounded-t-2xl">
         <span className={`h-2.5 w-2.5 rounded-full ${color}`} />
         <span className="text-xs font-bold text-ink dark:text-white/90 flex-1">{label}</span>
         <span className="text-[11px] font-bold text-slate-500 dark:text-white/40 tabular-nums bg-slate-200/60 dark:bg-white/10 px-2 py-0.5 rounded-full">
@@ -257,7 +268,9 @@ export function PipelinePage() {
   return (
     <div className="space-y-4">
       {/* Pipeline Board — full width smooth horizontal scroll container */}
-      <div className="w-full overflow-x-auto pb-4 pt-1 touch-pan-x">
+      <div className="relative w-full overflow-x-auto pb-4 pt-1 touch-pan-x">
+        {/* Scroll indicator gradient */}
+        <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-12 bg-gradient-to-l from-slate-50/80 dark:from-dark/80 to-transparent z-10" />
         <DndContext
           sensors={sensors}
           collisionDetection={closestCorners}

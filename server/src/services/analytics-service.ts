@@ -36,6 +36,7 @@ export const analyticsService = {
   async getStats(userId: string): Promise<AnalyticsData> {
     const applications = await prisma.application.findMany({
       where: { userId },
+      take: 10000, // Safety cap — prevents unbounded memory usage
       select: {
         id: true,
         status: true,

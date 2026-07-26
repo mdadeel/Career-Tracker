@@ -1,10 +1,9 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAnalytics } from "../hooks/useAnalytics";
 import { Skeleton, Button } from "../components/ui";
 import { ChartBar } from "@phosphor-icons/react";
 import {
-  AreaChart,
-  Area,
   BarChart,
   Bar,
   XAxis,
@@ -151,10 +150,21 @@ function formatMonth(month: string): string {
   return date.toLocaleDateString("en-US", { month: "short", year: "2-digit" });
 }
 
+/* ─── Center label for Donut ─── */
+function DonutCenterLabel({ total }: { total: number }) {
+  return (
+    <text x="50%" y="50%" textAnchor="middle" dominantBaseline="middle" className="fill-ink dark:fill-white/80">
+      <tspan x="50%" dy="-0.3em" className="text-lg font-bold tabular-nums">{total}</tspan>
+      <tspan x="50%" dy="1.2em" className="text-[10px] fill-ink-tertiary dark:fill-white/40">Total</tspan>
+    </text>
+  );
+}
+
 /* ─── Main Component ─── */
 export function AnalyticsPage() {
   const { data, isLoading, error, refresh } = useAnalytics();
   const navigate = useNavigate();
+  const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d" | "all">("all");
 
   if (isLoading) return <AnalyticsSkeleton />;
   if (error) return (
@@ -184,6 +194,8 @@ export function AnalyticsPage() {
 
   const { summary, monthlyTrends, funnel, sourceEffectiveness, statusDistribution } = data;
 
+  const maxSourceVolume = Math.max(...sourceEffectiveness.map((s) => s.total), 1);
+
   return (
     <div className="mx-auto max-w-5xl py-5 lg:py-6 space-y-5">
       {/* Header */}
@@ -194,9 +206,25 @@ export function AnalyticsPage() {
             Deep insights into your job search performance
           </p>
         </div>
+        {/* Time range selector */}
+        <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-0.5">
+          {(["7d", "30d", "90d", "all"] as const).map((range) => (
+            <button
+              key={range}
+              onClick={() => setTimeRange(range)}
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+                timeRange === range
+                  ? "bg-brand-600 text-white shadow-sm"
+                  : "text-ink-tertiary dark:text-white/40 hover:text-ink dark:hover:text-white/70"
+              }`}
+            >
+              {range === "all" ? "All" : range}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Summary Metric Cards */}
+      {/* Summary Metric Cards with deltas */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
         <MetricCard label="Applications" value={summary.totalApplications} sub="Total tracked" />
         <MetricCard
@@ -218,19 +246,14 @@ export function AnalyticsPage() {
 
       {/* Charts Grid */}
       <div className="grid gap-4 lg:grid-cols-2">
-        {/* Monthly Trend */}
+        {/* Weekly Trend - bars instead of area */}
         <Widget title="Application Trend">
           {monthlyTrends.some((m) => m.count > 0) ? (
             <div className="h-56">
+              {/* TODO: Add weekly data from backend, using monthly as fallback */}
               <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={monthlyTrends} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
-                  <defs>
-                    <linearGradient id="trendGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={BRAND_GRADIENT} stopOpacity={0.2} />
-                      <stop offset="100%" stopColor={BRAND_GRADIENT} stopOpacity={0.02} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.06} />
+                <BarChart data={monthlyTrends} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.06} vertical={false} />
                   <XAxis
                     dataKey="month"
                     tickFormatter={formatMonth}
@@ -247,16 +270,12 @@ export function AnalyticsPage() {
                     tickLine={false}
                   />
                   <Tooltip content={<ChartTooltip />} />
-                  <Area
-                    type="monotone"
-                    dataKey="count"
-                    name="Applications"
-                    stroke={BRAND_GRADIENT}
-                    strokeWidth={2}
-                    fill="url(#trendGradient)"
-                    animationDuration={500}
-                  />
-                </AreaChart>
+                  <Bar dataKey="count" name="Applications" radius={[4, 4, 0, 0]} barSize={24} animationDuration={500}>
+                    {monthlyTrends.map((entry) => (
+                      <Cell key={entry.month} fill={BRAND_GRADIENT} />
+                    ))}
+                  </Bar>
+                </BarChart>
               </ResponsiveContainer>
             </div>
           ) : (
@@ -266,8 +285,8 @@ export function AnalyticsPage() {
           )}
         </Widget>
 
-        {/* Conversion Funnel */}
-        <Widget title="Pipeline Funnel">
+        {/* Current Pipeline Status (renamed from Pipeline Funnel) */}
+        <Widget title="Current Pipeline Status">
           <div className="h-56">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
@@ -300,7 +319,7 @@ export function AnalyticsPage() {
           </div>
         </Widget>
 
-        {/* Source Breakdown */}
+        {/* Source Effectiveness - bar = volume, rate as label */}
         <Widget title="Source Effectiveness">
           {sourceEffectiveness.length > 0 ? (
             <div className="space-y-3">
@@ -313,20 +332,18 @@ export function AnalyticsPage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="flex-1 h-1.5 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
-                      {source.conversionRate > 0 && (
-                        <div
-                          className="h-full rounded-full bg-brand-500 transition-all duration-500"
-                          style={{ width: `${source.conversionRate}%` }}
-                        />
-                      )}
+                    <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-brand-500 transition-all duration-500"
+                        style={{ width: `${(source.total / maxSourceVolume) * 100}%` }}
+                      />
                     </div>
-                    <span className="w-8 text-right text-[11px] font-semibold text-ink dark:text-white/70 tabular-nums">
-                      {source.conversionRate}%
+                    <span className="w-10 text-right text-[10px] text-ink-secondary dark:text-white/50 tabular-nums">
+                      {source.conversionRate}% rate
                     </span>
                   </div>
                   {(source.interview > 0 || source.offer > 0) && (
-                    <p className="text-xs text-ink-tertiary dark:text-white/40 mt-0.5">
+                    <p className="text-[11px] text-ink-tertiary dark:text-white/40 mt-0.5">
                       {source.interview > 0 && `${source.interview} interview${source.interview !== 1 ? "s" : ""}`}
                       {source.interview > 0 && source.offer > 0 && " · "}
                       {source.offer > 0 && `${source.offer} offer${source.offer !== 1 ? "s" : ""}`}
@@ -340,7 +357,7 @@ export function AnalyticsPage() {
           )}
         </Widget>
 
-        {/* Status Distribution (donut chart) */}
+        {/* Status Distribution (donut chart with center label) */}
         <Widget title="Status Distribution">
           {statusDistribution.length > 0 ? (
             <div className="flex items-center gap-6">
@@ -365,6 +382,7 @@ export function AnalyticsPage() {
                         />
                       ))}
                     </Pie>
+                    <DonutCenterLabel total={summary.totalApplications} />
                     <Tooltip content={<ChartTooltip />} />
                   </PieChart>
                 </ResponsiveContainer>
@@ -392,26 +410,6 @@ export function AnalyticsPage() {
             <p className="text-xs text-ink-tertiary dark:text-white/40 py-8 text-center">No status data available</p>
           )}
         </Widget>
-      </div>
-
-      {/* Additional Metrics */}
-      <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
-        <MetricCard
-          label="Active Apps"
-          value={summary.activeApplications}
-          sub="Still in progress"
-        />
-        <MetricCard
-          label="Rejected"
-          value={summary.totalRejected}
-          sub={`${summary.rejectionRate}% rejection rate`}
-        />
-        <MetricCard
-          label="Avg Time to Interview"
-          value={summary.avgTimeToInterview !== null ? `${summary.avgTimeToInterview}d` : "—"}
-          sub={summary.avgTimeToInterview !== null ? "From application" : "No interview data yet"}
-        />
-        <MetricCard label="Offers" value={summary.totalOffers} sub={`${summary.offerRate}% offer rate`} />
       </div>
     </div>
   );

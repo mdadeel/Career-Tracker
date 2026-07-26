@@ -6,6 +6,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Geist', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Inter', 'Geist', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['Geist Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
@@ -30,7 +31,7 @@ export default {
         ink: {
           DEFAULT: '#0f172a',
           secondary: '#475569',
-          tertiary: '#94a3b8',
+          tertiary: '#64748b',
           disabled: '#cbd5e1',
         },
         // Dark mode surfaces (used via dark:)
@@ -51,7 +52,7 @@ export default {
         '2xl': '1.25rem',
       },
       boxShadow: {
-        'card': '0 1px 3px 0 rgb(0 0 0 / 0.04), 0 1px 2px -1px rgb(0 0 0 / 0.06)',
+        'card': '0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06)',
         'card-hover': '0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06)',
         'elevated': '0 8px 24px -4px rgb(0 0 0 / 0.08), 0 2px 6px 0 rgb(0 0 0 / 0.04)',
         'dialog': '0 20px 48px -8px rgb(0 0 0 / 0.12), 0 4px 12px 0 rgb(0 0 0 / 0.08)',

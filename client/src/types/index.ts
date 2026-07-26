@@ -15,6 +15,15 @@ export type ApplicationSource =
   | "Referral"
   | "Other";
 
+export interface Resume {
+  id: string;
+  fileName: string;
+  fileType: string;
+  fileSize: number;
+  textContent?: string | null;
+  createdAt: string;
+}
+
 export interface Application {
   id: string;
   companyName: string;
@@ -27,6 +36,7 @@ export interface Application {
   jobDescription: string | null;
   resumeLink: string | null;
   resumeText?: string | null;
+  resumeId?: string | null;
   interviewDate: string | null;
   salaryMin: number | null;
   salaryMax: number | null;
@@ -123,6 +133,7 @@ export interface ApplicationFormData {
   jobDescription: string;
   resumeLink: string;
   resumeText?: string;
+  resumeId?: string;
   interviewDate: string;
   salaryMin: string;
   salaryMax: string;

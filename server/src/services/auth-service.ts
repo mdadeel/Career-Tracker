@@ -5,8 +5,9 @@ import { AppError } from "../middlewares/error-handler";
 
 export const authService = {
   async register(data: { name: string; email: string; password: string }) {
+    const email = data.email.toLowerCase().trim();
     const existingUser = await prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email },
     });
 
     if (existingUser) {
@@ -18,7 +19,7 @@ export const authService = {
     const user = await prisma.user.create({
       data: {
         name: data.name,
-        email: data.email,
+        email,
         passwordHash,
       },
       select: {
@@ -34,8 +35,9 @@ export const authService = {
   },
 
   async login(data: { email: string; password: string }) {
+    const email = data.email.toLowerCase().trim();
     const user = await prisma.user.findUnique({
-      where: { email: data.email },
+      where: { email },
     });
 
     if (!user) {
@@ -74,14 +76,18 @@ export const authService = {
         aiBaseUrl: true,
         aiModel: true,
         createdAt: true,
-      } as any,
+      },
     });
 
     if (!user) {
       throw new AppError("User not found", 404);
     }
 
-    return user;
+    // Never return the real API key — just whether one is set
+    return {
+      ...user,
+      aiApiKey: user.aiApiKey ? "••••••••" : null,
+    };
   },
 
   async changePassword(userId: string, data: { currentPassword: string; newPassword: string }) {
@@ -112,7 +118,7 @@ export const authService = {
   async updateResume(userId: string, resumeText: string) {
     const user = await prisma.user.update({
       where: { id: userId },
-      data: { resumeText } as any,
+      data: { resumeText },
       select: {
         id: true,
         name: true,
@@ -120,24 +126,35 @@ export const authService = {
         resumeText: true,
         skills: true,
         aiProvider: true,
-        aiApiKey: true,
         aiBaseUrl: true,
         aiModel: true,
         createdAt: true,
-      } as any,
+      },
     });
     return user;
   },
 
   async updateAiConfig(userId: string, data: { aiProvider: string; aiApiKey?: string; aiBaseUrl?: string; aiModel?: string }) {
+    // Build update payload — only update aiApiKey if user sent a real new key
+    // (not the masked placeholder returned by /me)
+    const updatePayload: Record<string, unknown> = {
+      aiProvider: data.aiProvider,
+      aiBaseUrl: data.aiBaseUrl ?? null,
+      aiModel: data.aiModel ?? null,
+    };
+
+    // Only overwrite the key if user provided a real value (not the mask or empty)
+    if (data.aiApiKey && !data.aiApiKey.startsWith("••")) {
+      updatePayload.aiApiKey = data.aiApiKey;
+    } else if (data.aiApiKey === "") {
+      // Explicitly clearing the key
+      updatePayload.aiApiKey = null;
+    }
+    // If aiApiKey is undefined or is the mask, don't touch it
+
     const user = await prisma.user.update({
       where: { id: userId },
-      data: {
-        aiProvider: data.aiProvider,
-        aiApiKey: data.aiApiKey ?? null,
-        aiBaseUrl: data.aiBaseUrl ?? null,
-        aiModel: data.aiModel ?? null,
-      } as any,
+      data: updatePayload,
       select: {
         id: true,
         name: true,
@@ -149,8 +166,13 @@ export const authService = {
         aiBaseUrl: true,
         aiModel: true,
         createdAt: true,
-      } as any,
+      },
     });
-    return user;
+
+    // Return masked version, same as me()
+    return {
+      ...user,
+      aiApiKey: user.aiApiKey ? "••••••••" : null,
+    };
   },
 };

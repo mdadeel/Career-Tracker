@@ -96,10 +96,10 @@ export function RegisterPage() {
                   <input
                     type={showPassword ? "text" : "password"}
                     required
-                    minLength={6}
+                    minLength={8}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="At least 6 characters"
+                    placeholder="At least 8 characters"
                     className="block w-full rounded-lg border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface px-3 py-2.5 pr-10 text-body text-ink dark:text-white/80 placeholder:text-ink-tertiary dark:placeholder:text-white/30 transition-all duration-150 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
                   />
                   <button
