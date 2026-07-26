@@ -31,8 +31,19 @@ export interface UserAiConfig {
   aiModel?: string | null;
 }
 
-const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || 'sk_ri8qUXbt3uFqV22yOpeuq6BDfsLvjDJe';
+const POLLINATIONS_API_KEY = process.env.POLLINATIONS_API_KEY || '';
 const POLLINATIONS_URL = 'https://gen.pollinations.ai/v1/chat/completions';
+const AI_FETCH_TIMEOUT = 30_000;
+
+async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), AI_FETCH_TIMEOUT);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(id);
+  }
+}
 
 async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<string> {
   const provider = config?.aiProvider || 'system_default';
@@ -42,7 +53,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
   if (provider === 'google' && apiKey) {
     const model = config?.aiModel?.trim() || 'gemini-2.5-flash';
     const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-    const response = await fetch(geminiUrl, {
+    const response = await fetchWithTimeout(geminiUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -72,7 +83,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
   // 2. OpenRouter API
   if (provider === 'openrouter' && apiKey) {
     const model = config?.aiModel?.trim() || 'google/gemini-2.5-flash-lite:free';
-    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    const response = await fetchWithTimeout('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -106,7 +117,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
   // 3. Official OpenAI API
   if (provider === 'openai' && apiKey) {
     const model = config?.aiModel?.trim() || 'gpt-4o-mini';
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetchWithTimeout('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
@@ -143,7 +154,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
 
-    const response = await fetch(url, {
+    const response = await fetchWithTimeout(url, {
       method: 'POST',
       headers,
       body: JSON.stringify({
@@ -170,7 +181,10 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
   }
 
   // 5. System Default Fallback (Pollinations AI)
-  const response = await fetch(POLLINATIONS_URL, {
+  if (!POLLINATIONS_API_KEY) {
+    throw new Error('AI_NOT_CONFIGURED:No AI provider is configured. Add your API key in Settings to use AI features.');
+  }
+  const response = await fetchWithTimeout(POLLINATIONS_URL, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${POLLINATIONS_API_KEY}`,
@@ -233,7 +247,11 @@ Job Description Text:
 ${jdText}`;
 
     const rawJson = await callAiProvider(prompt, config);
-    return JSON.parse(rawJson) as ParsedJd;
+    try {
+      return JSON.parse(rawJson) as ParsedJd;
+    } catch {
+      throw new Error('AI returned invalid JSON for job description parsing. Please try again.');
+    }
   }
 
   static async analyzeMatch(jdText: string, userResumeText: string, config?: UserAiConfig): Promise<MatchAnalysis> {
@@ -254,7 +272,11 @@ Job Description:
 ${jdText}`;
 
     const rawJson = await callAiProvider(prompt, config);
-    return JSON.parse(rawJson) as MatchAnalysis;
+    try {
+      return JSON.parse(rawJson) as MatchAnalysis;
+    } catch {
+      throw new Error('AI returned invalid JSON for match analysis. Please try again.');
+    }
   }
 
   static async generateInterviewPrep(jobTitle: string, companyName: string, jdText?: string, config?: UserAiConfig): Promise<InterviewQuestion[]> {
@@ -273,7 +295,11 @@ Return strictly a JSON array of objects:
 ]`;
 
     const rawJson = await callAiProvider(prompt, config);
-    return JSON.parse(rawJson) as InterviewQuestion[];
+    try {
+      return JSON.parse(rawJson) as InterviewQuestion[];
+    } catch {
+      throw new Error('AI returned invalid JSON for interview prep. Please try again.');
+    }
   }
 
   static async generateOutreachEmail(
@@ -295,6 +321,10 @@ Return strictly a valid JSON object:
 }`;
 
     const rawJson = await callAiProvider(prompt, config);
-    return JSON.parse(rawJson) as { subject: string; body: string };
+    try {
+      return JSON.parse(rawJson) as { subject: string; body: string };
+    } catch {
+      throw new Error('AI returned invalid JSON for email draft. Please try again.');
+    }
   }
 }

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { applicationService } from "../services/applicationService";
 import { aiService, MatchAnalysis, InterviewQuestion, EmailDraft } from "../services/ai.service";
 import { useToast } from "../context/ToastContext";
-import { Button, Badge, statusVariantMap } from "../components/ui";
+import { Button, Badge, statusVariantMap, SparkleIcon } from "../components/ui";
 import {
   ArrowLeft,
   Spinner,
@@ -11,6 +11,12 @@ import {
 } from "@phosphor-icons/react";
 import type { Application } from "../types";
 import { formatDate, formatSalary, formatLocation } from "../utils/format";
+
+const AI_NOT_CONFIGURED_PREFIX = "AI_NOT_CONFIGURED:";
+
+function isAiNotConfigured(msg: string) {
+  return msg.startsWith(AI_NOT_CONFIGURED_PREFIX);
+}
 
 export function ApplicationAiDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -63,7 +69,13 @@ export function ApplicationAiDetailPage() {
       }
       addToast(forceRegenerate ? "Match score re-analyzed & saved!" : "Match score calculated & saved!", "success");
     } catch (err: any) {
-      addToast(err?.message || "Failed to analyze match score.", "error");
+      const msg = err?.message || "Failed to analyze match score.";
+      if (isAiNotConfigured(msg)) {
+        addToast("AI provider not configured. Go to Settings to add your API key.", "error");
+        navigate("/settings");
+      } else {
+        addToast(msg, "error");
+      }
     } finally {
       setIsMatchLoading(false);
     }
@@ -77,7 +89,13 @@ export function ApplicationAiDetailPage() {
       setQuestions(data);
       addToast("Interview prep questions generated!", "success");
     } catch (err: any) {
-      addToast(err?.message || "Failed to generate interview prep.", "error");
+      const msg = err?.message || "Failed to generate interview prep.";
+      if (isAiNotConfigured(msg)) {
+        addToast("AI provider not configured. Go to Settings to add your API key.", "error");
+        navigate("/settings");
+      } else {
+        addToast(msg, "error");
+      }
     } finally {
       setIsInterviewLoading(false);
     }
@@ -91,7 +109,13 @@ export function ApplicationAiDetailPage() {
       setEmailDraft(draft);
       addToast("Outreach email draft created!", "success");
     } catch (err: any) {
-      addToast(err?.message || "Failed to generate email draft.", "error");
+      const msg = err?.message || "Failed to generate email draft.";
+      if (isAiNotConfigured(msg)) {
+        addToast("AI provider not configured. Go to Settings to add your API key.", "error");
+        navigate("/settings");
+      } else {
+        addToast(msg, "error");
+      }
     } finally {
       setIsEmailLoading(false);
     }
@@ -141,7 +165,7 @@ export function ApplicationAiDetailPage() {
               </Badge>
               {matchData?.matchScore !== undefined && (
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20">
-                  ✨ {matchData.matchScore}% Match
+                  <SparkleIcon className="w-3 h-3" /> {matchData.matchScore}% Match
                 </span>
               )}
             </div>
@@ -214,7 +238,7 @@ export function ApplicationAiDetailPage() {
             {/* Copilot Header Tabs */}
             <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-                <span className="text-base">✨</span>
+                <SparkleIcon className="w-5 h-5" />
                 <h2 className="font-bold text-sm">AI Career Copilot Workspace</h2>
               </div>
 
@@ -318,7 +342,7 @@ export function ApplicationAiDetailPage() {
                     {matchData.recommendations?.length > 0 && (
                       <div className="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2">
                         <h4 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 text-xs">
-                          💡 Tailoring Recommendations
+                          <SparkleIcon className="w-3.5 h-3.5 text-indigo-500" /> Tailoring Recommendations
                         </h4>
                         <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-1 pl-1 text-xs">
                           {matchData.recommendations.map((rec, i) => (

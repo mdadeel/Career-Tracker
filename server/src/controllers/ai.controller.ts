@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { AiService, UserAiConfig } from '../services/ai.service';
 import { prisma } from '../utils/prisma';
 import z from 'zod';
+import { AuthenticatedRequest } from '../types';
 
 const parseJdSchema = z.object({
   jobDescription: z.string().min(20, 'Job description must be at least 20 characters long'),
@@ -16,17 +17,26 @@ async function getUserAiConfig(userId?: string): Promise<UserAiConfig | undefine
   if (!userId) return undefined;
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { aiProvider: true, aiApiKey: true, aiBaseUrl: true, aiModel: true } as any,
+    select: { aiProvider: true, aiApiKey: true, aiBaseUrl: true, aiModel: true },
   });
   if (!user) return undefined;
-  return user as UserAiConfig;
+  return user as unknown as UserAiConfig;
 }
 
 export class AiController {
   static async testConfig(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
+      const userId = (req as AuthenticatedRequest).user?.userId;
       const { aiProvider, aiApiKey, aiBaseUrl, aiModel } = req.body;
-      const result = await AiService.testAiConfig({ aiProvider, aiApiKey, aiBaseUrl, aiModel });
+
+      // If no key provided in request, fall back to stored key from DB
+      let effectiveKey = aiApiKey;
+      if (!effectiveKey && userId && aiProvider !== 'system_default') {
+        const dbConfig = await getUserAiConfig(userId);
+        effectiveKey = dbConfig?.aiApiKey;
+      }
+
+      const result = await AiService.testAiConfig({ aiProvider, aiApiKey: effectiveKey, aiBaseUrl, aiModel });
       res.status(200).json({ status: 'success', message: result.message });
     } catch (error: any) {
       res.status(400).json({ status: 'error', message: error?.message || 'Connection test failed' });
@@ -35,7 +45,7 @@ export class AiController {
 
   static async parseJobDescription(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = (req as any).user?.userId || (req as any).user?.id;
+      const userId = (req as AuthenticatedRequest).user?.userId;
       const { jobDescription } = parseJdSchema.parse(req.body);
       const aiConfig = await getUserAiConfig(userId);
       const parsedData = await AiService.parseJobDescription(jobDescription, aiConfig);
@@ -47,12 +57,12 @@ export class AiController {
 
   static async analyzeMatch(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = (req as any).user.userId || (req as any).user.id;
+      const userId = (req as AuthenticatedRequest).user!.userId;
       const applicationId = req.params.id;
 
-      const user = await prisma.user.findUnique({ where: { id: userId } });
       const application = await prisma.application.findUnique({
         where: { id: applicationId, userId },
+        include: { resume: true },
       });
 
       if (!application) {
@@ -65,13 +75,17 @@ export class AiController {
         return;
       }
 
-      const uAny = user as any;
-      const appAny = application as any;
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { resumeText: true, skills: true, aiProvider: true, aiApiKey: true, aiBaseUrl: true, aiModel: true },
+      });
+
       const effectiveResumeText =
-        appAny?.resumeText ||
-        uAny?.resumeText ||
-        (uAny?.skills ? `Skills: ${uAny.skills.join(', ')}` : '');
-      const aiConfig = await getUserAiConfig(userId);
+        application.resume?.textContent ||
+        application.resumeText ||
+        user?.resumeText ||
+        (Array.isArray(user?.skills) ? `Skills: ${user.skills.join(', ')}` : '');
+      const aiConfig = user as unknown as UserAiConfig | undefined;
       const analysis = await AiService.analyzeMatch(application.jobDescription, effectiveResumeText, aiConfig);
 
       // Save match score and analysis output back to application
@@ -79,8 +93,8 @@ export class AiController {
         where: { id: applicationId },
         data: {
           aiMatchScore: analysis.matchScore,
-          aiAnalysis: analysis as any,
-        } as any,
+          aiAnalysis: JSON.parse(JSON.stringify(analysis)),
+        },
       });
 
       res.status(200).json({ status: 'success', data: analysis });
@@ -91,7 +105,7 @@ export class AiController {
 
   static async generateInterviewPrep(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = (req as any).user.userId || (req as any).user.id;
+      const userId = (req as AuthenticatedRequest).user!.userId;
       const applicationId = req.params.id;
 
       const application = await prisma.application.findUnique({
@@ -119,20 +133,29 @@ export class AiController {
 
   static async generateOutreachEmail(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const userId = (req as any).user.userId || (req as any).user.id;
+      const userId = (req as AuthenticatedRequest).user!.userId;
       const { type, applicationId } = generateEmailSchema.parse(req.body);
 
-      const user = await prisma.user.findUnique({ where: { id: userId } });
       const application = await prisma.application.findUnique({
         where: { id: applicationId, userId },
       });
 
-      if (!application || !user) {
-        res.status(404).json({ status: 'error', message: 'Application or User not found' });
+      if (!application) {
+        res.status(404).json({ status: 'error', message: 'Application not found' });
         return;
       }
 
-      const aiConfig = await getUserAiConfig(userId);
+      const user = await prisma.user.findUnique({
+        where: { id: userId },
+        select: { name: true, aiProvider: true, aiApiKey: true, aiBaseUrl: true, aiModel: true },
+      });
+
+      if (!user) {
+        res.status(404).json({ status: 'error', message: 'User not found' });
+        return;
+      }
+
+      const aiConfig = user as unknown as UserAiConfig | undefined;
       const emailDraft = await AiService.generateOutreachEmail(
         type,
         application.companyName,

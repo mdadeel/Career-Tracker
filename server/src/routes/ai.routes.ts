@@ -1,10 +1,12 @@
 import { Router } from 'express';
 import { AiController } from '../controllers/ai.controller';
 import { authMiddleware } from '../middlewares/auth-middleware';
+import { aiLimiter } from '../middlewares/rate-limiter';
 
 const router = Router();
 
 router.use(authMiddleware as any);
+router.use(aiLimiter);
 
 router.post('/parse-jd', AiController.parseJobDescription);
 router.post('/test-config', AiController.testConfig);

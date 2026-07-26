@@ -1,14 +1,33 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Spinner, CheckCircle, ArrowUpRight } from "@phosphor-icons/react";
+import { Spinner, CheckCircle, ArrowUpRight, Gear } from "@phosphor-icons/react";
 import { aiService, MatchAnalysis, InterviewQuestion, EmailDraft } from "../services/ai.service";
 import { Button } from "./ui";
+import { SparkleIcon } from "./ui/SparkleIcon";
 
-function SparkleIcon({ className = "w-4 h-4" }: { className?: string }) {
+const AI_NOT_CONFIGURED_PREFIX = "AI_NOT_CONFIGURED:";
+
+function isAiNotConfigured(msg: string) {
+  return msg.startsWith(AI_NOT_CONFIGURED_PREFIX);
+}
+
+function AiSetupNotice() {
+  const navigate = useNavigate();
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z" />
-    </svg>
+    <div className="rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/20 p-3 space-y-2">
+      <p className="text-xs font-medium text-amber-800 dark:text-amber-300">AI Provider Not Configured</p>
+      <p className="text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+        Add your API key in Settings to use AI features.
+      </p>
+      <button
+        type="button"
+        onClick={() => navigate("/settings")}
+        className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-500/20 hover:bg-amber-200 dark:hover:bg-amber-500/30 px-3 py-1.5 rounded-lg transition-colors"
+      >
+        <Gear size={12} weight="fill" />
+        Configure in Settings
+      </button>
+    </div>
   );
 }
 
@@ -38,6 +57,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
   const [isEmailLoading, setIsEmailLoading] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [showSetupNotice, setShowSetupNotice] = useState(false);
 
   const fetchMatch = async () => {
     setIsMatchLoading(true);
@@ -46,7 +66,12 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
       const data = await aiService.analyzeMatch(applicationId);
       setMatchData(data);
     } catch (err: any) {
-      setMatchError(err?.message || "Failed to analyze match score.");
+      const msg = err?.message || "Failed to analyze match score.";
+      if (isAiNotConfigured(msg)) {
+        setShowSetupNotice(true);
+      } else {
+        setMatchError(msg);
+      }
     } finally {
       setIsMatchLoading(false);
     }
@@ -59,7 +84,12 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
       const data = await aiService.generateInterviewPrep(applicationId);
       setQuestions(data);
     } catch (err: any) {
-      setInterviewError(err?.message || "Failed to generate interview prep.");
+      const msg = err?.message || "Failed to generate interview prep.";
+      if (isAiNotConfigured(msg)) {
+        setShowSetupNotice(true);
+      } else {
+        setInterviewError(msg);
+      }
     } finally {
       setIsInterviewLoading(false);
     }
@@ -72,7 +102,12 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
       const draft = await aiService.generateOutreachEmail(applicationId, emailType);
       setEmailDraft(draft);
     } catch (err: any) {
-      setEmailError(err?.message || "Failed to generate email draft.");
+      const msg = err?.message || "Failed to generate email draft.";
+      if (isAiNotConfigured(msg)) {
+        setShowSetupNotice(true);
+      } else {
+        setEmailError(msg);
+      }
     } finally {
       setIsEmailLoading(false);
     }
@@ -137,6 +172,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
         </button>
       </div>
 
+      {showSetupNotice && <AiSetupNotice />}
+
       {/* MATCH TAB */}
       {activeTab === "match" && (
         <div className="space-y-4">
@@ -196,7 +233,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
               {matchData.recommendations?.length > 0 && (
                 <div className="bg-white dark:bg-zinc-800 p-3 rounded-lg border border-slate-200 dark:border-white/10 space-y-1">
                   <h4 className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                    💡 Key Recommendations:
+                    <SparkleIcon className="w-3.5 h-3.5 text-indigo-500" /> Key Recommendations
                   </h4>
                   <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-0.5 pl-1">
                     {matchData.recommendations.map((rec, i) => (

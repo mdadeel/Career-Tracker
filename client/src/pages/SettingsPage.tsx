@@ -4,6 +4,7 @@ import { useTheme } from "../hooks/useTheme";
 import { useToast } from "../context/ToastContext";
 import { authService } from "../services/authService";
 import { aiService } from "../services/ai.service";
+import { ResumeManager } from "../components/ResumeManager";
 import { Eye, EyeSlash, Sun, Moon, Warning, Spinner, CheckCircle, Lightning } from "@phosphor-icons/react";
 
 /* ─── Password toggle icon ─── */
@@ -90,10 +91,12 @@ export function SettingsPage() {
 
   // ── AI Provider Configuration State ──
   const [aiProvider, setAiProvider] = useState(user?.aiProvider || "system_default");
-  const [aiApiKey, setAiApiKey] = useState(user?.aiApiKey || "");
+  const [aiApiKey, setAiApiKey] = useState("");
+  const [aiApiKeyChanged, setAiApiKeyChanged] = useState(false);
   const [aiBaseUrl, setAiBaseUrl] = useState(user?.aiBaseUrl || "");
   const [aiModel, setAiModel] = useState(user?.aiModel || "");
   const [showApiKey, setShowApiKey] = useState(false);
+  const hasExistingKey = !!(user?.aiApiKey && user.aiApiKey.startsWith("••"));
 
   const [isSavingAiConfig, setIsSavingAiConfig] = useState(false);
   const [isTestingAiConfig, setIsTestingAiConfig] = useState(false);
@@ -103,7 +106,9 @@ export function SettingsPage() {
     if (user) {
       setResumeInput(user.resumeText || "");
       setAiProvider(user.aiProvider || "system_default");
-      setAiApiKey(user.aiApiKey || "");
+      // Never pre-fill the masked key — keep the input blank
+      setAiApiKey("");
+      setAiApiKeyChanged(false);
       setAiBaseUrl(user.aiBaseUrl || "");
       setAiModel(user.aiModel || "");
     }
@@ -123,15 +128,23 @@ export function SettingsPage() {
   };
 
   const handleTestAiConfig = async () => {
+    if (aiProvider !== "system_default" && !aiApiKey && !hasExistingKey) {
+      addToast("Please enter an API key first.", "error");
+      return;
+    }
     setIsTestingAiConfig(true);
     setTestResult(null);
     try {
-      const res = await aiService.testAiConfig({
+      const payload: { aiProvider: string; aiApiKey?: string; aiBaseUrl?: string; aiModel?: string } = {
         aiProvider,
-        aiApiKey,
         aiBaseUrl,
         aiModel,
-      });
+      };
+      // Only send key if user typed a new one; otherwise backend uses stored key
+      if (aiApiKeyChanged && aiApiKey) {
+        payload.aiApiKey = aiApiKey;
+      }
+      const res = await aiService.testAiConfig(payload);
       setTestResult({ success: true, message: res.message || "Connection successful!" });
       addToast("AI Provider connection verified!", "success");
     } catch (err: any) {
@@ -147,13 +160,22 @@ export function SettingsPage() {
     e.preventDefault();
     setIsSavingAiConfig(true);
     try {
-      const updatedUser = await authService.updateAiConfig({
+      const payload: { aiProvider: string; aiApiKey?: string; aiBaseUrl?: string; aiModel?: string } = {
         aiProvider,
-        aiApiKey,
         aiBaseUrl,
         aiModel,
-      });
+      };
+      // Only send aiApiKey if user actually typed a new one
+      if (aiApiKeyChanged && aiApiKey) {
+        payload.aiApiKey = aiApiKey;
+      } else if (aiApiKeyChanged && !aiApiKey) {
+        // User cleared the field explicitly
+        payload.aiApiKey = "";
+      }
+      const updatedUser = await authService.updateAiConfig(payload);
       updateUser(updatedUser);
+      setAiApiKeyChanged(false);
+      setAiApiKey("");
       addToast("AI Provider & API Keys saved successfully!", "success");
     } catch (err: any) {
       addToast(err?.message || "Failed to save AI configuration", "error");
@@ -181,8 +203,8 @@ export function SettingsPage() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setPasswordError("New password must be at least 6 characters");
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters");
       return;
     }
 
@@ -253,20 +275,18 @@ export function SettingsPage() {
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-base font-bold text-brand-600 dark:text-brand-400">
                   {user?.name?.charAt(0)?.toUpperCase() || "U"}
                 </div>
-                <div>
+                <div className="flex-1">
                   <p className="text-sm font-medium text-ink dark:text-white/85">{user?.name}</p>
                   <p className="text-xs text-ink-secondary dark:text-white/50">{user?.email}</p>
                 </div>
+                <button
+                  onClick={() => addToast("Profile editing is not available yet", "info")}
+                  className="rounded-lg px-3 py-1.5 text-[11px] font-medium text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-500/10 transition-colors"
+                >
+                  Edit
+                </button>
               </div>
               <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-medium text-ink-secondary dark:text-white/50 mb-1">Name</label>
-                  <p className="text-sm text-ink dark:text-white/80">{user?.name || "—"}</p>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-ink-secondary dark:text-white/50 mb-1">Email</label>
-                  <p className="text-sm text-ink dark:text-white/80">{user?.email || "—"}</p>
-                </div>
                 <div>
                   <label className="block text-xs font-medium text-ink-secondary dark:text-white/50 mb-1">User ID</label>
                   <div className="flex items-center gap-2">
@@ -294,29 +314,47 @@ export function SettingsPage() {
               <div>
                 <h2 className="text-sm font-semibold text-ink dark:text-white/85">AI Resume Profile</h2>
                 <p className="text-xs text-ink-secondary dark:text-white/50 mt-0.5">
-                  Paste your raw resume text or skills to enable instant AI Job Match scoring.
+                  Upload resumes for AI-powered job matching. Your uploaded resumes are parsed and used for match scoring.
                 </p>
               </div>
             </div>
-            <div className="p-5 space-y-3">
-              <textarea
-                value={resumeInput}
-                onChange={(e) => setResumeInput(e.target.value)}
-                placeholder="Paste your full resume text or key technical skills here..."
-                rows={5}
-                className="w-full rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/60 p-3 text-xs text-ink dark:text-white/80 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
-              />
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  onClick={handleSaveResume}
-                  disabled={isSavingResume}
-                  className="rounded-lg bg-brand-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-brand-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
-                >
-                  {isSavingResume ? <Spinner size={14} className="animate-spin" /> : null}
-                  {isSavingResume ? "Saving..." : "Save Resume Profile"}
-                </button>
-              </div>
+            <div className="p-5 space-y-4">
+              <ResumeManager />
+
+              <details className="group rounded-lg border border-slate-200 dark:border-white/10 overflow-hidden">
+                <summary className="flex cursor-pointer items-center justify-between px-3 py-2 text-xs font-medium text-ink-secondary dark:text-white/60 hover:bg-slate-50 dark:hover:bg-white/[0.02] list-none transition-colors">
+                  Default resume text (fallback)
+                  <span className="text-ink-tertiary group-open:rotate-180 transition-transform">▾</span>
+                </summary>
+                <div className="p-3 space-y-2 border-t border-slate-100 dark:border-white/5">
+                  <div className="relative">
+                    <textarea
+                      value={resumeInput}
+                      onChange={(e) => setResumeInput(e.target.value)}
+                      placeholder="Paste your full resume text or key technical skills here..."
+                      rows={4}
+                      className="w-full rounded-lg border border-slate-200 dark:border-white/10 bg-slate-50/50 dark:bg-zinc-900/60 p-3 text-xs text-ink dark:text-white/80 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30"
+                    />
+                    <span className="absolute bottom-2 right-2 text-[10px] text-ink-tertiary dark:text-white/40 tabular-nums">
+                      {resumeInput.split(/\s+/).filter(Boolean).length} words
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] text-ink-tertiary dark:text-white/30">
+                      {resumeInput !== (user?.resumeText || "") ? "Unsaved changes" : "Last saved"}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleSaveResume}
+                      disabled={isSavingResume}
+                      className="rounded-lg bg-brand-600 px-3.5 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-brand-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                    >
+                      {isSavingResume ? <Spinner size={14} className="animate-spin" /> : null}
+                      {isSavingResume ? "Saving..." : "Save"}
+                    </button>
+                  </div>
+                </div>
+              </details>
             </div>
           </section>
 
@@ -362,8 +400,12 @@ export function SettingsPage() {
                 <Lightning size={18} />
                 <h2 className="text-sm font-semibold">AI Provider & API Keys</h2>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300">
-                Custom Keys
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+                aiProvider === "system_default"
+                  ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
+                  : "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+              }`}>
+                {aiProvider === "system_default" ? "Built-in" : "Custom Keys"}
               </span>
             </div>
 
@@ -378,7 +420,7 @@ export function SettingsPage() {
                   onChange={(e) => setAiProvider(e.target.value)}
                   className="w-full rounded-lg border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface px-3 py-2 text-xs text-ink dark:text-white/80 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
                 >
-                  <option value="system_default">System Default (Pollinations / Built-in)</option>
+                  <option value="system_default">CareerTrack AI (default)</option>
                   <option value="google">Google Gemini (Direct API)</option>
                   <option value="openai">Official OpenAI (ChatGPT API)</option>
                   <option value="openrouter">OpenRouter (Multi-model Router)</option>
@@ -399,14 +441,19 @@ export function SettingsPage() {
                   <div>
                     <label className="block text-xs font-medium text-ink-secondary dark:text-white/60 mb-1.5">
                       API Key
+                      {hasExistingKey && !aiApiKeyChanged && (
+                        <span className="ml-2 text-[10px] font-normal text-emerald-600 dark:text-emerald-400">✓ Key saved</span>
+                      )}
                     </label>
                     <div className="relative">
                       <input
                         type={showApiKey ? "text" : "password"}
                         value={aiApiKey}
-                        onChange={(e) => setAiApiKey(e.target.value)}
+                        onChange={(e) => { setAiApiKey(e.target.value); setAiApiKeyChanged(true); }}
                         placeholder={
-                          aiProvider === "google" ? "AIzaSy..." : aiProvider === "openai" ? "sk-proj-..." : "sk-or-v1-..."
+                          hasExistingKey
+                            ? "••••••••  (leave blank to keep current key)"
+                            : aiProvider === "google" ? "AIzaSy..." : aiProvider === "openai" ? "sk-proj-..." : "sk-or-v1-..."
                         }
                         className="w-full rounded-lg border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface px-3 py-2 pr-9 text-xs text-ink dark:text-white/80 placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none font-mono"
                       />
