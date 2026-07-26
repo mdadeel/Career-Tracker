@@ -128,7 +128,8 @@ export function ApplicationFormPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl py-5 lg:py-6">
+    <div className="-mx-3 lg:-mx-4 -mt-5 lg:-mt-6 bg-[#f8f9fb] dark:bg-dark min-h-screen py-6 lg:py-8">
+      <div className="mx-auto max-w-4xl">
       {/* Header */}
       <div className="mb-6">
         <button
@@ -138,8 +139,8 @@ export function ApplicationFormPage() {
           <ArrowLeft size={14} />
           Back to applications
         </button>
-        <div className="flex items-center gap-3">
-          <div className="flex-1">
+        <div className="flex items-start justify-between gap-3">
+          <div>
             <h1 className="text-base font-semibold text-ink dark:text-white/90">
               {isEditing ? "Edit Application" : "New Application"}
             </h1>
@@ -147,20 +148,28 @@ export function ApplicationFormPage() {
               {isEditing ? "Update the details of your job application" : "Record a new job application to track"}
             </p>
           </div>
-          {!isEditing && draftStatus && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400 animate-fade-in">
+          {!isEditing && (
+            <span className={`shrink-0 inline-flex items-center gap-1.5 text-[11px] font-medium transition-all duration-300 ${
+              draftStatus === "saved"
+                ? "text-emerald-600 dark:text-emerald-400"
+                : draftStatus === "saving"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : "text-ink-tertiary dark:text-white/30"
+            }`}>
               {draftStatus === "saving" ? (
-                <Spinner size={12} className="animate-spin" />
+                <Spinner size={10} className="animate-spin" />
+              ) : draftStatus === "saved" ? (
+                <CheckCircle size={10} weight="fill" />
               ) : (
-                <CheckCircle size={12} />
+                <span className="inline-block w-1.5 h-1.5 rounded-full bg-ink-tertiary dark:bg-white/30" />
               )}
-              Draft {draftStatus === "saving" ? "saving..." : "saved"}
+              {draftStatus === "saving" ? "Saving draft..." : draftStatus === "saved" ? "Draft saved" : "Draft not started"}
             </span>
           )}
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <ApplicationFormFields
           formData={formData}
           onChange={updateField}
@@ -174,8 +183,8 @@ export function ApplicationFormPage() {
           </div>
         )}
 
-        {/* Actions */}
-        <div className="flex items-center justify-end gap-3 pt-1">
+        {/* Sticky action bar */}
+        <div className="sticky bottom-0 z-10 flex items-center justify-end gap-3 py-4 bg-white/95 dark:bg-dark/95 backdrop-blur-md border-t border-slate-200 dark:border-dark-border shadow-[0_-2px_8px_rgba(0,0,0,0.04)]">
           <Button type="button" variant="secondary" onClick={() => navigate("/applications")}>
             Cancel
           </Button>
@@ -184,6 +193,7 @@ export function ApplicationFormPage() {
           </Button>
         </div>
       </form>
+      </div>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, type FormEvent } from "react";
+import { useState, useEffect, useRef, useCallback, lazy, Suspense, memo, type FormEvent } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useApplications } from "../hooks/useApplications";
 import { useToast } from "../context/ToastContext";
@@ -9,19 +9,11 @@ import {
   EmptyState,
   Button,
   Dialog,
+  SparkleIcon,
 } from "../components/ui";
 import { ApplicationRow } from "../components/ApplicationRow";
 import { ApplicationFormFields } from "../components/ApplicationFormFields";
 import { AiAssistantDrawer } from "../components/AiAssistantDrawer";
-import { PipelinePage } from "./PipelinePage";
-import { aiService } from "../services/ai.service";
-import { formatDate, formatSalary, formatLocation } from "../utils/format";
-import {
-  createEmptyForm,
-  FILTER_STATUSES,
-  FILTER_SOURCES,
-  SORT_OPTIONS,
-} from "../constants/applications";
 import type { Application, ApplicationFormData } from "../types";
 import {
   Plus,
@@ -39,6 +31,41 @@ import {
   SquaresFour,
   Bookmark,
 } from "@phosphor-icons/react";
+
+const PipelinePage = lazy(() => import("./PipelinePage").then((m) => ({ default: m.PipelinePage })));
+import { aiService } from "../services/ai.service";
+import { api } from "../services/api";
+import { formatDate, formatSalary, formatLocation } from "../utils/format";
+import {
+  createEmptyForm,
+  FILTER_STATUSES,
+  FILTER_SOURCES,
+  SORT_OPTIONS,
+} from "../constants/applications";
+
+const ApplicationListItem = memo(function ApplicationListItem({
+  app,
+  onView,
+  onEdit,
+  onDelete,
+  onAnalyzeMatch,
+}: {
+  app: Application;
+  onView: (app: Application) => void;
+  onEdit: (app: Application) => void;
+  onDelete: (app: Application) => void;
+  onAnalyzeMatch: (id: string) => void;
+}) {
+  return (
+    <ApplicationRow
+      application={app}
+      onView={() => onView(app)}
+      onEdit={() => onEdit(app)}
+      onDelete={() => onDelete(app)}
+      onAnalyzeMatch={() => onAnalyzeMatch(app.id)}
+    />
+  );
+});
 
 const MODAL_DRAFT_KEY = "app-form-modal-draft";
 const SAVE_DELAY = 1500;
@@ -190,27 +217,31 @@ export function ApplicationsPage() {
     };
   }, [modalForm, formModal.open, formModal.editApp]);
 
-  const openFormModal = (app?: Application) => {
+  const openFormModal = useCallback(async (app?: Application) => {
     if (app) {
+      let data = app;
+      try {
+        data = await api.get<Application>(`/applications/${app.id}`);
+      } catch {}
       setModalForm({
-        companyName: app.companyName,
-        jobTitle: app.jobTitle,
-        jobUrl: app.jobUrl || "",
-        source: app.source,
-        applicationDate: app.applicationDate.split("T")[0],
-        status: app.status,
-        notes: app.notes || "",
-        jobDescription: app.jobDescription || "",
-        resumeLink: app.resumeLink || "",
-        resumeText: app.resumeText || "",
-        interviewDate: app.interviewDate ? app.interviewDate.slice(0, 16) : "",
-        salaryMin: app.salaryMin ? String(app.salaryMin) : "",
-        salaryMax: app.salaryMax ? String(app.salaryMax) : "",
-        salaryCurrency: app.salaryCurrency || "USD",
-        location: app.location || "",
-        employmentType: app.employmentType || "",
-        remoteStatus: app.remoteStatus || "",
-        companyLogo: app.companyLogo || "",
+        companyName: data.companyName,
+        jobTitle: data.jobTitle,
+        jobUrl: data.jobUrl || "",
+        source: data.source,
+        applicationDate: data.applicationDate.split("T")[0],
+        status: data.status,
+        notes: data.notes || "",
+        jobDescription: data.jobDescription || "",
+        resumeLink: data.resumeLink || "",
+        resumeText: data.resumeText || "",
+        interviewDate: data.interviewDate ? data.interviewDate.slice(0, 16) : "",
+        salaryMin: data.salaryMin ? String(data.salaryMin) : "",
+        salaryMax: data.salaryMax ? String(data.salaryMax) : "",
+        salaryCurrency: data.salaryCurrency || "USD",
+        location: data.location || "",
+        employmentType: data.employmentType || "",
+        remoteStatus: data.remoteStatus || "",
+        companyLogo: data.companyLogo || "",
       });
       setFormModal({ open: true, editApp: app });
     } else {
@@ -219,7 +250,20 @@ export function ApplicationsPage() {
     }
     setFormError(null);
     setModalDraftStatus(null);
-  };
+  }, []);
+
+  const handleView = useCallback((app: Application) => setSelectedApp(app), []);
+  const handleDeleteTarget = useCallback((app: Application) => setDeleteTarget(app), []);
+  const handleAnalyzeMatch = useCallback(async (id: string) => {
+    try {
+      addToast("Analyzing AI match score in background...", "info");
+      await aiService.analyzeMatch(id);
+      addToast("Match score updated!", "success");
+      refresh();
+    } catch (err: any) {
+      addToast(err?.message || "Failed to analyze match score.", "error");
+    }
+  }, [addToast, refresh]);
 
   const updateFormField = <K extends keyof ApplicationFormData>(key: K, value: ApplicationFormData[K]) => {
     setModalForm((prev) => ({ ...prev, [key]: value }));
@@ -402,7 +446,9 @@ export function ApplicationsPage() {
 
       {/* Board / Kanban View */}
       {activeView === "board" ? (
-        <PipelinePage />
+        <Suspense fallback={<ApplicationsSkeleton />}>
+          <PipelinePage />
+        </Suspense>
       ) : isLoading ? (
         <ApplicationsSkeleton />
       ) : applications.length === 0 ? (
@@ -426,23 +472,25 @@ export function ApplicationsPage() {
       ) : (
         /* Applications List */
         <div className="space-y-1.5">
+          {/* Column headers - hidden on mobile */}
+          <div className="hidden md:flex items-center gap-3 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">
+            <div className="w-[45px] shrink-0" />
+            <div className="flex-1 min-w-0 pl-2">Role</div>
+            <div className="w-24 shrink-0 text-center">Status</div>
+            <div className="w-20 shrink-0 text-center">Source</div>
+            <div className="w-24 shrink-0 text-center">AI Match</div>
+            <div className="w-12 shrink-0 text-center">Resume</div>
+            <div className="w-20 shrink-0 text-right">Date</div>
+            <div className="w-[72px] shrink-0" />
+          </div>
           {applications.map((app) => (
-            <ApplicationRow
+            <ApplicationListItem
               key={app.id}
-              application={app}
-              onView={() => setSelectedApp(app)}
-              onEdit={() => openFormModal(app)}
-              onDelete={() => setDeleteTarget(app)}
-              onAnalyzeMatch={async () => {
-                try {
-                  addToast("Analyzing AI match score in background...", "info");
-                  await aiService.analyzeMatch(app.id);
-                  addToast("Match score updated!", "success");
-                  refresh();
-                } catch (err: any) {
-                  addToast(err?.message || "Failed to analyze match score.", "error");
-                }
-              }}
+              app={app}
+              onView={handleView}
+              onEdit={openFormModal}
+              onDelete={handleDeleteTarget}
+              onAnalyzeMatch={handleAnalyzeMatch}
             />
           ))}
         </div>
@@ -519,6 +567,35 @@ export function ApplicationsPage() {
             </div>
 
             <div className="p-5 space-y-5">
+              {/* Status Stepper */}
+              <div className="flex items-center justify-between px-1">
+                {["Saved", "Applied", "Assessment", "Interview", "Offer"].map((s, i) => {
+                  const statuses = ["Saved", "Applied", "Assessment", "Interview", "Offer"];
+                  const currentIdx = statuses.indexOf(selectedApp.status);
+                  const isActive = i <= currentIdx;
+                  const isCurrent = selectedApp.status === s;
+                  return (
+                    <button
+                      key={s}
+                      onClick={() => {}}
+                      className={`flex flex-col items-center gap-1 transition-opacity ${isCurrent ? "" : "opacity-50 hover:opacity-80"}`}
+                      title={`Change status to ${s}`}
+                    >
+                      <span className={`flex h-5 w-5 items-center justify-center rounded-full text-[9px] font-bold ${
+                        isCurrent
+                          ? "bg-brand-600 text-white ring-2 ring-brand-200 dark:ring-brand-800"
+                          : isActive
+                          ? "bg-brand-100 dark:bg-brand-500/20 text-brand-600 dark:text-brand-400"
+                          : "bg-slate-100 dark:bg-white/10 text-slate-400 dark:text-white/40"
+                      }`}>
+                        {i + 1}
+                      </span>
+                      <span className="text-[8px] font-medium text-ink-tertiary dark:text-white/40 whitespace-nowrap">{s}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
               {/* Company + Status */}
               <div className="flex items-center justify-between">
                 <div>
@@ -528,6 +605,23 @@ export function ApplicationsPage() {
                 <Badge variant={statusVariantMap[selectedApp.status] || "default"} dot={false}>
                   {selectedApp.status}
                 </Badge>
+              </div>
+
+              {/* Activity Timeline */}
+              <div className="rounded-lg bg-surface-secondary dark:bg-white/[0.03] p-3 space-y-1.5">
+                <p className="text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">Activity</p>
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-brand-500 shrink-0" />
+                    <span className="text-ink dark:text-white/70">Status: {selectedApp.status}</span>
+                    <span className="ml-auto text-ink-tertiary dark:text-white/40">{formatDate(selectedApp.updatedAt)}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-[11px]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-slate-300 dark:bg-white/20 shrink-0" />
+                    <span className="text-ink-secondary dark:text-white/50">Application created</span>
+                    <span className="ml-auto text-ink-tertiary dark:text-white/40">{formatDate(selectedApp.createdAt)}</span>
+                  </div>
+                </div>
               </div>
 
               {/* Key info grid */}
@@ -576,15 +670,23 @@ export function ApplicationsPage() {
               )}
 
               {/* Resume */}
-              {selectedApp.resumeLink && (
+              {(selectedApp.resumeLink || selectedApp.resumeId) && (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40 mb-1">Resume</p>
-                  <a href={selectedApp.resumeLink} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
-                  >
-                    <ArrowUp size={16} />
-                    View Resume
-                  </a>
+                  {selectedApp.resumeId && (
+                    <p className="inline-flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 mb-1">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      Resume attached
+                    </p>
+                  )}
+                  {selectedApp.resumeLink && (
+                    <a href={selectedApp.resumeLink} target="_blank" rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300"
+                    >
+                      <ArrowUp size={16} />
+                      View Resume
+                    </a>
+                  )}
                 </div>
               )}
 
@@ -616,11 +718,11 @@ export function ApplicationsPage() {
                 </div>
               )}
 
-              {/* Job Description */}
+              {/* Job Description - scrollable */}
               {selectedApp.jobDescription && (
                 <div>
                   <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40 mb-1.5">Job Description</p>
-                  <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 dark:border-dark-border bg-surface-secondary dark:bg-white/[0.03] p-3">
+                  <div className="max-h-60 overflow-y-auto rounded-lg border border-slate-200 dark:border-dark-border bg-surface-secondary dark:bg-white/[0.03] p-3">
                     <p className="whitespace-pre-wrap text-sm text-ink dark:text-white/70">{selectedApp.jobDescription}</p>
                   </div>
                 </div>
@@ -646,15 +748,16 @@ export function ApplicationsPage() {
               </p>
             </div>
 
-            {/* Footer actions */}
+            {/* Footer actions - consolidated AI button */}
             <div className="sticky bottom-0 border-t border-slate-100 dark:border-dark-border bg-white dark:bg-dark-surface px-5 py-3 flex items-center justify-between gap-2">
               <Button
-                variant="secondary"
+                variant="primary"
                 size="sm"
                 onClick={() => { const id = selectedApp.id; setSelectedApp(null); navigate(`/applications/${id}/copilot`); }}
-                className="text-indigo-600 dark:text-indigo-400 gap-1.5"
+                className="gap-1.5"
               >
-                ✨ Open Full AI Workspace
+                <SparkleIcon className="w-3.5 h-3.5" />
+                Open AI Workspace
               </Button>
               <div className="flex items-center gap-2">
                 <Button variant="ghost" size="sm" onClick={() => { const app = selectedApp; setSelectedApp(null); openFormModal(app); }}>
@@ -713,6 +816,7 @@ export function ApplicationsPage() {
               <ApplicationFormFields
                 formData={modalForm}
                 onChange={updateFormField}
+                wideLayout
               />
 
               {/* Error */}

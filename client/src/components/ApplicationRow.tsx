@@ -5,15 +5,9 @@ import {
   Eye,
   PencilSimpleLine,
   TrashSimple,
+  FileText,
 } from "@phosphor-icons/react";
-
-function SparkleIcon({ className = "w-3 h-3" }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0L14.59 8.41L23 11L14.59 13.59L12 22L9.41 13.59L1 11L9.41 8.41L12 0Z" />
-    </svg>
-  );
-}
+import { SparkleIcon } from "./ui/SparkleIcon";
 
 /* ─── Constants ─── */
 
@@ -151,7 +145,7 @@ export const ApplicationRow = memo(function ApplicationRow({
       ? statusConfig[application.status]
       : statusConfig.Saved;
   const border = config.border;
-  const hasResume = !!application.resumeLink;
+  const hasResume = !!(application.resumeLink || application.resumeId);
 
   return (
     <div
@@ -159,7 +153,7 @@ export const ApplicationRow = memo(function ApplicationRow({
       tabIndex={0}
       onClick={onView}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onView(); } }}
-      className="group relative flex cursor-pointer items-stretch rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface transition-all duration-150 hover:border-slate-300 dark:hover:border-white/15 hover:shadow-sm hover:-translate-y-px"
+      className="group relative flex cursor-pointer items-stretch rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface transition-all duration-150 hover:border-slate-300 dark:hover:border-white/15 hover:shadow-card-hover hover:-translate-y-px"
     >
       {/* Status left border */}
       <div className={`w-[3px] shrink-0 rounded-l-xl ${border}`} />
@@ -185,9 +179,9 @@ export const ApplicationRow = memo(function ApplicationRow({
           {application.source}
         </span>
 
-        <div className="w-28 shrink-0 flex items-center justify-center">
+        <div className="w-24 shrink-0 flex items-center justify-center">
           {application.aiMatchScore !== undefined && application.aiMatchScore !== null ? (
-            <span className="inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
+            <span className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
               <SparkleIcon className="w-3 h-3 text-indigo-500" />
               <span>{application.aiMatchScore}%</span>
             </span>
@@ -197,17 +191,21 @@ export const ApplicationRow = memo(function ApplicationRow({
                 e.stopPropagation();
                 if (onAnalyzeMatch) onAnalyzeMatch();
               }}
-              className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1 text-[11px] font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-sm hover:shadow-indigo-500/20 active:scale-95 transition-all duration-150 cursor-pointer"
-              title="Analyze AI Match Score directly"
+              className="rounded-md p-1.5 text-ink-tertiary dark:text-white/30 opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+              title="Analyze AI Match Score"
+              aria-label="Analyze AI Match Score"
             >
-              <SparkleIcon className="w-3 h-3 text-amber-300 animate-pulse" />
-              <span>Analyze</span>
+              <SparkleIcon className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
-        <span className="text-[11px] text-ink-tertiary dark:text-white/40 w-16 shrink-0 truncate">
-          {hasResume ? "Resume" : ""}
+        <span className="w-12 shrink-0 flex items-center justify-center">
+          {hasResume ? (
+            <FileText size={14} className="text-indigo-500" />
+          ) : (
+            <FileText size={14} className="text-ink-tertiary dark:text-white/30 opacity-40" />
+          )}
         </span>
 
         <span className="text-[11px] text-ink-tertiary dark:text-white/40 w-20 shrink-0 whitespace-nowrap text-right">
