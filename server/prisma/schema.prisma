@@ -54,6 +54,7 @@ model Resume {
   fileType    String
   fileSize    Int
   textContent String?
+  s3Key       String?       @map("s3_key")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   applications Application[]
