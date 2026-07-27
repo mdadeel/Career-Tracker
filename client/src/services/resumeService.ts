@@ -12,12 +12,11 @@ export const resumeService = {
   getById: (id: string) => api.get<Resume>(`/resumes/${id}`),
 
   upload: async (file: File): Promise<Resume> => {
-    const token = localStorage.getItem("token");
     const formData = new FormData();
     formData.append("resume", file);
     const response = await fetch(`${API_BASE}/resumes/upload`, {
       method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: "include",
       body: formData,
     });
     if (!response.ok) {

@@ -36,8 +36,8 @@ export function ResumeManager() {
       setResumes((prev) => prev.filter((r) => r.id !== id));
       if (expandedId === id) setExpandedId(null);
       addToast("Resume deleted", "success");
-    } catch (err: any) {
-      addToast(err?.message || "Failed to delete resume", "error");
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : "Failed to delete resume", "error");
     } finally {
       setDeleting(null);
     }
@@ -54,8 +54,8 @@ export function ResumeManager() {
       setResumes((prev) => prev.map((r) => (r.id === id ? { ...r, textContent: updated.textContent } : r)));
       setEditingId(null);
       addToast("Resume text updated", "success");
-    } catch (err: any) {
-      addToast(err?.message || "Failed to update resume", "error");
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : "Failed to update resume", "error");
     } finally {
       setSavingId(null);
     }
@@ -113,6 +113,19 @@ export function ResumeManager() {
                     </p>
                   </div>
                 </button>
+                {r.fileUrl && (
+                  <a
+                    href={r.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md p-1.5 text-ink-tertiary dark:text-white/30 hover:bg-slate-100 dark:hover:bg-white/5 hover:text-brand-600 dark:hover:text-brand-400 transition-colors"
+                    title="Download resume file"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 256 256" fill="currentColor" className="block">
+                      <path d="M216 176v40a8 8 0 0 1-8 8H48a8 8 0 0 1-8-8v-40a8 8 0 0 1 16 0v32h144v-32a8 8 0 0 1 16 0ZM96 96h24v-64a8 8 0 0 1 16 0v64h24a8 8 0 0 1 5.66 13.66l-32 32a8 8 0 0 1-11.32 0l-32-32A8 8 0 0 1 96 96Z" />
+                    </svg>
+                  </a>
+                )}
                 <button
                   type="button"
                   onClick={() => handleDelete(r.id)}

@@ -1,4 +1,7 @@
-import fs from 'fs/promises';
+/**
+ * Resume parsing utilities.
+ * Accepts Buffers directly so callers don't need local disk access.
+ */
 import path from 'path';
 
 export interface ParseResult {
@@ -38,10 +41,13 @@ function getStandardFontsUrl(): string {
 
 const STANDARD_FONTS_URL = getStandardFontsUrl();
 
-export async function parseResumeFile(filePath: string, mimeType: string): Promise<string> {
+/**
+ * Parse a resume from an in-memory Buffer.
+ * Supports PDF, DOCX, and plain text.
+ */
+export async function parseResumeBuffer(buffer: Buffer, mimeType: string): Promise<string> {
   if (mimeType === 'application/pdf') {
     const { PDFParse } = await import('pdf-parse');
-    const buffer = await fs.readFile(filePath);
     const doc = new PDFParse({
       data: new Uint8Array(buffer),
       standardFontDataUrl: STANDARD_FONTS_URL,
@@ -53,10 +59,17 @@ export async function parseResumeFile(filePath: string, mimeType: string): Promi
 
   if (mimeType === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
     const mammoth = await import('mammoth');
-    const buffer = await fs.readFile(filePath);
     const result = await mammoth.extractRawText({ buffer });
     return result.value;
   }
 
-  return fs.readFile(filePath, 'utf-8');
+  // Plain text
+  return buffer.toString('utf-8');
+}
+
+/** Legacy alias — reads from file path, delegates to parseResumeBuffer. */
+export async function parseResumeFile(filePath: string, mimeType: string): Promise<string> {
+  const fs = await import('fs/promises');
+  const buffer = await fs.readFile(filePath);
+  return parseResumeBuffer(buffer, mimeType);
 }

@@ -1,19 +1,10 @@
 import { prisma } from '../utils/prisma';
 import { AppError } from '../middlewares/error-handler';
-import fs from 'fs/promises';
-import path from 'path';
-
-const UPLOAD_DIR = path.join(process.cwd(), 'uploads', 'resumes');
-
-async function ensureUploadDir() {
-  try {
-    await fs.mkdir(UPLOAD_DIR, { recursive: true });
-  } catch { /* exists */ }
-}
+import { isS3Configured, uploadToS3, getS3SignedUrl, buildResumeKey } from '../utils/s3';
 
 export const resumeService = {
   async list(userId: string) {
-    return prisma.resume.findMany({
+    const resumes = await prisma.resume.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
       select: {
@@ -21,20 +12,33 @@ export const resumeService = {
         fileName: true,
         fileType: true,
         fileSize: true,
+        textContent: true,
+        s3Key: true,
         createdAt: true,
       },
     });
+
+    // Generate signed URLs in parallel
+    return Promise.all(
+      resumes.map(async (r) => ({
+        ...r,
+        fileUrl: r.s3Key ? await getS3SignedUrl(r.s3Key) : null,
+      }))
+    );
   },
 
   async getById(id: string, userId: string) {
     const resume = await prisma.resume.findUnique({ where: { id } });
     if (!resume) throw new AppError('Resume not found', 404);
     if (resume.userId !== userId) throw new AppError('Access denied', 403);
-    return resume;
+    return {
+      ...resume,
+      fileUrl: resume.s3Key ? await getS3SignedUrl(resume.s3Key) : null,
+    };
   },
 
   async create(userId: string, file: Express.Multer.File, textContent: string) {
-    await ensureUploadDir();
+    // Save resume metadata first to get the ID
     const saved = await prisma.resume.create({
       data: {
         userId,
@@ -45,12 +49,27 @@ export const resumeService = {
       },
     });
 
+    // Upload to S3 if configured
+    let s3Key: string | null = null;
+    if (isS3Configured()) {
+      s3Key = buildResumeKey(userId, saved.id, file.originalname);
+      await uploadToS3(file.buffer, s3Key, file.mimetype);
+
+      // Update the record with the S3 key
+      await prisma.resume.update({
+        where: { id: saved.id },
+        data: { s3Key },
+      });
+    }
+
     return {
       id: saved.id,
       fileName: saved.fileName,
       fileType: saved.fileType,
       fileSize: saved.fileSize,
+      s3Key,
       createdAt: saved.createdAt,
+      fileUrl: s3Key ? await getS3SignedUrl(s3Key) : null,
     };
   },
 
@@ -66,7 +85,12 @@ export const resumeService = {
       throw new AppError('Access denied', 403);
     }
 
-    return prisma.resume.findUnique({ where: { id } });
+    const updated = await prisma.resume.findUnique({ where: { id } });
+    if (!updated) throw new AppError('Resume not found', 404);
+    return {
+      ...updated,
+      fileUrl: updated.s3Key ? await getS3SignedUrl(updated.s3Key) : null,
+    };
   },
 
   async remove(id: string, userId: string) {

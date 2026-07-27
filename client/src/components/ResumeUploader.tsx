@@ -33,8 +33,8 @@ export function ResumeUploader({ onUploaded }: ResumeUploaderProps) {
       const resume = await resumeService.upload(file);
       onUploaded(resume);
       addToast(`"${file.name}" uploaded successfully!`, "success");
-    } catch (err: any) {
-      addToast(err?.message || "Upload failed. Please try again.", "error");
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : "Upload failed. Please try again.", "error");
     } finally {
       setIsUploading(false);
     }

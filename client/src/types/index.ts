@@ -21,6 +21,8 @@ export interface Resume {
   fileType: string;
   fileSize: number;
   textContent?: string | null;
+  s3Key?: string | null;
+  fileUrl?: string | null;
   createdAt: string;
 }
 
@@ -46,7 +48,13 @@ export interface Application {
   remoteStatus: string | null;
   companyLogo: string | null;
   aiMatchScore?: number | null;
-  aiAnalysis?: any;
+  aiAnalysis?: {
+    matchScore: number;
+    matchingSkills: string[];
+    missingSkills: string[];
+    summary: string;
+    recommendations: string[];
+  } | null;
   createdAt: string;
   updatedAt: string;
 }
