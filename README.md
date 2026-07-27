@@ -461,6 +461,32 @@ In development, the Prisma client is cached globally to avoid hot-reload connect
 
 ---
 
+## 🧬 Advanced Application Patterns
+
+The codebase features advanced design patterns to ensure developer productivity, rapid client response times, and premium usability.
+
+### 1. Optimistic CRUD & State Reconciliation
+The application hook [useApplications.ts](file:///home/adeel/Documents/projects/task/client/src/hooks/useApplications.ts) implements optimistic UI updates. When a user creates, updates, or deletes an application:
+*   The UI state is updated immediately based on the expected result.
+*   The actual HTTP request runs in the background.
+*   If the server request succeeds, the local state is reconciled.
+*   If the server request fails, the client rolls back to the previous snapshot, and displays a localized error toast notification.
+
+### 2. In-Memory Client Cache with Cross-Tab Sync
+The API service layer maintains a client-side in-memory cache with **30-second Time-To-Live (TTL)**:
+*   A `Map<string, CacheEntry>` caches GET request responses.
+*   Any write operation (POST, PATCH, DELETE) automatically invalidates relevant cache entries.
+*   Uses **BroadcastChannel API** to sync cache invalidation across open browser tabs — when one tab creates an application, all other tabs automatically refresh.
+*   Reduces redundant network requests and ensures instant navigation between dashboard, pipeline, and calendar pages.
+
+### 3. Form Draft Auto-Save
+Form components save unfinished data drafts to browser `localStorage` using a 1.5-second debounced function:
+*   Protects users from losing long job descriptions or notes on accidental tab closes or navigation changes.
+*   Drafts automatically expire after 24 hours to prevent stale data conflicts.
+*   Separate local storage keys isolate modal drafts from standalone page drafts.
+
+---
+
 ## 🤖 AI Integration Engine
 
 The server includes a dedicated AI services wrapper ([ai.service.ts](file:///home/adeel/Documents/projects/task/server/src/services/ai.service.ts)) that supports multiple LLM providers.
