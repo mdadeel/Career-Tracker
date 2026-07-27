@@ -123,14 +123,6 @@ export async function create(
 
     res.status(201).json({ success: true, data: application });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ success: false, message: error.message });
       return;
@@ -153,14 +145,6 @@ export async function update(
 
     res.status(200).json({ success: true, data: application });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ success: false, message: error.message });
       return;
@@ -182,7 +166,7 @@ export async function remove(
 
     res.status(200).json({
       success: true,
-      message: "Application deleted successfully",
+      data: { message: "Application deleted successfully" },
     });
   } catch (error) {
     if (error instanceof AppError) {

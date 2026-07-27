@@ -5,7 +5,6 @@ import type { User } from "../types";
 
 interface AuthContextType {
   user: User | null;
-  token: string | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (name: string, email: string, password: string) => Promise<void>;
@@ -17,54 +16,49 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(
-    () => localStorage.getItem("token")
-  );
   const [isLoading, setIsLoading] = useState(true);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    setToken(null);
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Even if the logout request fails, clear local state
+    }
     setUser(null);
   };
 
   useEffect(() => {
     const unsubscribe = onUnauthorized(() => {
-      logout();
+      setUser(null);
     });
     return unsubscribe;
   }, []);
 
   useEffect(() => {
-    if (token) {
-      authService
-        .me()
-        .then((userData) => {
-          setUser(userData);
-        })
-        .catch(() => {
-          logout();
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      setIsLoading(false);
-    }
-  }, [token]);
+    // Try to restore the session by calling /auth/me
+    // The JWT is sent automatically via httpOnly cookie
+    authService
+      .me()
+      .then((userData) => {
+        setUser(userData);
+      })
+      .catch(() => {
+        setUser(null);
+      })
+      .finally(() => setIsLoading(false));
+  }, []);
 
   const login = async (email: string, password: string) => {
     const response = await authService.login({ email, password });
-    localStorage.setItem("token", response.token);
-    setToken(response.token);
+    // Token is stored as httpOnly cookie by the server
     setUser(response.user);
   };
 
   const register = async (name: string, email: string, password: string) => {
     const response = await authService.register({ name, email, password });
-    localStorage.setItem("token", response.token);
-    setToken(response.token);
+    // Token is stored as httpOnly cookie by the server
     setUser(response.user);
   };
-
 
   const updateUser = (updatedUser: User) => {
     setUser(updatedUser);
@@ -72,7 +66,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, token, isLoading, login, register, logout, updateUser }}
+      value={{ user, isLoading, login, register, logout, updateUser }}
     >
       {children}
     </AuthContext.Provider>

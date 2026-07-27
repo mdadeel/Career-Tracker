@@ -10,6 +10,8 @@ export const authService = {
 
   me: () => api.get<User>("/auth/me"),
 
+  logout: () => api.post<{ message: string }>("/auth/logout", {}),
+
   changePassword: (data: { currentPassword: string; newPassword: string }) =>
     api.patch<{ message: string }>("/auth/password", data),
 

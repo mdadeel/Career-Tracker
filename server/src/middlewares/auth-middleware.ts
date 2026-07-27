@@ -7,17 +7,20 @@ export function authMiddleware(
   res: Response,
   next: NextFunction
 ): void {
-  const authHeader = req.headers.authorization;
+  // Read token from cookie (httpOnly) first, fall back to Authorization header
+  const token =
+    req.cookies?.token ||
+    (req.headers.authorization?.startsWith("Bearer ")
+      ? req.headers.authorization.split(" ")[1]
+      : null);
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+  if (!token) {
     res.status(401).json({
       success: false,
       message: "Authentication required",
     });
     return;
   }
-
-  const token = authHeader.split(" ")[1];
 
   try {
     const payload = verifyToken(token);

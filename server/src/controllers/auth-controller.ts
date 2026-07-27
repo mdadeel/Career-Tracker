@@ -33,6 +33,27 @@ const updateAiConfigSchema = z.object({
   aiModel: z.string().max(200).optional(),
 });
 
+/** Set the JWT as an httpOnly cookie on the response. */
+function setTokenCookie(res: Response, token: string): void {
+  const isProduction = process.env.NODE_ENV === "production";
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    path: "/",
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours (matches JWT_EXPIRY default)
+  });
+}
+
+function clearTokenCookie(res: Response): void {
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    path: "/",
+  });
+}
+
 export async function register(
   req: AuthenticatedRequest,
   res: Response,
@@ -42,16 +63,9 @@ export async function register(
     const data = registerSchema.parse(req.body);
     const result = await authService.register(data);
 
+    setTokenCookie(res, result.token);
     res.status(201).json({ success: true, data: result });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ success: false, message: error.message });
       return;
@@ -69,20 +83,26 @@ export async function login(
     const data = loginSchema.parse(req.body);
     const result = await authService.login(data);
 
+    setTokenCookie(res, result.token);
     res.status(200).json({ success: true, data: result });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ success: false, message: error.message });
       return;
     }
+    next(error);
+  }
+}
+
+export async function logout(
+  _req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    clearTokenCookie(res);
+    res.status(200).json({ success: true, data: { message: "Logged out successfully" } });
+  } catch (error) {
     next(error);
   }
 }
@@ -119,14 +139,6 @@ export async function changePassword(
 
     res.status(200).json({ success: true, data: result });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     if (error instanceof AppError) {
       res.status(error.statusCode).json({ success: false, message: error.message });
       return;
@@ -146,14 +158,6 @@ export async function updateResume(
     const user = await authService.updateResume(userId, resumeText);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     next(error);
   }
 }
@@ -169,14 +173,6 @@ export async function updateAiConfig(
     const user = await authService.updateAiConfig(userId, data);
     res.status(200).json({ success: true, data: user });
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      res.status(400).json({
-        success: false,
-        message: error.errors[0]?.message || "Validation failed",
-        errors: error.errors.map((e) => ({ field: e.path.join("."), message: e.message })),
-      });
-      return;
-    }
     next(error);
   }
 }

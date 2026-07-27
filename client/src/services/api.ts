@@ -22,16 +22,13 @@ async function request<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const token = localStorage.getItem("token");
+  // Token is sent automatically via httpOnly cookie — no manual Authorization header needed.
+  // Include credentials so the browser sends cookies cross-origin.
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...(options.headers as Record<string, string>),
   };
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
-  }
 
   // Invalidate affected cache entries on any mutation (POST, PATCH, DELETE)
   if (options.method && options.method !== "GET") {
@@ -46,10 +43,13 @@ async function request<T>(
       const response = await fetch(`${API_BASE}${endpoint}`, {
         ...options,
         headers,
+        credentials: "include", // Send cookies (httpOnly token) with every request
       });
 
       if (response.status === 401) {
         notifyUnauthorized();
+        // On 401, also clear any stale user state
+        localStorage.removeItem("user");
       }
 
       const data = await response.json();

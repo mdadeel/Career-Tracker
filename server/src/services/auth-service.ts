@@ -126,12 +126,17 @@ export const authService = {
         resumeText: true,
         skills: true,
         aiProvider: true,
+        aiApiKey: true,
         aiBaseUrl: true,
         aiModel: true,
         createdAt: true,
       },
     });
-    return user;
+    // Mask the API key — never return plaintext to the client
+    return {
+      ...user,
+      aiApiKey: user.aiApiKey ? "••••••••" : null,
+    };
   },
 
   async updateAiConfig(userId: string, data: { aiProvider: string; aiApiKey?: string; aiBaseUrl?: string; aiModel?: string }) {
