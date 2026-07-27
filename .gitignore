@@ -38,3 +38,4 @@ skills-lock.json
 .env*
 secs/mini.md
 design.md
+client/playwright-report/
