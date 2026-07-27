@@ -45,6 +45,12 @@ async function fetchWithTimeout(url: string, options: RequestInit = {}): Promise
   }
 }
 
+/** Response shape from chat completion providers (OpenAI-compatible). */
+interface ChatCompletionResponse {
+  choices?: { message?: { content?: string } }[];
+  candidates?: { content?: { parts?: { text?: string }[] } }[];
+}
+
 async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<string> {
   const provider = config?.aiProvider || 'system_default';
   const apiKey = config?.aiApiKey?.trim();
@@ -74,7 +80,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
       throw new Error(`Google Gemini API error (${response.status}): ${errorText}`);
     }
 
-    const data: any = await response.json();
+    const data = (await response.json()) as ChatCompletionResponse;
     let text = data.candidates?.[0]?.content?.parts?.[0]?.text;
     if (!text) throw new Error('Empty response from Google Gemini API');
     return text.trim().replace(/^```(?:json)?\s*|\s*```$/gi, '');
@@ -108,7 +114,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
       throw new Error(`OpenRouter API error (${response.status}): ${errorText}`);
     }
 
-    const data: any = await response.json();
+    const data = (await response.json()) as ChatCompletionResponse;
     let content = data.choices?.[0]?.message?.content;
     if (!content) throw new Error('Empty response from OpenRouter API');
     return content.trim().replace(/^```(?:json)?\s*|\s*```$/gi, '');
@@ -140,7 +146,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
       throw new Error(`OpenAI API error (${response.status}): ${errorText}`);
     }
 
-    const data: any = await response.json();
+    const data = (await response.json()) as ChatCompletionResponse;
     let content = data.choices?.[0]?.message?.content;
     if (!content) throw new Error('Empty response from OpenAI API');
     return content.trim().replace(/^```(?:json)?\s*|\s*```$/gi, '');
@@ -174,7 +180,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
       throw new Error(`Custom AI Endpoint error (${response.status}): ${errorText}`);
     }
 
-    const data: any = await response.json();
+    const data = (await response.json()) as ChatCompletionResponse;
     let content = data.choices?.[0]?.message?.content;
     if (!content) throw new Error('Empty response from Custom AI API');
     return content.trim().replace(/^```(?:json)?\s*|\s*```$/gi, '');
@@ -207,7 +213,7 @@ async function callAiProvider(prompt: string, config?: UserAiConfig): Promise<st
     throw new Error(`System Default AI error (${response.status}): ${errorText}`);
   }
 
-  const data: any = await response.json();
+  const data = (await response.json()) as ChatCompletionResponse;
   let content = data.choices?.[0]?.message?.content;
   if (!content) throw new Error('Empty response from AI API');
   return content.trim().replace(/^```(?:json)?\s*|\s*```$/gi, '');

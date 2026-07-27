@@ -68,8 +68,8 @@ export function ApplicationAiDetailPage() {
         setApplication({ ...application, aiMatchScore: data.matchScore, aiAnalysis: data });
       }
       addToast(forceRegenerate ? "Match score re-analyzed & saved!" : "Match score calculated & saved!", "success");
-    } catch (err: any) {
-      const msg = err?.message || "Failed to analyze match score.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to analyze match score.";
       if (isAiNotConfigured(msg)) {
         addToast("AI provider not configured. Go to Settings to add your API key.", "error");
         navigate("/settings");
@@ -88,8 +88,8 @@ export function ApplicationAiDetailPage() {
       const data = await aiService.generateInterviewPrep(id);
       setQuestions(data);
       addToast("Interview prep questions generated!", "success");
-    } catch (err: any) {
-      const msg = err?.message || "Failed to generate interview prep.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate interview prep.";
       if (isAiNotConfigured(msg)) {
         addToast("AI provider not configured. Go to Settings to add your API key.", "error");
         navigate("/settings");
@@ -108,8 +108,8 @@ export function ApplicationAiDetailPage() {
       const draft = await aiService.generateOutreachEmail(id, emailType);
       setEmailDraft(draft);
       addToast("Outreach email draft created!", "success");
-    } catch (err: any) {
-      const msg = err?.message || "Failed to generate email draft.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate email draft.";
       if (isAiNotConfigured(msg)) {
         addToast("AI provider not configured. Go to Settings to add your API key.", "error");
         navigate("/settings");
@@ -401,7 +401,7 @@ export function ApplicationAiDetailPage() {
                 <div className="flex items-center gap-3">
                   <select
                     value={emailType}
-                    onChange={(e: any) => setEmailType(e.target.value)}
+                    onChange={(e) => setEmailType(e.target.value as "follow_up" | "thank_you" | "cold_outreach")}
                     className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200 font-medium"
                   >
                     <option value="follow_up">Application Follow-up</option>

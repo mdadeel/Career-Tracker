@@ -63,8 +63,8 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
       onParsed(result, jdText);
       setIsSuccess(true);
       setTimeout(() => setIsSuccess(false), 3000);
-    } catch (err: any) {
-      const msg = err?.message || "Failed to parse job description with AI.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to parse job description with AI.";
       if (isAiNotConfigured(msg)) {
         setShowSetupPrompt(true);
         setError(null);

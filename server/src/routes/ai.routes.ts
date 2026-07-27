@@ -5,7 +5,7 @@ import { aiLimiter } from '../middlewares/rate-limiter';
 
 const router = Router();
 
-router.use(authMiddleware as any);
+router.use(authMiddleware);
 router.use(aiLimiter);
 
 router.post('/parse-jd', AiController.parseJobDescription);

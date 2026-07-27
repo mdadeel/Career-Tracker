@@ -65,8 +65,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
     try {
       const data = await aiService.analyzeMatch(applicationId);
       setMatchData(data);
-    } catch (err: any) {
-      const msg = err?.message || "Failed to analyze match score.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to analyze match score.";
       if (isAiNotConfigured(msg)) {
         setShowSetupNotice(true);
       } else {
@@ -83,8 +83,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
     try {
       const data = await aiService.generateInterviewPrep(applicationId);
       setQuestions(data);
-    } catch (err: any) {
-      const msg = err?.message || "Failed to generate interview prep.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate interview prep.";
       if (isAiNotConfigured(msg)) {
         setShowSetupNotice(true);
       } else {
@@ -101,8 +101,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
     try {
       const draft = await aiService.generateOutreachEmail(applicationId, emailType);
       setEmailDraft(draft);
-    } catch (err: any) {
-      const msg = err?.message || "Failed to generate email draft.";
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Failed to generate email draft.";
       if (isAiNotConfigured(msg)) {
         setShowSetupNotice(true);
       } else {
@@ -285,7 +285,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           <div className="flex items-center gap-2">
             <select
               value={emailType}
-              onChange={(e: any) => setEmailType(e.target.value)}
+              onChange={(e) => setEmailType(e.target.value as "follow_up" | "thank_you" | "cold_outreach")}
               className="rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-zinc-800 px-3 py-1.5 text-xs text-slate-800 dark:text-slate-200"
             >
               <option value="follow_up">Application Follow-up</option>
