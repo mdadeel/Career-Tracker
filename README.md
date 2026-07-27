@@ -32,55 +32,75 @@
 ---
 
 ## 📖 Table of Contents
-- [✨ Core Features](#-core-features)
-- [🛠️ Tech Stack](#️-tech-stack)
-- [📐 System Architecture](#-system-architecture)
-- [🔒 Security Architecture](#-security-architecture)
-- [📡 API Reference](#-api-reference)
-- [📊 Data Models](#-data-models)
-- [🏗️ Infrastructure & Operations](#️-infrastructure--operations)
-- [📦 CI/CD Pipeline](#-cicd-pipeline)
-- [🐳 Docker Deployment](#-docker-deployment)
-- [🤖 AI Integration Engine](#-ai-integration-engine)
-- [📂 Project Structure](#-project-structure)
-- [🚀 Local Setup & Installation](#-local-setup--installation)
-- [🧪 Testing Suite](#-testing-suite)
-- [🔧 Environment Variables Reference](#-environment-variables-reference)
-- [🚢 Production Deployment](#-production-deployment)
-- [🎓 Author & Submission Credits](#-author--submission-credits)
+
+<div align="center">
+
+| ⚡ Getting Started | 🏗️ Architecture & Ops | 📋 Reference |
+|:---:|:---:|:---:|
+| [🚀 Local Setup](#-local-setup--installation) | [📐 System Architecture](#-system-architecture) | [📡 API Reference](#-api-reference) |
+| [🔧 Environment Variables](#-environment-variables-reference) | [🔒 Security Architecture](#-security-architecture) | [📊 Data Models](#-data-models) |
+| [🧪 Testing Suite](#-testing-suite) | [🛠️ Tech Stack](#️-tech-stack) | [📂 Project Structure](#-project-structure) |
+| [🚢 Production Deployment](#-production-deployment) | [📦 CI/CD Pipeline](#-cicd-pipeline) | [✨ Core Features](#-core-features) |
+| | [🐳 Docker Deployment](#-docker-deployment) | [🧬 Advanced Patterns](#-advanced-application-patterns) |
+| | [🤖 AI Integration Engine](#-ai-integration-engine) | |
+| | [🏗️ Infrastructure](#️-infrastructure--operations) | |
+
+</div>
 
 ---
 
 ## ✨ Core Features
 
-*   **🔒 httpOnly Cookie JWT Authentication** — XSS-protected session management. Tokens are stored in secure, httpOnly cookies (not localStorage), with `SameSite=None; Secure` in production for cross-origin support.
-*   **📋 Full CRUD & Rich Application Metadata** — Store salary ranges ($ min/max/currency), location, employment type, remote status, full job descriptions (JDs), resume links, and custom notes.
-*   **📊 Interactive Dashboard & Metrics** — Real-time KPI summaries (Total Apps, Interview Count, Offers, Response Rate) using optimized SQL aggregation queries for instant load times.
-*   **🎛️ Drag-and-Drop Pipeline (Kanban)** — Manage applications across 6 stages (`Saved`, `Applied`, `Assessment`, `Interview`, `Offer`, `Rejected`) using a spring-animated column interface powered by `@dnd-kit`.
-*   **📈 Deep Analytics & Visualizations** — 4 interactive Recharts diagrams charting monthly submission velocities, conversion funnels, source effectiveness, and status distributions — backed by typed raw SQL queries.
-*   **📅 Interview Calendar** — Comprehensive month-view grid displaying scheduled interviews and application dates.
-*   **📎 S3 Resume Uploads** — Upload and store resumes in AWS S3 (or compatible S3 storage). Downloads use signed, time-limited URLs. Gracefully falls back to text-only storage when S3 is not configured.
-*   **🛠️ Bento 2.0 Feature Matrix** — An asymmetric layout with micro-animations showing dynamic features (Intelligent Pipeline, `Cmd+K` Command palette, Interview countdowns, Analytics funnels, and JD Vaults).
-*   **🎮 Live Sandbox Mode** — Allows visitors on the landing page to experience search and status filters on real-world mock data before registering.
-*   **⚡ Premium User Experience** — Ctrl+K command palette, debounced inputs, local storage drafts, **30s TTL in-memory cache with BroadcastChannel cross-tab sync**, responsive navigation (sidebar/mobile drawer), and full dark mode.
-*   **🔍 SEO & Structured Metadata** — Helmet-driven document titles, OpenGraph tags, and JSON-LD structured data (`SoftwareApplication` and `FAQPage` schemas).
-*   **📊 Optimized Query Performance** — Dashboard and analytics endpoints use Prisma `groupBy` and typed `$queryRaw` SQL aggregation instead of `findMany` + client-side compute, reducing data transfer from thousands of rows to a few aggregate values.
+<div align="center">
+
+| | | |
+|:---:|:---:|:---:|
+| 🔒 **httpOnly Cookie Auth**<br/><sub>XSS-protected JWT sessions via secure httpOnly cookies. `SameSite=None; Secure` in production.</sub> | 📋 **Full CRUD Metadata**<br/><sub>Salary ranges, location, employment type, remote status, JDs, resume links, custom notes.</sub> | 📊 **Dashboard & KPIs**<br/><sub>Real-time summaries via SQL aggregation. Total Apps, Interview Count, Offers, Response Rate.</sub> |
+| 🎛️ **Kanban Pipeline**<br/><sub>6-stage drag-and-drop with `@dnd-kit` spring animations: Saved → Applied → Assessment → Interview → Offer → Rejected.</sub> | 📈 **Analytics & Charts**<br/><sub>4 interactive Recharts diagrams — velocity, funnel, source effectiveness, status distribution. Typed SQL backend.</sub> | 📅 **Interview Calendar**<br/><sub>Monthly grid view displaying all scheduled interviews and application deadlines at a glance.</sub> |
+| 📎 **S3 Resume Uploads**<br/><sub>Upload to AWS S3 with signed, time-limited download URLs. Falls back gracefully to text-only storage.</sub> | 🛠️ **Bento 2.0 Matrix**<br/><sub>Asymmetric animated layout: Pipeline, `Cmd+K` palette, countdowns, funnels, and JD Vault.</sub> | 🎮 **Sandbox Mode**<br/><sub>Visitors explore search and filters on real-world mock data before registering.</sub> |
+| ⚡ **Premium UX**<br/><sub>`Cmd+K` palette, debounced inputs, localStorage drafts, 30s TTL cache with BroadcastChannel cross-tab sync, dark mode.</sub> | 🔍 **SEO & Metadata**<br/><sub>Helmet-driven OG tags, JSON-LD structured data (`SoftwareApplication`, `FAQPage` schemas).</sub> | 🚀 **Optimized Queries**<br/><sub>`groupBy` + typed `$queryRaw` aggregation instead of `findMany`. Rows → aggregates instantly.</sub> |
+
+</div>
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technologies | Purpose |
-| :--- | :--- | :--- |
-| **Frontend** | React 18, TypeScript, Vite, Tailwind CSS v3, React Router v6, Recharts, `@dnd-kit`, `react-helmet-async`, `@phosphor-icons/react` | Client-side routing, state mutations, interactive charts, drag-and-drop pipelines, responsive templates. |
-| **Backend** | Node.js, Express 4, TypeScript, Zod (validation), Helmet (headers), Express Rate Limit, **Pino (structured logging)**, **Compression (gzip/brotli)**, **Cookie-Parser** | REST API endpoints, user authentication, payload validation, server security, structured JSON logging, response compression. |
-| **Database** | PostgreSQL (Neon Cloud) via Prisma ORM Client | Relational schema management, transactions, connection pooling (configurable via `PRISMA_POOL_SIZE`), and seeding. |
-| **File Storage** | AWS S3 (or compatible) via `@aws-sdk/client-s3` | Resume file uploads. Signed URL downloads. Graceful fallback to text-only when S3 is not configured. |
-| **Monitoring** | **Sentry** (`@sentry/node`, `@sentry/react`) | Production error tracking. Captures unhandled exceptions and React rendering errors. Disabled when no DSN is configured. |
-| **Testing** | Vitest, Testing Library (React/Hooks), **Playwright (E2E)** | Component, helper, custom hooks and **full end-to-end Playwright tests covering all user flows**. |
-| **CI/CD** | **GitHub Actions** | Automated test runs, TypeScript checks, and build verification on push and PR. |
-| **Containerization** | **Docker** (multi-stage) | Production-ready Docker image with Prisma client generation. |
-| **Hosting** | Vercel (Client) · Render (Server/API) · Neon (Database) | Production CI/CD pipelines. |
+<div align="center">
+
+### 🎨 Frontend
+
+| | | | |
+|:---:|:---:|:---:|:---:|
+| [![React 18](https://img.shields.io/badge/React_18-20232A?style=flat&logo=react&logoColor=61DAFB)](https://react.dev) | [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org) | [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev) | [![Tailwind v3](https://img.shields.io/badge/Tailwind_v3-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com) |
+| [![React Router v6](https://img.shields.io/badge/React_Router-v6-CA4245?style=flat&logo=reactrouter&logoColor=white)](https://reactrouter.com) | [![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat&logo=recharts&logoColor=white)](https://recharts.org) | [![dnd-kit](https://img.shields.io/badge/@dnd--kit-000?style=flat&logo=dnd&logoColor=white)](https://dndkit.com) | [![Phosphor Icons](https://img.shields.io/badge/Phosphor_Icons-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4Ij48cGF0aCBkPSJNNjQgMjJhNDIgNDIgMCAxIDAgMCA4NCA0MiA0MiAwIDAgMCAwLTg0em0wIDc2YTM0IDM0IDAgMSAxIDAtNjggMzQgMzQgMCAwIDEgMCA2OHoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=&logoColor=white)](https://phosphoricons.com) |
+
+### ⚙️ Backend
+
+| | | | |
+|:---:|:---:|:---:|:---:|
+| [![Express 4](https://img.shields.io/badge/Express_4-000?style=flat&logo=express&logoColor=white)](https://expressjs.com) | [![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)](https://nodejs.org) | [![Zod](https://img.shields.io/badge/Zod-3068B7?style=flat&logo=zod&logoColor=white)](https://zod.dev) | [![Pino](https://img.shields.io/badge/Pino-9146FF?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzkxNDZGRiIvPjxwYXRoIGQ9Ik0xMCAxMGwyMCAyME0yMCAxMGwxMCAyME0zMCAxMGwtMjAgMjAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==&logoColor=white)](https://getpino.io) |
+| [![Helmet](https://img.shields.io/badge/Helmet-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBvbHlnb24gcG9pbnRzPSIyMCw1IDM1LDE1IDM1LDMwIDIwLDQwIDUsMzAgNSwxNSIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iMC44Ii8+PC9zdmc+&logoColor=white)](https://helmetjs.github.io) | [![JWT](https://img.shields.io/badge/JWT-black?style=flat&logo=JSON%20web%20tokens)](https://jwt.io) | [![Cookie-Parser](https://img.shields.io/badge/Cookie--Parser-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTUiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuOCIvPjwvc3ZnPg==&logoColor=white)](https://github.com/expressjs/cookie-parser) |
+
+### 🗄️ Data & Storage
+
+| | | | |
+|:---:|:---:|:---:|:---:|
+| [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org) | [![Prisma](https://img.shields.io/badge/Prisma_ORM-39825B?style=flat&logo=prisma&logoColor=white)](https://prisma.io) | [![Neon](https://img.shields.io/badge/Neon-00E599?style=flat&logo=neon&logoColor=black)](https://neon.tech) | [![AWS S3](https://img.shields.io/badge/AWS_S3-569A31?style=flat&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/) |
+
+### 🧪 Testing & CI/CD
+
+| | | | |
+|:---:|:---:|:---:|:---:|
+| [![Vitest](https://img.shields.io/badge/Vitest-729B1B?style=flat&logo=vitest&logoColor=white)](https://vitest.dev) | [![Playwright](https://img.shields.io/badge/Playwright-45ba4b?style=flat&logo=playwright&logoColor=white)](https://playwright.dev) | [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)](https://github.com/features/actions) | [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://docker.com) |
+
+### 📊 Monitoring & Deployment
+
+| | | | |
+|:---:|:---:|:---:|:---:|
+| [![Sentry](https://img.shields.io/badge/Sentry-362D59?style=flat&logo=sentry&logoColor=white)](https://sentry.io) | [![Vercel](https://img.shields.io/badge/Vercel-000?style=flat&logo=vercel&logoColor=white)](https://vercel.com) | [![Render](https://img.shields.io/badge/Render-46E3B7?style=flat&logo=render&logoColor=white)](https://render.com) | [![Compression](https://img.shields.io/badge/Gzip%2FBrotli-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iMC4yIi8+PC9zdmc+&logoColor=white)](https://expressjs.com) |
+
+</div>
 
 ---
 
@@ -211,74 +231,78 @@ sequenceDiagram
 
 ## 📡 API Reference
 
-Base Endpoint: `/api`
+<div align="center">
 
-### 1. Authentication (`/api/auth`)
-<details>
-<summary>View Auth Endpoints</summary>
+**Base Endpoint:** `https://your-api.com/api`  ·  Auth via **httpOnly Cookie** (no Bearer tokens)
+
+</div>
+
+<details open>
+<summary><b>🔐 1. Authentication</b>  <code>/api/auth</code></summary>
 
 | Method | Endpoint | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/register` | – | Register a new account. JWT is set as an httpOnly cookie. |
-| `POST` | `/login` | – | Authenticate credentials. JWT is set as an httpOnly cookie. |
-| `GET` | `/me` | ✅ | Get profile details for the currently logged-in user. |
-| `PATCH` | `/password` | ✅ | Update password (requires current password validation). |
-| `POST` | `/logout` | – | Clear the auth cookie. |
+|:------:|:---------|:----:|:------------|
+| <span style="color:#22c55e">●</span> POST | `/register` | — | Register a new account. JWT set as httpOnly cookie. |
+| <span style="color:#22c55e">●</span> POST | `/login` | — | Authenticate credentials. JWT set as httpOnly cookie. |
+| <span style="color:#3b82f6">●</span> GET | `/me` | ✅ | Get profile for the currently logged-in user. |
+| <span style="color:#eab308">●</span> PATCH | `/password` | ✅ | Update password (requires current password). |
+| <span style="color:#ef4444">●</span> POST | `/logout` | — | Clear the auth cookie. |
 
-> **Auth Note:** Authentication uses **httpOnly cookies**, not Bearer tokens. The JWT is automatically sent with every request by the browser. No client-side token management is needed.
+> 🔒 **Auth Note:** Sessions use **httpOnly cookies**, not Bearer tokens. The JWT is automatically sent with every request by the browser. No client-side token management needed.
+
 </details>
 
-### 2. Applications Management (`/api/applications`)
 <details>
-<summary>View Applications Endpoints</summary>
+<summary><b>📋 2. Applications</b>  <code>/api/applications</code></summary>
 
 | Method | Endpoint | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | ✅ | Get user's applications (supports filtering via query params: `search`, `status`, `source`, `sortBy=newest\|oldest`). |
-| `GET` | `/:id` | ✅ | Get a single application by UUID. |
-| `POST` | `/` | ✅ | Create a new application entry. |
-| `PATCH` | `/:id` | ✅ | Update an application. Verify ownership before saving. |
-| `DELETE` | `/:id` | ✅ | Delete an application. |
+|:------:|:---------|:----:|:------------|
+| <span style="color:#3b82f6">●</span> GET | `/` | ✅ | List applications. Supports `search`, `status`, `source`, `sortBy` query params. |
+| <span style="color:#3b82f6">●</span> GET | `/:id` | ✅ | Get a single application by UUID. |
+| <span style="color:#22c55e">●</span> POST | `/` | ✅ | Create a new application entry. |
+| <span style="color:#eab308">●</span> PATCH | `/:id` | ✅ | Update an application (ownership verified). |
+| <span style="color:#ef4444">●</span> DELETE | `/:id` | ✅ | Delete an application. |
 
-#### Filter Query Example:
-`GET /api/applications?search=engineer&status=Interview&source=LinkedIn&sortBy=newest`
+```
+GET /api/applications?search=engineer&status=Interview&source=LinkedIn&sortBy=newest
+```
+
 </details>
 
-### 3. Resume Management (`/api/resumes`)
 <details>
-<summary>View Resume Endpoints</summary>
+<summary><b>📎 3. Resumes</b>  <code>/api/resumes</code></summary>
 
 | Method | Endpoint | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/` | ✅ | List all user's uploaded resumes. |
-| `POST` | `/upload` | ✅ | Upload a new resume (multipart/form-data). Stores in S3 if configured, otherwise extracts text content. |
-| `DELETE` | `/:id` | ✅ | Delete a resume. |
+|:------:|:---------|:----:|:------------|
+| <span style="color:#3b82f6">●</span> GET | `/` | ✅ | List all user's uploaded resumes. |
+| <span style="color:#22c55e">●</span> POST | `/upload` | ✅ | Upload resume (multipart). Stores in S3 if configured, otherwise extracts text. |
+| <span style="color:#ef4444">●</span> DELETE | `/:id` | ✅ | Delete a resume. |
 
-#### Upload Response Example:
 ```json
 {
   "success": true,
   "data": {
     "id": "uuid",
     "filename": "my-resume.pdf",
-    "fileUrl": "https://s3-bucket.s3.amazonaws.com/...?X-Amz-Signature=...",
+    "fileUrl": "https://s3-bucket.s3.amazonaws.com/...",
     "s3Key": "resumes/uuid/file.pdf",
     "textContent": "PDF text extraction...",
     "createdAt": "2024-01-15T10:30:00Z"
   }
 }
 ```
-> When S3 is configured, the response includes `fileUrl` (a signed, time-limited URL) and `s3Key`. Otherwise, only `textContent` is returned and a download button is not shown in the UI.
+
+> When S3 is configured, the response includes `fileUrl` (a signed, time-limited URL) and `s3Key`. Otherwise, only `textContent` is returned.
+
 </details>
 
-### 4. Analytics & Dashboard (`/api/dashboard` & `/api/analytics`)
 <details>
-<summary>View Analytics Endpoints</summary>
+<summary><b>📊 4. Dashboard & Analytics</b>  <code>/api/dashboard</code> / <code>/api/analytics</code></summary>
 
 | Method | Endpoint | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/dashboard/stats` | ✅ | Get quick KPI summary counts and the 5 most recent application logs. Uses SQL aggregation for performance. |
-| `GET` | `/analytics/stats` | ✅ | Get detailed metrics (monthly submission rates, funnel dropoffs, application source yields) via typed raw SQL queries. |
+|:------:|:---------|:----:|:------------|
+| <span style="color:#3b82f6">●</span> GET | `/dashboard/stats` | ✅ | KPI summary counts + 5 most recent application logs. Uses SQL aggregation. |
+| <span style="color:#3b82f6">●</span> GET | `/analytics/stats` | ✅ | Monthly trends, funnel dropoffs, source effectiveness via typed raw SQL queries. |
 
 ```json
 {
@@ -296,28 +320,28 @@ Base Endpoint: `/api`
   }
 }
 ```
+
 </details>
 
-### 5. AI Services Coordinator (`/api/ai`)
 <details>
-<summary>View AI Endpoints</summary>
+<summary><b>🤖 5. AI Services</b>  <code>/api/ai</code></summary>
 
 | Method | Endpoint | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/parse-jd` | ✅ | Parses a raw job description string and returns structured info. |
-| `POST` | `/test-config` | ✅ | Test connection for user-supplied custom AI models. |
-| `POST` | `/match-score/:id` | ✅ | Match resume text against a saved application's JD. |
-| `POST` | `/interview-prep/:id` | ✅ | Generate 5 interview questions and STAR-method answering tips. |
-| `POST` | `/generate-email` | ✅ | Generate a follow-up or cold outreach email template. |
+|:------:|:---------|:----:|:------------|
+| <span style="color:#22c55e">●</span> POST | `/parse-jd` | ✅ | Parse raw job description into structured fields. |
+| <span style="color:#22c55e">●</span> POST | `/test-config` | ✅ | Test connection for custom AI model config. |
+| <span style="color:#22c55e">●</span> POST | `/match-score/:id` | ✅ | Match resume vs. job description → match % + skill gaps. |
+| <span style="color:#22c55e">●</span> POST | `/interview-prep/:id` | ✅ | Generate 5 STAR-method interview questions + tips. |
+| <span style="color:#22c55e">●</span> POST | `/generate-email` | ✅ | Draft follow-up, thank-you, or cold outreach templates. |
+
 </details>
 
-### 6. Health Check (`/api/health`)
 <details>
-<summary>View Health Endpoint</summary>
+<summary><b>💚 6. Health Check</b>  <code>/api/health</code></summary>
 
 | Method | Endpoint | Auth | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/health` | – | Server health check with uptime, memory usage, and version info. |
+|:------:|:---------|:----:|:------------|
+| <span style="color:#3b82f6">●</span> GET | `/health` | — | Server status, uptime, memory, version info. |
 
 ```json
 {
@@ -332,6 +356,7 @@ Base Endpoint: `/api`
   "timestamp": "2024-01-15T10:30:00Z"
 }
 ```
+
 </details>
 
 ---
@@ -463,27 +488,56 @@ In development, the Prisma client is cached globally to avoid hot-reload connect
 
 ## 🧬 Advanced Application Patterns
 
-The codebase features advanced design patterns to ensure developer productivity, rapid client response times, and premium usability.
+<table>
+<tr>
+<td width="33%" align="center">
 
-### 1. Optimistic CRUD & State Reconciliation
-The application hook [useApplications.ts](file:///home/adeel/Documents/projects/task/client/src/hooks/useApplications.ts) implements optimistic UI updates. When a user creates, updates, or deletes an application:
-*   The UI state is updated immediately based on the expected result.
-*   The actual HTTP request runs in the background.
-*   If the server request succeeds, the local state is reconciled.
-*   If the server request fails, the client rolls back to the previous snapshot, and displays a localized error toast notification.
+### 🔄 Optimistic CRUD
 
-### 2. In-Memory Client Cache with Cross-Tab Sync
-The API service layer maintains a client-side in-memory cache with **30-second Time-To-Live (TTL)**:
-*   A `Map<string, CacheEntry>` caches GET request responses.
-*   Any write operation (POST, PATCH, DELETE) automatically invalidates relevant cache entries.
-*   Uses **BroadcastChannel API** to sync cache invalidation across open browser tabs — when one tab creates an application, all other tabs automatically refresh.
-*   Reduces redundant network requests and ensures instant navigation between dashboard, pipeline, and calendar pages.
+<sub><b>Instant UI · Background Sync · Auto-Rollback</b></sub>
 
-### 3. Form Draft Auto-Save
-Form components save unfinished data drafts to browser `localStorage` using a 1.5-second debounced function:
-*   Protects users from losing long job descriptions or notes on accidental tab closes or navigation changes.
-*   Drafts automatically expire after 24 hours to prevent stale data conflicts.
-*   Separate local storage keys isolate modal drafts from standalone page drafts.
+---
+
+The [useApplications](file:///home/adeel/Documents/projects/task/client/src/hooks/useApplications.ts) hook implements optimistic updates:
+
+1. **UI updates instantly** based on expected result
+2. **HTTP request fires** in the background
+3. **On success** → state reconciled
+4. **On failure** → snapshot rollback + toast
+
+</td>
+<td width="33%" align="center">
+
+### 🗄️ Smart Cache
+
+<sub><b>30s TTL · Auto-Invalidation · Cross-Tab Sync</b></sub>
+
+---
+
+[In-memory `Map<string, CacheEntry>`](file:///home/adeel/Documents/projects/task/client/src/services/cache.ts) with:
+
+- **30-second TTL** per cached response
+- **Auto-invalidation** on POST/PATCH/DELETE
+- **BroadcastChannel API** syncs across browser tabs — create an app in one tab, second tab refreshes automatically
+
+</td>
+<td width="33%" align="center">
+
+### 💾 Draft Auto-Save
+
+<sub><b>1.5s Debounce · 24h Expiry · localStorage</b></sub>
+
+---
+
+Form components preserve unfinished work:
+
+- **1.5-second debounced** save to `localStorage`
+- **24-hour expiry** prevents stale data conflicts
+- **Isolated keys** keep modal drafts separate from page drafts
+
+</td>
+</tr>
+</table>
 
 ---
 
