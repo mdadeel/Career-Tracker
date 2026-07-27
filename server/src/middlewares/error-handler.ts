@@ -1,5 +1,9 @@
 import { Request, Response, NextFunction } from "express";
 import { z } from "zod";
+import pino from "pino";
+import * as Sentry from "@sentry/node";
+
+const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
 export class AppError extends Error {
   public statusCode: number;
@@ -34,7 +38,12 @@ export function errorHandler(
     return;
   }
 
-  console.error("Unhandled error:", err);
+  // Report unexpected errors to Sentry in production
+  if (process.env.SENTRY_DSN) {
+    Sentry.captureException(err);
+  }
+
+  logger.error({ err, path: _req.path }, "Unhandled error");
 
   res.status(500).json({
     success: false,

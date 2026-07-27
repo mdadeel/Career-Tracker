@@ -1,6 +1,12 @@
-import express from "express";
+import express, { type Request, type Response, type NextFunction } from "express";
 import cors from "cors";
+import compression from "compression";
+import timeout from "connect-timeout";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
+import pino from "pino";
+import pinoHttp from "pino-http";
+import * as Sentry from "@sentry/node";
 import authRoutes from "./routes/auth-routes";
 import applicationRoutes from "./routes/application-routes";
 import dashboardRoutes from "./routes/dashboard-routes";
@@ -30,6 +36,25 @@ if (missing.length > 0) {
   process.exit(1);
 }
 
+// Initialize Sentry if DSN is configured
+if (process.env.SENTRY_DSN) {
+  Sentry.init({
+    dsn: process.env.SENTRY_DSN,
+    environment: process.env.NODE_ENV || "development",
+    tracesSampleRate: parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE || "0.1"),
+    // Only track errors in production to reduce noise
+    enabled: process.env.NODE_ENV === "production",
+  });
+}
+
+const logger = pino({
+  level: process.env.LOG_LEVEL || "info",
+  transport:
+    process.env.NODE_ENV !== "production"
+      ? { target: "pino-pretty", options: { colorize: true } }
+      : undefined,
+});
+
 const app = express();
 const PORT = process.env.PORT || 5000;
 const rawClientUrl = process.env.CLIENT_URL;
@@ -53,6 +78,26 @@ app.use((_req, res, next) => {
   next();
 });
 
+// Compression (gzip/brotli) — must come before routes
+app.use(compression());
+
+// Request timeout — connect-timeout manages the timer. Set different limits
+// for normal (30s) vs AI (60s) routes via a wrapping middleware.
+app.use((req: Request, _res: Response, next: NextFunction) => {
+  const limit = req.path.startsWith("/api/ai/") ? "60s" : "30s";
+  timeout(limit)(req, _res, next);
+});
+
+// Structured request logging
+app.use(
+  pinoHttp({
+    logger,
+    autoLogging: {
+      ignore: (req) => req.url?.startsWith("/api/health") ?? false,
+    },
+  })
+);
+
 // CORS
 app.use(
   cors({
@@ -72,16 +117,7 @@ app.use(
 );
 
 app.use(express.json({ limit: "1mb" }));
-
-// Request logging
-app.use((req, res, next) => {
-  const start = Date.now();
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    console.log(`${req.method} ${req.originalUrl} ${res.statusCode} ${duration}ms`);
-  });
-  next();
-});
+app.use(cookieParser());
 
 // Rate limiting
 app.use("/api/auth", authLimiter);
@@ -111,6 +147,15 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/ai", aiRoutes);
 app.use("/api/resumes", resumeRoutes);
+
+// Timeout error handler — runs AFTER all routes but BEFORE the generic error handler
+app.use((req: Request, res: Response, next: NextFunction) => {
+  if ((req as any).timedout) {
+    res.status(503).json({ success: false, message: "Request timed out" });
+    return;
+  }
+  next();
+});
 
 // Error handling
 app.use(errorHandler);
