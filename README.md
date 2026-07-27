@@ -72,33 +72,33 @@
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| [![React 18](https://img.shields.io/badge/React_18-20232A?style=flat&logo=react&logoColor=61DAFB)](https://react.dev) | [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://typescriptlang.org) | [![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white)](https://vitejs.dev) | [![Tailwind v3](https://img.shields.io/badge/Tailwind_v3-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com) |
-| [![React Router v6](https://img.shields.io/badge/React_Router-v6-CA4245?style=flat&logo=reactrouter&logoColor=white)](https://reactrouter.com) | [![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=flat&logo=recharts&logoColor=white)](https://recharts.org) | [![dnd-kit](https://img.shields.io/badge/@dnd--kit-000?style=flat&logo=dnd&logoColor=white)](https://dndkit.com) | [![Phosphor Icons](https://img.shields.io/badge/Phosphor_Icons-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4Ij48cGF0aCBkPSJNNjQgMjJhNDIgNDIgMCAxIDAgMCA4NCA0MiA0MiAwIDAgMCAwLTg0em0wIDc2YTM0IDM0IDAgMSAxIDAtNjggMzQgMzQgMCAwIDEgMCA2OHoiIGZpbGw9IiNmZmYiLz48L3N2Zz4=&logoColor=white)](https://phosphoricons.com) |
+| <a href="https://react.dev"><img src="https://img.shields.io/badge/React_18-20232A?style=flat&logo=react&logoColor=61DAFB" alt="React 18"/></a> | <a href="https://typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white" alt="TypeScript"/></a> | <a href="https://vitejs.dev"><img src="https://img.shields.io/badge/Vite-646CFF?style=flat&logo=vite&logoColor=white" alt="Vite"/></a> | <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_v3-38B2AC?style=flat&logo=tailwind-css&logoColor=white" alt="Tailwind v3"/></a> |
+| <a href="https://reactrouter.com"><img src="https://img.shields.io/badge/React_Router-v6-CA4245?style=flat&logo=reactrouter&logoColor=white" alt="React Router v6"/></a> | <a href="https://recharts.org"><img src="https://img.shields.io/badge/Recharts-22B5BF?style=flat&logo=recharts&logoColor=white" alt="Recharts"/></a> | <a href="https://dndkit.com"><img src="https://img.shields.io/badge/@dnd--kit-000?style=flat&logoColor=white" alt="dnd-kit"/></a> | <a href="https://phosphoricons.com"><img src="https://img.shields.io/badge/Phosphor_Icons-000?style=flat&logoColor=white" alt="Phosphor Icons"/></a> |
 
 ### ⚙️ Backend
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| [![Express 4](https://img.shields.io/badge/Express_4-000?style=flat&logo=express&logoColor=white)](https://expressjs.com) | [![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)](https://nodejs.org) | [![Zod](https://img.shields.io/badge/Zod-3068B7?style=flat&logo=zod&logoColor=white)](https://zod.dev) | [![Pino](https://img.shields.io/badge/Pino-9146FF?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzkxNDZGRiIvPjxwYXRoIGQ9Ik0xMCAxMGwyMCAyME0yMCAxMGwxMCAyME0zMCAxMGwtMjAgMjAiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS13aWR0aD0iMiIvPjwvc3ZnPg==&logoColor=white)](https://getpino.io) |
-| [![Helmet](https://img.shields.io/badge/Helmet-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHBvbHlnb24gcG9pbnRzPSIyMCw1IDM1LDE1IDM1LDMwIDIwLDQwIDUsMzAgNSwxNSIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iMC44Ii8+PC9zdmc+&logoColor=white)](https://helmetjs.github.io) | [![JWT](https://img.shields.io/badge/JWT-black?style=flat&logo=JSON%20web%20tokens)](https://jwt.io) | [![Cookie-Parser](https://img.shields.io/badge/Cookie--Parser-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMTUiIGZpbGw9IiNmZmYiIG9wYWNpdHk9IjAuOCIvPjwvc3ZnPg==&logoColor=white)](https://github.com/expressjs/cookie-parser) |
+| <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Express_4-000?style=flat&logo=express&logoColor=white" alt="Express 4"/></a> | <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white" alt="Node.js"/></a> | <a href="https://zod.dev"><img src="https://img.shields.io/badge/Zod-3068B7?style=flat&logo=zod&logoColor=white" alt="Zod"/></a> | <a href="https://getpino.io"><img src="https://img.shields.io/badge/Pino-9146FF?style=flat&logoColor=white" alt="Pino"/></a> |
+| <a href="https://helmetjs.github.io"><img src="https://img.shields.io/badge/Helmet-000?style=flat&logoColor=white" alt="Helmet"/></a> | <a href="https://jwt.io"><img src="https://img.shields.io/badge/JWT-black?style=flat&logo=JSON%20web%20tokens" alt="JWT"/></a> | <a href="https://github.com/expressjs/cookie-parser"><img src="https://img.shields.io/badge/Cookie--Parser-000?style=flat&logoColor=white" alt="Cookie-Parser"/></a> | <a href="https://expressjs.com"><img src="https://img.shields.io/badge/Compression-000?style=flat&logoColor=white" alt="Compression"/></a> |
 
 ### 🗄️ Data & Storage
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white)](https://postgresql.org) | [![Prisma](https://img.shields.io/badge/Prisma_ORM-39825B?style=flat&logo=prisma&logoColor=white)](https://prisma.io) | [![Neon](https://img.shields.io/badge/Neon-00E599?style=flat&logo=neon&logoColor=black)](https://neon.tech) | [![AWS S3](https://img.shields.io/badge/AWS_S3-569A31?style=flat&logo=amazons3&logoColor=white)](https://aws.amazon.com/s3/) |
+| <a href="https://postgresql.org"><img src="https://img.shields.io/badge/PostgreSQL-316192?style=flat&logo=postgresql&logoColor=white" alt="PostgreSQL"/></a> | <a href="https://prisma.io"><img src="https://img.shields.io/badge/Prisma_ORM-39825B?style=flat&logo=prisma&logoColor=white" alt="Prisma"/></a> | <a href="https://neon.tech"><img src="https://img.shields.io/badge/Neon-00E599?style=flat&logo=neon&logoColor=black" alt="Neon"/></a> | <a href="https://aws.amazon.com/s3/"><img src="https://img.shields.io/badge/AWS_S3-569A31?style=flat&logo=amazons3&logoColor=white" alt="AWS S3"/></a> |
 
 ### 🧪 Testing & CI/CD
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| [![Vitest](https://img.shields.io/badge/Vitest-729B1B?style=flat&logo=vitest&logoColor=white)](https://vitest.dev) | [![Playwright](https://img.shields.io/badge/Playwright-45ba4b?style=flat&logo=playwright&logoColor=white)](https://playwright.dev) | [![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white)](https://github.com/features/actions) | [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://docker.com) |
+| <a href="https://vitest.dev"><img src="https://img.shields.io/badge/Vitest-729B1B?style=flat&logo=vitest&logoColor=white" alt="Vitest"/></a> | <a href="https://playwright.dev"><img src="https://img.shields.io/badge/Playwright-45ba4b?style=flat&logo=playwright&logoColor=white" alt="Playwright"/></a> | <a href="https://github.com/features/actions"><img src="https://img.shields.io/badge/GitHub_Actions-2088FF?style=flat&logo=github-actions&logoColor=white" alt="GitHub Actions"/></a> | <a href="https://docker.com"><img src="https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white" alt="Docker"/></a> |
 
 ### 📊 Monitoring & Deployment
 
 | | | | |
 |:---:|:---:|:---:|:---:|
-| [![Sentry](https://img.shields.io/badge/Sentry-362D59?style=flat&logo=sentry&logoColor=white)](https://sentry.io) | [![Vercel](https://img.shields.io/badge/Vercel-000?style=flat&logo=vercel&logoColor=white)](https://vercel.com) | [![Render](https://img.shields.io/badge/Render-46E3B7?style=flat&logo=render&logoColor=white)](https://render.com) | [![Compression](https://img.shields.io/badge/Gzip%2FBrotli-000?style=flat&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCI+PHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iNCIgZmlsbD0iI2ZmZiIgb3BhY2l0eT0iMC4yIi8+PC9zdmc+&logoColor=white)](https://expressjs.com) |
+| <a href="https://sentry.io"><img src="https://img.shields.io/badge/Sentry-362D59?style=flat&logo=sentry&logoColor=white" alt="Sentry"/></a> | <a href="https://vercel.com"><img src="https://img.shields.io/badge/Vercel-000?style=flat&logo=vercel&logoColor=white" alt="Vercel"/></a> | <a href="https://render.com"><img src="https://img.shields.io/badge/Render-46E3B7?style=flat&logo=render&logoColor=white" alt="Render"/></a> | <img src="https://img.shields.io/badge/Gzip%2FBrotli-000?style=flat&logoColor=white" alt="Gzip/Brotli"/> |
 
 </div>
 
@@ -488,52 +488,50 @@ In development, the Prisma client is cached globally to avoid hot-reload connect
 
 ## 🧬 Advanced Application Patterns
 
+<blockquote>
+The codebase features three advanced UX patterns that ensure rapid interactions, data safety, and premium usability.
+</blockquote>
+
 <table>
 <tr>
-<td width="33%" align="center">
+<td width="33%" align="center" valign="top">
 
-### 🔄 Optimistic CRUD
-
-<sub><b>Instant UI · Background Sync · Auto-Rollback</b></sub>
-
----
-
-The [useApplications](file:///home/adeel/Documents/projects/task/client/src/hooks/useApplications.ts) hook implements optimistic updates:
-
-1. **UI updates instantly** based on expected result
-2. **HTTP request fires** in the background
-3. **On success** → state reconciled
-4. **On failure** → snapshot rollback + toast
+<h3>🔄 Optimistic CRUD</h3>
+<p><small><b>Instant UI · Background Sync · Auto-Rollback</b></small></p>
+<hr/>
+<p>The <code>useApplications</code> hook implements optimistic updates:</p>
+<ol>
+<li><b>UI updates instantly</b> based on expected result</li>
+<li><b>HTTP request fires</b> in the background</li>
+<li><b>On success</b> — state reconciled</li>
+<li><b>On failure</b> — snapshot rollback + toast</li>
+</ol>
 
 </td>
-<td width="33%" align="center">
+<td width="33%" align="center" valign="top">
 
-### 🗄️ Smart Cache
-
-<sub><b>30s TTL · Auto-Invalidation · Cross-Tab Sync</b></sub>
-
----
-
-[In-memory `Map<string, CacheEntry>`](file:///home/adeel/Documents/projects/task/client/src/services/cache.ts) with:
-
-- **30-second TTL** per cached response
-- **Auto-invalidation** on POST/PATCH/DELETE
-- **BroadcastChannel API** syncs across browser tabs — create an app in one tab, second tab refreshes automatically
+<h3>🗄️ Smart Cache</h3>
+<p><small><b>30s TTL · Auto-Invalidation · Cross-Tab Sync</b></small></p>
+<hr/>
+<p>In-memory <code>Map&lt;string, CacheEntry&gt;</code> with:</p>
+<ul>
+<li><b>30-second TTL</b> per cached response</li>
+<li><b>Auto-invalidation</b> on POST/PATCH/DELETE</li>
+<li><b>BroadcastChannel API</b> syncs across browser tabs</li>
+</ul>
 
 </td>
-<td width="33%" align="center">
+<td width="33%" align="center" valign="top">
 
-### 💾 Draft Auto-Save
-
-<sub><b>1.5s Debounce · 24h Expiry · localStorage</b></sub>
-
----
-
-Form components preserve unfinished work:
-
-- **1.5-second debounced** save to `localStorage`
-- **24-hour expiry** prevents stale data conflicts
-- **Isolated keys** keep modal drafts separate from page drafts
+<h3>💾 Draft Auto-Save</h3>
+<p><small><b>1.5s Debounce · 24h Expiry · localStorage</b></small></p>
+<hr/>
+<p>Form components preserve unfinished work:</p>
+<ul>
+<li><b>1.5-second debounced</b> save to <code>localStorage</code></li>
+<li><b>24-hour expiry</b> prevents stale data conflicts</li>
+<li><b>Isolated keys</b> keep modal drafts separate from page drafts</li>
+</ul>
 
 </td>
 </tr>
