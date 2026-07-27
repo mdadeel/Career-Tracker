@@ -120,8 +120,8 @@ export function SettingsPage() {
       const updatedUser = await authService.updateResume(resumeInput);
       updateUser(updatedUser);
       addToast("Resume profile saved successfully!", "success");
-    } catch (err: any) {
-      addToast(err?.message || "Failed to save resume profile", "error");
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : "Failed to save resume profile", "error");
     } finally {
       setIsSavingResume(false);
     }
@@ -147,8 +147,9 @@ export function SettingsPage() {
       const res = await aiService.testAiConfig(payload);
       setTestResult({ success: true, message: res.message || "Connection successful!" });
       addToast("AI Provider connection verified!", "success");
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Connection failed";
+    } catch (err: unknown) {
+      const apiErr = err as { response?: { data?: { message?: string } }; message?: string };
+      const msg = apiErr?.response?.data?.message || apiErr?.message || "Connection failed";
       setTestResult({ success: false, message: msg });
       addToast(msg, "error");
     } finally {
@@ -177,8 +178,8 @@ export function SettingsPage() {
       setAiApiKeyChanged(false);
       setAiApiKey("");
       addToast("AI Provider & API Keys saved successfully!", "success");
-    } catch (err: any) {
-      addToast(err?.message || "Failed to save AI configuration", "error");
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : "Failed to save AI configuration", "error");
     } finally {
       setIsSavingAiConfig(false);
     }

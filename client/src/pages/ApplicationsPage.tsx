@@ -260,8 +260,8 @@ export function ApplicationsPage() {
       await aiService.analyzeMatch(id);
       addToast("Match score updated!", "success");
       refresh();
-    } catch (err: any) {
-      addToast(err?.message || "Failed to analyze match score.", "error");
+    } catch (err: unknown) {
+      addToast(err instanceof Error ? err.message : "Failed to analyze match score.", "error");
     }
   }, [addToast, refresh]);
 

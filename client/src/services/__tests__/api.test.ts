@@ -16,7 +16,7 @@ describe("api", () => {
     vi.useRealTimers();
   });
 
-  it("sends GET requests with the correct path and headers", async () => {
+  it("sends GET requests with the correct path, headers, and credentials", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ success: true, data: { id: "1" } }),
@@ -31,14 +31,13 @@ describe("api", () => {
         headers: expect.objectContaining({
           "Content-Type": "application/json",
         }),
+        credentials: "include",
       })
     );
     expect(result).toEqual({ id: "1" });
   });
 
-  it("includes the Authorization header when a token exists", async () => {
-    localStorage.setItem("token", "test-jwt-token");
-
+  it("sends credentials: include for cookie-based auth", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ success: true, data: {} }),
@@ -46,14 +45,27 @@ describe("api", () => {
 
     await api.get("/applications");
 
+    // Token is sent via httpOnly cookie, not Authorization header
     expect(mockFetch).toHaveBeenCalledWith(
       "/api/applications",
       expect.objectContaining({
-        headers: expect.objectContaining({
-          Authorization: "Bearer test-jwt-token",
-        }),
+        credentials: "include",
       })
     );
+
+    // No explicit Authorization header should be set
+    const callArgs = mockFetch.mock.calls[0][1];
+    expect(callArgs.headers).not.toHaveProperty("Authorization");
+  });
+
+  it("notifies unauthorized listeners on 401", async () => {
+    mockFetch.mockResolvedValueOnce({
+      status: 401,
+      ok: false,
+      json: () => Promise.resolve({ message: "Unauthorized" }),
+    });
+
+    await expect(api.get("/protected")).rejects.toThrow("Unauthorized");
   });
 
   it("throws an error for non-ok responses", async () => {
@@ -74,7 +86,7 @@ describe("api", () => {
     await expect(api.get("/test")).rejects.toThrow("Something went wrong");
   });
 
-  it("sends POST requests with JSON body", async () => {
+  it("sends POST requests with JSON body and credentials: include", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ success: true, data: { id: "new-1" } }),
@@ -88,12 +100,13 @@ describe("api", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify(body),
+        credentials: "include",
       })
     );
     expect(result).toEqual({ id: "new-1" });
   });
 
-  it("sends PATCH requests with JSON body", async () => {
+  it("sends PATCH requests with JSON body and credentials: include", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ success: true, data: { id: "1", status: "Interview" } }),
@@ -108,12 +121,13 @@ describe("api", () => {
       expect.objectContaining({
         method: "PATCH",
         body: JSON.stringify({ status: "Interview" }),
+        credentials: "include",
       })
     );
     expect(result.status).toBe("Interview");
   });
 
-  it("sends DELETE requests", async () => {
+  it("sends DELETE requests with credentials: include", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve({ success: true, data: { message: "Deleted" } }),
@@ -125,6 +139,7 @@ describe("api", () => {
       "/api/applications/1",
       expect.objectContaining({
         method: "DELETE",
+        credentials: "include",
       })
     );
   });

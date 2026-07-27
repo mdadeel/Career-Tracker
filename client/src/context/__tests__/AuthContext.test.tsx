@@ -47,7 +47,14 @@ describe("AuthContext", () => {
     );
   }
 
-  it("shows not logged in when no token exists", async () => {
+  it("shows not logged in when session restore fails (no cookie)", async () => {
+    // On mount, AuthContext calls /auth/me which fails (no cookie = 401)
+    mockFetch.mockResolvedValueOnce({
+      status: 401,
+      ok: false,
+      json: () => Promise.resolve({ success: false, message: "Authentication required" }),
+    });
+
     renderAuth();
 
     await waitFor(() => {
@@ -56,6 +63,14 @@ describe("AuthContext", () => {
   });
 
   it("logs in a user and updates state", async () => {
+    // First call: /auth/me on mount (fails — no cookie yet)
+    mockFetch.mockResolvedValueOnce({
+      status: 401,
+      ok: false,
+      json: () => Promise.resolve({ success: false, message: "Authentication required" }),
+    });
+
+    // Second call: login POST — sets user
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () =>
@@ -81,10 +96,19 @@ describe("AuthContext", () => {
       expect(screen.getByTestId("user-email")).toHaveTextContent("test@example.com");
     });
 
-    expect(localStorage.getItem("token")).toBe("fake-jwt");
+    // Token is stored as httpOnly cookie by the server — NOT in localStorage
+    expect(localStorage.getItem("token")).toBeNull();
   });
 
   it("registers a user and updates state", async () => {
+    // First call: /auth/me on mount (fails)
+    mockFetch.mockResolvedValueOnce({
+      status: 401,
+      ok: false,
+      json: () => Promise.resolve({ success: false, message: "Authentication required" }),
+    });
+
+    // Second call: register POST
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () =>
@@ -109,13 +133,12 @@ describe("AuthContext", () => {
       expect(screen.getByTestId("auth-state")).toHaveTextContent("Logged in as Test User");
     });
 
-    expect(localStorage.getItem("token")).toBe("register-jwt");
+    // Token is in httpOnly cookie, not localStorage
+    expect(localStorage.getItem("token")).toBeNull();
   });
 
   it("logs out a user and clears state", async () => {
-    // Seed a token so the context thinks there's an active session
-    localStorage.setItem("token", "existing-token");
-
+    // On mount: /auth/me succeeds → restore session
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () =>
@@ -127,24 +150,28 @@ describe("AuthContext", () => {
 
     renderAuth();
 
-    // Wait for the me() call to complete and show logged in
     await waitFor(() => {
       expect(screen.getByTestId("auth-state")).toHaveTextContent("Logged in as Test User");
     });
 
-    // Click logout
+    // On logout: POST /auth/logout
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ success: true, data: { message: "Logged out" } }),
+    });
+
     await userEvent.click(screen.getByTestId("logout-btn"));
 
     await waitFor(() => {
       expect(screen.getByTestId("auth-state")).toHaveTextContent("Not logged in");
     });
 
+    // No localStorage token to clear
     expect(localStorage.getItem("token")).toBeNull();
   });
 
-  it("clears token on me() failure", async () => {
-    localStorage.setItem("token", "expired-token");
-
+  it("shows not logged in on me() failure (expired session)", async () => {
+    // On mount: /auth/me fails (expired/invalid cookie)
     mockFetch.mockRejectedValueOnce(new Error("Token expired"));
 
     renderAuth();
@@ -152,8 +179,6 @@ describe("AuthContext", () => {
     await waitFor(() => {
       expect(screen.getByTestId("auth-state")).toHaveTextContent("Not logged in");
     });
-
-    expect(localStorage.getItem("token")).toBeNull();
   });
 
   it("throws when useAuth is used outside AuthProvider", () => {

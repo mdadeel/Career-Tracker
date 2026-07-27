@@ -99,12 +99,24 @@ function Widget({ title, children }: { title: string; children: React.ReactNode 
 }
 
 /* ─── Custom Tooltip ─── */
-function ChartTooltip({ active, payload, label }: any) {
+interface TooltipPayloadEntry {
+  color?: string;
+  name?: string;
+  value?: number;
+}
+
+interface ChartTooltipProps {
+  active?: boolean;
+  payload?: TooltipPayloadEntry[];
+  label?: string;
+}
+
+function ChartTooltip({ active, payload, label }: ChartTooltipProps) {
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface px-3 py-2 shadow-elevated text-xs">
       <p className="font-medium text-ink dark:text-white/80 mb-0.5">{label}</p>
-      {payload.map((entry: any, i: number) => (
+      {payload.map((entry, i) => (
         <p key={i} style={{ color: entry.color }} className="tabular-nums">
           {entry.name}: {entry.value}
         </p>
