@@ -47,10 +47,12 @@ if (process.env.SENTRY_DSN) {
   });
 }
 
+const isProduction = process.env.NODE_ENV === "production" || !!process.env.VERCEL;
+
 const logger = pino({
   level: process.env.LOG_LEVEL || "info",
   transport:
-    process.env.NODE_ENV !== "production"
+    !isProduction
       ? { target: "pino-pretty", options: { colorize: true } }
       : undefined,
 });
