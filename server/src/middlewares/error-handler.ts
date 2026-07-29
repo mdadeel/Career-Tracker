@@ -7,11 +7,13 @@ const logger = pino({ level: process.env.LOG_LEVEL || "info" });
 
 export class AppError extends Error {
   public statusCode: number;
+  public devMessage?: string;
 
-  constructor(message: string, statusCode: number = 500) {
+  constructor(message: string, statusCode: number = 500, devMessage?: string) {
     super(message);
     this.statusCode = statusCode;
     this.name = "AppError";
+    this.devMessage = devMessage;
   }
 }
 
@@ -21,6 +23,11 @@ export function errorHandler(
   res: Response,
   _next: NextFunction
 ): void {
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    !!process.env.VERCEL ||
+    process.env.RENDER === "true";
+
   if (err instanceof z.ZodError) {
     res.status(400).json({
       success: false,
@@ -33,7 +40,7 @@ export function errorHandler(
   if (err instanceof AppError) {
     res.status(err.statusCode).json({
       success: false,
-      message: err.message,
+      message: isProduction ? err.message : (err.devMessage || err.message),
     });
     return;
   }
@@ -47,10 +54,8 @@ export function errorHandler(
 
   res.status(500).json({
     success: false,
-    message:
-      process.env.NODE_ENV === "production"
-        ? "Internal server error"
-        : err.message,
+    message: isProduction ? "Internal server error" : err.message,
+    ...(!isProduction ? { stack: err.stack } : {}),
   });
 }
 

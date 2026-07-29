@@ -1,6 +1,7 @@
 import { Response, NextFunction } from "express";
 import { verifyToken } from "../utils/token";
 import { AuthenticatedRequest } from "../types";
+import { AppError } from "./error-handler";
 
 export function authMiddleware(
   req: AuthenticatedRequest,
@@ -15,10 +16,13 @@ export function authMiddleware(
       : null);
 
   if (!token) {
-    res.status(401).json({
-      success: false,
-      message: "Authentication required",
-    });
+    next(
+      new AppError(
+        "Please sign in to access this resource.",
+        401,
+        "Authentication required - no token found in request cookies or headers"
+      )
+    );
     return;
   }
 
@@ -26,10 +30,14 @@ export function authMiddleware(
     const payload = verifyToken(token);
     req.user = payload;
     next();
-  } catch {
-    res.status(401).json({
-      success: false,
-      message: "Invalid or expired token",
-    });
+  } catch (error) {
+    const detail = error instanceof Error ? error.message : "unknown error";
+    next(
+      new AppError(
+        "Your session has expired. Please sign in again.",
+        401,
+        `Token validation failed: ${detail}`
+      )
+    );
   }
 }

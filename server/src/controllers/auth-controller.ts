@@ -35,7 +35,10 @@ const updateAiConfigSchema = z.object({
 
 /** Set the JWT as an httpOnly cookie on the response. */
 function setTokenCookie(res: Response, token: string): void {
-  const isProduction = process.env.NODE_ENV === "production";
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    !!process.env.VERCEL ||
+    process.env.RENDER === "true";
   res.cookie("token", token, {
     httpOnly: true,
     secure: isProduction,
@@ -46,10 +49,14 @@ function setTokenCookie(res: Response, token: string): void {
 }
 
 function clearTokenCookie(res: Response): void {
+  const isProduction =
+    process.env.NODE_ENV === "production" ||
+    !!process.env.VERCEL ||
+    process.env.RENDER === "true";
   res.clearCookie("token", {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
     path: "/",
   });
 }

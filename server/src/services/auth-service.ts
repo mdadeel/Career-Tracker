@@ -41,13 +41,21 @@ export const authService = {
     });
 
     if (!user) {
-      throw new AppError("Invalid credentials", 401);
+      throw new AppError(
+        "Invalid email or password",
+        401,
+        `Invalid credentials - no user found with email: ${email}`
+      );
     }
 
     const isPasswordValid = await verifyPassword(data.password, user.passwordHash);
 
     if (!isPasswordValid) {
-      throw new AppError("Invalid credentials", 401);
+      throw new AppError(
+        "Invalid email or password",
+        401,
+        "Invalid credentials - incorrect password"
+      );
     }
 
     const token = generateToken({ userId: user.id, email: user.email });
