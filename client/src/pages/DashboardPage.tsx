@@ -44,7 +44,7 @@ function MetricCard({
   return (
     <button
       onClick={onClick}
-      className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4 text-left transition-all duration-200 hover:-translate-y-0.5 hover:border-brand-500/40 hover:shadow-card-hover active:scale-[0.98]"
+      className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4 text-left transition-[border-color,box-shadow,background-color] duration-200 hover:border-brand-500/50 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] hover:shadow-card-hover"
     >
       <div className="flex items-center justify-between mb-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">
@@ -71,7 +71,7 @@ function StageBar({ label, count, total, color }: { label: string; count: number
     <div className="flex items-center gap-3">
       <span className="w-20 shrink-0 text-xs text-ink-secondary dark:text-white/50">{label}</span>
       <div className="flex-1 h-2 rounded-full bg-slate-100 dark:bg-white/[0.06] overflow-hidden">
-        <div className={`h-full rounded-full transition-all duration-500 ${color} hover:scale-y-125 hover:opacity-80`} style={{ width: `${pct}%` }} />
+        <div className={`h-full rounded-full transition-all duration-500 ${color} hover:opacity-80`} style={{ width: `${pct}%` }} />
       </div>
       <span className="w-6 text-right text-xs font-semibold text-ink dark:text-white/70 tabular-nums">{count}</span>
     </div>

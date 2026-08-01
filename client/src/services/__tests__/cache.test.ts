@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { getCached, setCache, invalidateCache } from "../cache";
+import { getCached, setCache, invalidateCache, DEFAULT_TTL } from "../cache";
 
 describe("cache", () => {
   beforeEach(() => {
@@ -22,8 +22,8 @@ describe("cache", () => {
 
   it("returns null for an expired entry", () => {
     setCache("test-key", "some data");
-    // Advance time past the 30s TTL
-    vi.advanceTimersByTime(31_000);
+    // Advance time past the configured TTL
+    vi.advanceTimersByTime(DEFAULT_TTL + 1_000);
     expect(getCached("test-key")).toBeNull();
   });
 

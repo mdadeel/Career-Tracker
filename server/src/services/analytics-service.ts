@@ -67,17 +67,13 @@ export const analyticsService = {
 
     // ── Run all independent queries in parallel ──
     const [
-      total,
       statusRows,
       monthlyRows,
       weeklyRows,
       sourceRows,
       avgRow,
     ] = await Promise.all([
-      // 1. Total count
-      prisma.application.count({ where: { userId } }),
-
-      // 2. Status distribution
+      // 1. Status distribution (total derived from sum)
       prisma.$queryRaw<StatusRow[]>`
         SELECT "status", COUNT(*)::int AS "count"
         FROM "applications"
@@ -175,6 +171,7 @@ export const analyticsService = {
     }
 
     // ── Summary counts ──
+    const total = statusRows.reduce((sum, r) => sum + r.count, 0);
     const interview = statusMap.get("Interview") ?? 0;
     const offer = statusMap.get("Offer") ?? 0;
     const rejected = statusMap.get("Rejected") ?? 0;

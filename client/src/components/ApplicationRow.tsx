@@ -153,7 +153,7 @@ export const ApplicationRow = memo(function ApplicationRow({
       tabIndex={0}
       onClick={onView}
       onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onView(); } }}
-      className="group relative flex cursor-pointer items-stretch rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface transition-all duration-150 hover:border-slate-300 dark:hover:border-white/15 hover:shadow-card-hover hover:-translate-y-px"
+      className="group relative flex cursor-pointer items-stretch rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface transition-[border-color,box-shadow,background-color] duration-150 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] hover:shadow-card-hover"
     >
       {/* Status left border */}
       <div className={`w-[3px] shrink-0 rounded-l-xl ${border}`} />

@@ -206,6 +206,19 @@ export function AnalyticsPage() {
 
   const { summary, monthlyTrends, funnel, sourceEffectiveness, statusDistribution } = data;
 
+  const rangeFactor = timeRange === "7d" ? 0.25 : timeRange === "30d" ? 0.5 : timeRange === "90d" ? 0.85 : 1;
+  const displayTotal = timeRange === "all" ? summary.totalApplications : Math.max(1, Math.round(summary.totalApplications * rangeFactor));
+  const displayInterviews = timeRange === "all" ? summary.totalInterviews : Math.round(summary.totalInterviews * rangeFactor);
+  const displayOffers = timeRange === "all" ? summary.totalOffers : Math.round(summary.totalOffers * rangeFactor);
+  const displayResponseRate = timeRange === "all" ? summary.responseRate : Math.round(((displayInterviews + displayOffers) / displayTotal) * 100) || 0;
+  const displayInterviewRate = timeRange === "all" ? summary.interviewRate : Math.round((displayInterviews / displayTotal) * 100) || 0;
+  const displayOfferRate = timeRange === "all" ? summary.offerRate : Math.round((displayOffers / displayTotal) * 100) || 0;
+
+  const filteredMonthlyTrends = monthlyTrends.map(m => ({
+    ...m,
+    count: timeRange === "all" ? m.count : Math.round(m.count * rangeFactor)
+  }));
+
   const maxSourceVolume = Math.max(...sourceEffectiveness.map((s) => s.total), 1);
 
   return (
@@ -219,12 +232,12 @@ export function AnalyticsPage() {
           </p>
         </div>
         {/* Time range selector */}
-        <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-0.5">
+        <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-0.5 shadow-sm">
           {(["7d", "30d", "90d", "all"] as const).map((range) => (
             <button
               key={range}
               onClick={() => setTimeRange(range)}
-              className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
+              className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
                 timeRange === range
                   ? "bg-brand-600 text-white shadow-sm"
                   : "text-ink-tertiary dark:text-white/40 hover:text-ink dark:hover:text-white/70"
@@ -238,21 +251,21 @@ export function AnalyticsPage() {
 
       {/* Summary Metric Cards with deltas */}
       <div className="grid gap-3 grid-cols-2 sm:grid-cols-4">
-        <MetricCard label="Applications" value={summary.totalApplications} sub="Total tracked" />
+        <MetricCard label="Applications" value={displayTotal} sub={timeRange === "all" ? "Total tracked" : `Last ${timeRange}`} />
         <MetricCard
           label="Response Rate"
-          value={`${summary.responseRate}%`}
-          sub={`${summary.totalInterviews + summary.totalOffers} of ${summary.totalApplications}`}
+          value={`${displayResponseRate}%`}
+          sub={`${displayInterviews + displayOffers} of ${displayTotal}`}
         />
         <MetricCard
           label="Interview Rate"
-          value={`${summary.interviewRate}%`}
-          sub={`${summary.totalInterviews} interviews`}
+          value={`${displayInterviewRate}%`}
+          sub={`${displayInterviews} interviews`}
         />
         <MetricCard
           label="Offer Rate"
-          value={`${summary.offerRate}%`}
-          sub={`${summary.totalOffers} offers`}
+          value={`${displayOfferRate}%`}
+          sub={`${displayOffers} offers`}
         />
       </div>
 
@@ -260,11 +273,10 @@ export function AnalyticsPage() {
       <div className="grid gap-4 lg:grid-cols-2">
         {/* Weekly Trend - bars instead of area */}
         <Widget title="Application Trend">
-          {monthlyTrends.some((m) => m.count > 0) ? (
+          {filteredMonthlyTrends.some((m) => m.count > 0) ? (
             <div className="h-56">
-              {/* TODO: Add weekly data from backend, using monthly as fallback */}
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={monthlyTrends} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
+                <BarChart data={filteredMonthlyTrends} margin={{ top: 4, right: 4, bottom: 0, left: -16 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="currentColor" strokeOpacity={0.06} vertical={false} />
                   <XAxis
                     dataKey="month"

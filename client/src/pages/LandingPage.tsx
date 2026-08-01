@@ -239,12 +239,12 @@ function AsymmetricHero() {
 
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link to="/register">
-                <Button size="lg" icon={<ArrowRight size={16} />} className="shadow-lg shadow-brand-500/20 active:scale-[0.98] transition-all hover:-translate-y-0.5">
+                <Button size="lg" icon={<ArrowRight size={16} />} className="shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30">
                   Start Tracking Free
                 </Button>
               </Link>
               <a href="#sandbox">
-                <Button variant="secondary" size="lg" icon={<Lightning size={16} />} className="active:scale-[0.98] transition-all">
+                <Button variant="secondary" size="lg" icon={<Lightning size={16} />}>
                   Try Interactive Demo
                 </Button>
               </a>

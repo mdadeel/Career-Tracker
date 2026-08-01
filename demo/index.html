@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CareerTrack — UI/UX Concept Gallery</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,600&family=Sora:wght@400;600;700;800&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --ease-inout: cubic-bezier(0.77, 0, 0.175, 1);
+    --bg: #0a0f1a;
+    --ink: #e6ebf4;
+    --muted: #8b94ab;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: "Instrument Sans", sans-serif;
+    background:
+      radial-gradient(900px 500px at 85% -10%, rgba(99,102,241,0.22), transparent 60%),
+      radial-gradient(800px 500px at 0% 20%, rgba(139,92,246,0.14), transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body::after {
+    content: "";
+    position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 24px 96px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 7px 14px; border-radius: 999px;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase;
+    color: #a5b4fc; background: rgba(99,102,241,0.12);
+    border: 1px solid rgba(129,140,248,0.25);
+  }
+  .eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: #818cf8; box-shadow: 0 0 12px #818cf8; }
+  h1 {
+    margin-top: 22px;
+    font-family: "Sora", sans-serif;
+    font-size: clamp(34px, 6vw, 60px);
+    line-height: 1.05; font-weight: 700; letter-spacing: -0.03em;
+  }
+  h1 em { font-style: normal; background: linear-gradient(100deg, #a5b4fc, #e879f9); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lede { margin-top: 18px; max-width: 620px; color: var(--muted); font-size: 16px; line-height: 1.7; }
+  .grid { margin-top: 48px; display: grid; gap: 20px; }
+  @media (min-width: 900px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+  .card {
+    position: relative; display: flex; flex-direction: column;
+    border-radius: 24px; padding: 24px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.055), rgba(255,255,255,0.02));
+    border: 1px solid rgba(255,255,255,0.09);
+    text-decoration: none; color: inherit;
+    transition: transform 0.45s var(--ease-out), border-color 0.3s ease, background 0.3s ease;
+    overflow: hidden;
+  }
+  .card:hover { transform: translateY(-6px); border-color: rgba(129,140,248,0.45); background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03)); }
+  .card::before {
+    content: ""; position: absolute; inset: 0; border-radius: 24px; opacity: 0; transition: opacity 0.4s ease;
+    background: radial-gradient(400px 200px at 20% 0%, rgba(129,140,248,0.18), transparent 65%);
+  }
+  .card:hover::before { opacity: 1; }
+  .num { position: absolute; top: 18px; right: 20px; font-family: "JetBrains Mono", monospace; font-size: 12px; color: rgba(165,180,252,0.6); letter-spacing: 0.08em; }
+  .icon {
+    width: 46px; height: 46px; border-radius: 14px; display: grid; place-items: center;
+    font-size: 20px; background: rgba(99,102,241,0.14); border: 1px solid rgba(129,140,248,0.3);
+  }
+  .card:nth-child(2) .icon { background: rgba(236,72,153,0.12); border-color: rgba(244,114,182,0.3); }
+  .card:nth-child(3) .icon { background: rgba(16,185,129,0.12); border-color: rgba(52,211,153,0.3); }
+  h2 { margin-top: 20px; font-family: "Sora", sans-serif; font-size: 19px; font-weight: 700; letter-spacing: -0.01em; }
+  .tag { margin-top: 8px; font-size: 11px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: #a5b4fc; }
+  p.desc { margin-top: 10px; font-size: 13.5px; line-height: 1.65; color: var(--muted); flex: 1; }
+  .cta { margin-top: 20px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: #c7d2fe; }
+  .cta .arr { transition: transform 0.25s var(--ease-out); }
+  .card:hover .cta .arr { transform: translateX(4px); }
+  .footer { margin-top: 56px; display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; color: var(--muted); }
+  .chip { padding: 6px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.03); }
+  .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.7s var(--ease-out), transform 0.7s var(--ease-out); }
+  .reveal.in { opacity: 1; transform: none; }
+</style>
+</head>
+<body>
+  <main class="wrap">
+    <span class="eyebrow reveal in"><span class="dot"></span>CareerTrack · Design Exploration</span>
+    <h1 class="reveal">Three directions for the <em>next</em> frontend.</h1>
+    <p class="lede reveal">Fresh standalone HTML concepts, rebuilt around the real CareerTrack feature set — dashboards, pipelines, analytics, calendars, and AI matching. Each page is a self-contained prototype with a distinct art direction. Open them in your browser and click around.</p>
+
+    <div class="grid">
+      <a class="card reveal" href="dashboard.html" style="transition-delay:0.05s">
+        <span class="num">01</span>
+        <span class="icon">✦</span>
+        <span class="tag">Ethereal Glass · Dark</span>
+        <h2>Halo Dashboard</h2>
+        <p class="desc">An OLED-black command surface. Floating glass island nav, bento stat grid with live count-ups, animated pipeline bars, upcoming interviews, a working Cmd+K palette, and a mouse-tracked glow.</p>
+        <span class="cta">Open concept <span class="arr">→</span></span>
+      </a>
+
+      <a class="card reveal" href="applications.html" style="transition-delay:0.12s">
+        <span class="num">02</span>
+        <span class="icon">✎</span>
+        <span class="tag">Editorial · Light</span>
+        <h2>The Ledger</h2>
+        <p class="desc">A warm, magazine-grade applications workspace. Serif display type, live search + status filter chips with counts, an expanding row detail drawer, and a modal "Add Application" form.</p>
+        <span class="cta">Open concept <span class="arr">→</span></span>
+      </a>
+
+      <a class="card reveal" href="analytics.html" style="transition-delay:0.19s">
+        <span class="num">03</span>
+        <span class="icon">◒</span>
+        <span class="tag">Command Center · Dark</span>
+        <h2>Pulse Analytics</h2>
+        <p class="desc">A dense intelligence terminal. Hand-rolled SVG area chart with draw-in animation, animated funnel, status donut, source effectiveness bars, and a working 7d/30d/90d/all range switcher.</p>
+        <span class="cta">Open concept <span class="arr">→</span></span>
+      </a>
+    </div>
+
+    <div class="footer">
+      <span class="chip">6 statuses</span>
+      <span class="chip">7 sources</span>
+      <span class="chip">AI match scores</span>
+      <span class="chip">Calendar + interviews</span>
+      <span class="chip">0 build step — just open the files</span>
+    </div>
+  </main>
+
+<script>
+  const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && e.target.classList.add("in")), { threshold: 0.15 });
+  document.querySelectorAll(".reveal:not(.in)").forEach((el) => io.observe(el));
+  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) document.querySelectorAll(".reveal").forEach((el) => el.classList.add("in"));
+</script>
+</body>
+</html>

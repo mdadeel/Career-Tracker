@@ -60,7 +60,7 @@ function PipelineCard({ app, isDragging }: { app: Application; isDragging?: bool
         e.stopPropagation();
         navigate(`/applications?id=${app.id}`);
       }}
-      className={`rounded-xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5 cursor-grab active:cursor-grabbing transition-all hover:border-slate-300 dark:hover:border-white/20 hover:shadow-card-hover hover:-translate-y-0.5 ${
+      className={`rounded-xl border border-slate-200/80 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5 cursor-grab active:cursor-grabbing transition-[border-color,box-shadow,background-color] duration-150 hover:border-slate-300 dark:hover:border-white/20 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] hover:shadow-card-hover ${
         isDragging ? "shadow-elevated ring-2 ring-brand-500/30" : ""
       }`}
     >

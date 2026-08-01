@@ -18,13 +18,8 @@ export const resumeService = {
       },
     });
 
-    // Generate signed URLs in parallel
-    return Promise.all(
-      resumes.map(async (r) => ({
-        ...r,
-        fileUrl: r.s3Key ? await getS3SignedUrl(r.s3Key) : null,
-      }))
-    );
+    // No signed URL generation here — lazy-load via getById on download click
+    return resumes.map((r) => ({ ...r, fileUrl: null }));
   },
 
   async getById(id: string, userId: string) {

@@ -108,6 +108,12 @@ export function CalendarPage() {
   }, [appsByDate]);
 
   const [calendarView, setCalendarView] = useState<"month" | "agenda">("month");
+  const [activeStageFilter, setActiveStageFilter] = useState<string | null>(null);
+
+  const toggleStageFilter = (status: string) => {
+    setActiveStageFilter((prev) => (prev === status ? null : status));
+  };
+
   const goToToday = () => setViewDate(new Date(today.getFullYear(), today.getMonth(), 1));
 
   const getEventIcon = (status: string) => {
@@ -164,8 +170,8 @@ export function CalendarPage() {
 
       <div className="grid gap-5 lg:grid-cols-[1fr_280px]">
         {/* Calendar Grid */}
-        <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface overflow-hidden">
-          {/* Header */}
+        <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface overflow-hidden shadow-sm">
+          {/* Month Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border">
             <button onClick={prevMonth} className="rounded-lg p-1 text-ink-tertiary dark:text-white/40 hover:bg-surface-tertiary dark:hover:bg-white/5 transition-colors">
               <CaretLeft size={16} />
@@ -176,14 +182,26 @@ export function CalendarPage() {
             </button>
           </div>
 
-          {/* Color legend */}
-          <div className="flex flex-wrap gap-3 px-4 py-2 border-b border-slate-100 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">
-            {Object.entries(STATUS_PILL_STYLES).map(([status]) => (
-              <span key={status} className="inline-flex items-center gap-1 text-[10px] text-ink-tertiary dark:text-white/50">
-                <span className={`h-2 w-2 rounded-full ${STATUS_PILL_STYLES[status].split(" ")[0]}`} />
-                {status}
-              </span>
-            ))}
+          {/* Interactive Stage Legend */}
+          <div className="flex flex-wrap items-center gap-2 px-4 py-2.5 border-b border-slate-100 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">
+            <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40 mr-1">Filter Stage:</span>
+            {Object.entries(STATUS_PILL_STYLES).map(([status]) => {
+              const isActive = activeStageFilter === status;
+              return (
+                <button
+                  key={status}
+                  onClick={() => toggleStageFilter(status)}
+                  className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium transition-all ${
+                    isActive
+                      ? "ring-2 ring-brand-500 bg-brand-500 text-white"
+                      : "text-ink-tertiary dark:text-white/60 hover:bg-slate-200/60 dark:hover:bg-white/10"
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${isActive ? "bg-white" : STATUS_PILL_STYLES[status].split(" ")[0]}`} />
+                  {status}
+                </button>
+              );
+            })}
           </div>
 
           {/* Weekday headers */}
@@ -198,49 +216,55 @@ export function CalendarPage() {
           {/* Days grid */}
           <div className="grid grid-cols-7">
             {days.map((day, i) => {
-              if (day === null) return <div key={`e-${i}`} className="aspect-square" />;
-              const apps = appsByDate.get(day) || [];
+              if (day === null) return <div key={`e-${i}`} className="aspect-square bg-slate-50/30 dark:bg-white/[0.01]" />;
+              const rawApps = appsByDate.get(day) || [];
+              const apps = activeStageFilter ? rawApps.filter(a => a.status === activeStageFilter) : rawApps;
               const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
               const isPast = new Date(year, month, day) < new Date(new Date().toDateString());
+              
+              const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
               return (
                 <div
                   key={day}
-                  className={`aspect-square border-b border-r border-slate-100 dark:border-dark-border p-1 transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.02] ${
-                    isToday ? "bg-brand-50 dark:bg-brand-500/10" : ""
-                  } ${isPast ? "opacity-40" : ""}`}
+                  onClick={() => navigate(`/applications/new?date=${dateStr}`)}
+                  className={`group relative aspect-square border-b border-r border-slate-100 dark:border-dark-border p-1.5 transition-colors cursor-pointer hover:bg-brand-50/40 dark:hover:bg-brand-500/5 ${
+                    isToday ? "bg-brand-50/70 dark:bg-brand-500/10" : ""
+                  } ${isPast ? "opacity-60" : ""}`}
                 >
-                  <div className="flex items-center justify-center">
+                  <div className="flex items-center justify-between">
                     <span
-                      className={`flex h-6 w-6 items-center justify-center rounded-full text-xs ${
+                      className={`flex h-5 w-5 items-center justify-center rounded-full text-[11px] ${
                         isToday
-                          ? "bg-brand-600 text-white font-semibold"
-                          : isPast
-                          ? "text-slate-300 dark:text-white/30"
-                          : "text-ink dark:text-white/70"
+                          ? "bg-brand-600 text-white font-bold shadow-xs"
+                          : "text-ink dark:text-white/70 font-medium"
                       }`}
                     >
                       {day}
                     </span>
+                    <span className="opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold text-brand-600 dark:text-brand-400">
+                      +
+                    </span>
                   </div>
                   {apps.length > 0 && (
-                    <div className="mt-0.5 space-y-0.5">
-                      {apps.slice(0, 2).map((app) => {
-                    const isPast = new Date(app.interviewDate || app.applicationDate) < new Date(new Date().toDateString());
-                    return (
-                      <button
-                        key={app.id}
-                        onClick={() => navigate(`/applications?id=${app.id}`)}
-                        className={`w-full truncate rounded px-1 py-0.5 text-[9px] font-medium text-left transition-colors flex items-center gap-1 ${
-                          STATUS_PILL_STYLES[app.status] || STATUS_PILL_STYLES.Saved
-                        } ${isPast ? "opacity-50" : ""}`}
-                      >
-                        <span className="shrink-0">{getEventIcon(app.status)}</span>
-                        <span className="truncate">{app.companyName}</span>
-                      </button>
-                    );
-                  })}
+                    <div className="mt-1 space-y-0.5">
+                      {apps.slice(0, 2).map((app) => (
+                        <button
+                          key={app.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/applications?id=${app.id}`);
+                          }}
+                          className={`w-full truncate rounded px-1.5 py-0.5 text-[9px] font-medium text-left transition-colors flex items-center gap-1 ${
+                            STATUS_PILL_STYLES[app.status] || STATUS_PILL_STYLES.Saved
+                          }`}
+                        >
+                          <span className="shrink-0">{getEventIcon(app.status)}</span>
+                          <span className="truncate">{app.companyName}</span>
+                        </button>
+                      ))}
                       {apps.length > 2 && (
-                        <p className="text-[9px] text-ink-tertiary dark:text-white/40 pl-1">+{apps.length - 2} more</p>
+                        <p className="text-[9px] text-ink-tertiary dark:text-white/40 pl-1 font-mono">+{apps.length - 2} more</p>
                       )}
                     </div>
                   )}

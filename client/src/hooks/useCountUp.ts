@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 
 export function useCountUp(end: number, duration = 1200, enabled = true) {
-  const [value, setValue] = useState(0);
-  const startTime = useRef<number | null>(null);
+  const [value, setValue] = useState(end);
+  const prevEnd = useRef(end);
   const raf = useRef<number>(0);
 
   useEffect(() => {
@@ -11,14 +11,17 @@ export function useCountUp(end: number, duration = 1200, enabled = true) {
       return;
     }
 
-    startTime.current = null;
+    if (end === prevEnd.current) return;
+    prevEnd.current = end;
+
+    const from = value;
+    const startTime = performance.now();
 
     const step = (timestamp: number) => {
-      if (!startTime.current) startTime.current = timestamp;
-      const elapsed = timestamp - startTime.current;
+      const elapsed = timestamp - startTime;
       const progress = Math.min(elapsed / duration, 1);
       const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(eased * end));
+      setValue(Math.round(from + eased * (end - from)));
       if (progress < 1) {
         raf.current = requestAnimationFrame(step);
       }

@@ -134,7 +134,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:shadow-indigo-500/20 transition-all cursor-pointer group shrink-0"
         >
           <span>Open Full Page</span>
-          <ArrowUpRight size={14} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          <ArrowUpRight size={14} />
         </button>
       </div>
 

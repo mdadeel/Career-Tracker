@@ -2,11 +2,9 @@ import { useState, useRef, useEffect, Suspense, type ReactNode } from "react";
 import { Link, useLocation, Outlet, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useTheme } from "../../hooks/useTheme";
-import { useApplications } from "../../hooks/useApplications";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { CommandPalette } from "../CommandPalette";
 import { LogoFull } from "./Logo";
-import { SparkleIcon } from "./SparkleIcon";
 import {
   SquaresFour, StackSimple, ChartBar, Calendar, FileText,
   Gear, SignOut, Sun, Moon, CaretDown, List,
@@ -59,14 +57,10 @@ export function SidebarLayout() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { applications } = useApplications();
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showAiMenu, setShowAiMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
-  const aiMenuRef = useRef<HTMLDivElement>(null);
 
   // Close user menu on click outside
   useEffect(() => {
@@ -79,20 +73,6 @@ export function SidebarLayout() {
     document.addEventListener("mousedown", handleClick);
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showUserMenu]);
-
-  // Close AI menu on click outside
-  useEffect(() => {
-    if (!showAiMenu) return;
-    const handleClick = (e: MouseEvent) => {
-      if (aiMenuRef.current && !aiMenuRef.current.contains(e.target as Node)) {
-        setShowAiMenu(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [showAiMenu]);
-
-  const recentAppsForAi = applications.slice(0, 5);
 
   return (
     <div className="flex min-h-screen bg-surface-secondary dark:bg-dark">
@@ -240,54 +220,6 @@ export function SidebarLayout() {
             </div>
           </ErrorBoundary>
         </main>
-
-        {/* AI Copilot floating button + popup */}
-        <div ref={aiMenuRef} className="fixed bottom-6 right-6 z-40">
-          <button
-            onClick={() => setShowAiMenu(!showAiMenu)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-brand-600 text-white shadow-lg shadow-indigo-500/20 transition-all duration-200 hover:scale-110 hover:shadow-xl hover:shadow-indigo-500/30 active:scale-95"
-            title="AI Copilot"
-          >
-            <SparkleIcon className="h-[18px] w-[18px] text-white" />
-          </button>
-          {showAiMenu && (
-            <div className="absolute bottom-full right-0 mb-3 w-64 rounded-xl border border-white/[0.08] bg-[#161b2e] py-1.5 shadow-xl overflow-hidden">
-              <div className="px-3 py-2 border-b border-white/[0.06]">
-                <p className="text-xs font-semibold text-white/85">AI Copilot</p>
-                <p className="text-[10px] text-white/40">Select an application</p>
-              </div>
-              {recentAppsForAi.length > 0 ? (
-                <div className="max-h-60 overflow-y-auto">
-                  {recentAppsForAi.map((app) => (
-                    <button
-                      key={app.id}
-                      onClick={() => { setShowAiMenu(false); navigate(`/applications/${app.id}/copilot`); }}
-                      className="flex w-full items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-white/[0.05]"
-                    >
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-indigo-500/20 text-[10px] font-bold text-indigo-400">
-                        {app.companyName.charAt(0)}
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-xs font-medium text-white/80">{app.jobTitle}</p>
-                        <p className="truncate text-[10px] text-white/40">{app.companyName}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              ) : (
-                <div className="px-3 py-4 text-center">
-                  <p className="text-xs text-white/50">No applications yet</p>
-                  <button
-                    onClick={() => { setShowAiMenu(false); navigate("/applications/new"); }}
-                    className="mt-2 text-[11px] font-semibold text-indigo-400 hover:text-indigo-300"
-                  >
-                    Add your first application
-                  </button>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
       </div>
 
       {/* Command Palette */}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { analyticsService } from "../services/analyticsService";
 import { getCached } from "../services/cache";
 import type { AnalyticsData } from "../types/analytics";
@@ -8,9 +8,13 @@ export function useAnalytics() {
   const [data, setData] = useState<AnalyticsData | null>(cached);
   const [isLoading, setIsLoading] = useState(!cached);
   const [error, setError] = useState<string | null>(null);
+  const hasCached = useRef(!!cached);
 
   const fetchStats = useCallback(async () => {
-    setIsLoading(true);
+    if (!hasCached.current) {
+      setIsLoading(true);
+    }
+    hasCached.current = true;
     setError(null);
     try {
       const result = await analyticsService.getStats();

@@ -9,8 +9,8 @@ function getDatabaseUrl(): string | undefined {
   const url = process.env.DATABASE_URL;
   if (!url) return undefined;
 
-  const poolConfig = process.env.PRISMA_POOL_SIZE;
-  if (!poolConfig) return url;
+  // Default pool size: 5 for Neon serverless, configurable via PRISMA_POOL_SIZE
+  const poolConfig = process.env.PRISMA_POOL_SIZE || "5";
 
   // Only inject if connection_limit isn't already set
   if (url.includes("connection_limit=")) return url;
@@ -22,7 +22,7 @@ function getDatabaseUrl(): string | undefined {
 /** Determine log level based on environment. */
 function getLogLevel(): LogLevel[] {
   if (process.env.NODE_ENV === "development") {
-    return ["warn", "error"];
+    return ["warn", "error", "query"];
   }
   return ["error"];
 }

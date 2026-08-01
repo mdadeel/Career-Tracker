@@ -45,6 +45,7 @@ export function useApplications(options?: UseApplicationsOptions) {
   );
   const [isLoading, setIsLoading] = useState(!initialCached);
   const [error, setError] = useState<string | null>(null);
+  const hasCached = useRef(!!initialCached);
   const [total, setTotal] = useState(initialCached?.total ?? 0);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(initialCached?.totalPages ?? 1);
@@ -85,7 +86,10 @@ export function useApplications(options?: UseApplicationsOptions) {
   const fetchApplications = useCallback(async () => {
     const currentFilters = { search: searchDebounced, statusFilter, sourceFilter, sortBy };
 
-    setIsLoading(true);
+    if (!hasCached.current) {
+      setIsLoading(true);
+    }
+    hasCached.current = true;
     setError(null);
     try {
       // Auto-reset to page 1 when filters change

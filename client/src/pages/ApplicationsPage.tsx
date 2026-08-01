@@ -473,7 +473,7 @@ export function ApplicationsPage() {
         /* Applications List */
         <div className="space-y-1.5">
           {/* Column headers - hidden on mobile */}
-          <div className="hidden md:flex items-center gap-3 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">
+          <div className="hidden md:flex items-center gap-3 px-3 py-2 rounded-lg bg-slate-200/50 dark:bg-dark-surface/60 border border-slate-200 dark:border-dark-border/60 text-[10px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40 mb-1">
             <div className="w-[45px] shrink-0" />
             <div className="flex-1 min-w-0 pl-2">Role</div>
             <div className="w-24 shrink-0 text-center">Status</div>

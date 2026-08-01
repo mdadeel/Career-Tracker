@@ -24,7 +24,7 @@ export function Card({
       onClick={onClick}
       className={`
         rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface shadow-card
-        ${hover ? "transition-all duration-150 hover:shadow-card-hover hover:border-slate-300 dark:hover:border-white/20" : ""}
+        ${hover ? "transition-[border-color,box-shadow,background-color] duration-150 hover:shadow-card-hover hover:border-slate-300 dark:hover:border-white/20" : ""}
         ${onClick ? "cursor-pointer text-left w-full" : ""}
         ${className}
       `.trim()}

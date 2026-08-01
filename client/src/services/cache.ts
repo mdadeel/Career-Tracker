@@ -7,7 +7,7 @@ interface CacheEntry {
 }
 
 const store = new Map<string, CacheEntry>();
-const DEFAULT_TTL = 30_000; // 30 seconds
+export const DEFAULT_TTL = 1_800_000; // 30 minutes — cross-navigation persistence
 
 /* ── BroadcastChannel for cross-tab invalidation ── */
 let channel: BroadcastChannel | null = null;
