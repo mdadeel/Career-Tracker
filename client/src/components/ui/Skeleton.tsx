@@ -3,6 +3,8 @@ interface SkeletonProps {
   variant?: "text" | "circular" | "rectangular";
   width?: string | number;
   height?: string | number;
+  /** Render with aria-busy semantics instead of purely decorative aria-hidden. */
+  busy?: boolean;
 }
 
 export function Skeleton({
@@ -10,6 +12,7 @@ export function Skeleton({
   variant = "text",
   width,
   height,
+  busy = false,
 }: SkeletonProps) {
   const baseClass = "animate-pulse bg-slate-200 dark:bg-white/[0.06]";
 
@@ -24,7 +27,8 @@ export function Skeleton({
       className={`${baseClass} ${variants[variant]} ${className}`}
       style={{ width, height }}
       role="presentation"
-      aria-hidden="true"
+      aria-hidden={!busy}
+      aria-busy={busy ? "true" : undefined}
     />
   );
 }

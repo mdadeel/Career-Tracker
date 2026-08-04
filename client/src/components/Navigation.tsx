@@ -57,12 +57,13 @@ export function Navigation() {
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-slate-200/80 bg-white/90 dark:border-dark-border dark:bg-dark/85 backdrop-blur-md">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
+      {/* Only the link group is <nav> per the header-navbar pattern; brand + actions stay outside */}
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3.5 lg:px-8">
         <Link to="/" className="flex items-center">
           <LogoFull size={28} showSubtitle />
         </Link>
 
-        <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
+        <nav aria-label="Main" className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 md:flex">
           {navLinks.map((l) => (
             <a
               key={l.href}
@@ -73,7 +74,7 @@ export function Navigation() {
               {l.label}
             </a>
           ))}
-        </div>
+        </nav>
 
         <div className="hidden items-center gap-3 md:flex">
           {isLoggedIn ? (
@@ -102,13 +103,15 @@ export function Navigation() {
           className="text-ink dark:text-white/80 md:hidden"
           onClick={() => setOpen((v) => !v)}
           aria-label="Toggle menu"
+          aria-expanded={open}
+          aria-controls="mobile-nav"
         >
           {open ? <X size={22} /> : <List size={22} />}
         </button>
-      </nav>
+      </div>
 
       {open && (
-        <div className="animate-fade-in border-t border-slate-200 bg-white px-5 py-4 md:hidden dark:border-dark-border dark:bg-dark">
+        <nav id="mobile-nav" aria-label="Mobile" className="animate-fade-in border-t border-slate-200 bg-white px-5 py-4 md:hidden dark:border-dark-border dark:bg-dark">
           <div className="flex flex-col gap-1">
             {navLinks.map((l) => (
               <a
@@ -146,7 +149,7 @@ export function Navigation() {
               )}
             </div>
           </div>
-        </div>
+        </nav>
       )}
     </header>
   );

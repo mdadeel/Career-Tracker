@@ -107,6 +107,16 @@
   .text-pretty {
     text-wrap: pretty;
   }
+
+  /* Native <dialog> backdrop — the scrim behind modal dialogs */
+  dialog::backdrop {
+    background: rgba(15, 23, 42, 0.4);
+    backdrop-filter: blur(4px);
+  }
+
+  .dark dialog::backdrop {
+    background: rgba(0, 0, 0, 0.6);
+  }
 }
 
 @layer utilities {
@@ -116,6 +126,18 @@
   }
 
   .font-display {
-    font-family: 'Inter', 'Geist', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Geist', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  }
+}
+
+/* Respect reduced-motion preferences for animations */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

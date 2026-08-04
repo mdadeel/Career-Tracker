@@ -3,22 +3,29 @@ import { forwardRef, type SelectHTMLAttributes } from "react";
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label?: string;
   error?: string;
+  helperText?: string;
   options: readonly { value: string; label: string }[];
   placeholder?: string;
 }
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
-  ({ label, error, options, placeholder, className = "", id, ...props }, ref) => {
+  ({ label, error, helperText, options, placeholder, className = "", id, ...props }, ref) => {
     const selectId = id || label?.toLowerCase().replace(/\s+/g, "-");
+    const helperId = `${selectId}-helper`;
+    const errorId = `${selectId}-error`;
+    const describedBy = [error ? errorId : null, helperText && !error ? helperId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
     return (
       <div className="space-y-1.5">
         {label && (
           <label
             htmlFor={selectId}
-            className="block text-label uppercase tracking-wider text-ink-secondary"
+            className="block text-label uppercase tracking-wider text-ink-secondary dark:text-white/60"
           >
             {label}
+            {props.required && <span className="ml-1 text-rose-400" aria-hidden="true">*</span>}
           </label>
         )}
         <select
@@ -33,6 +40,8 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             disabled:cursor-not-allowed disabled:opacity-50
             ${className}
           `.trim()}
+          aria-invalid={error ? "true" : undefined}
+          aria-describedby={describedBy}
           {...props}
         >
           {placeholder && (
@@ -46,11 +55,15 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
             </option>
           ))}
         </select>
-        {error && (
-          <p className="text-caption text-rose-500" role="alert">
+        {error ? (
+          <p id={errorId} className="text-caption text-rose-500" role="alert">
             {error}
           </p>
-        )}
+        ) : helperText ? (
+          <p id={helperId} className="text-caption text-ink-tertiary dark:text-white/40">
+            {helperText}
+          </p>
+        ) : null}
       </div>
     );
   }

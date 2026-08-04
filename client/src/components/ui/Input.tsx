@@ -5,23 +5,29 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   error?: string;
   helperText?: string;
   icon?: ReactNode;
+  /** Slot rendered inside the field on the right (e.g. show-password toggle). */
+  trailing?: ReactNode;
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, helperText, icon, className = "", id, ...props }, ref) => {
+  ({ label, error, helperText, icon, trailing, className = "", id, ...props }, ref) => {
     const inputId = id || label?.toLowerCase().replace(/\s+/g, "-");
+    const helperId = `${inputId}-helper`;
+    const errorId = `${inputId}-error`;
+    // Link helper text AND error message to the input via aria-describedby
+    const describedBy = [error ? errorId : null, helperText && !error ? helperId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
     return (
       <div className="space-y-1.5">
         {label && (
           <label
             htmlFor={inputId}
-            className="block text-label uppercase tracking-wider text-ink-secondary"
+            className="block text-label uppercase tracking-wider text-ink-secondary dark:text-white/60"
           >
             {label}
-            {props.required && (
-              <span className="ml-1 text-rose-400">*</span>
-            )}
+            {props.required && <span className="ml-1 text-rose-400" aria-hidden="true">*</span>}
           </label>
         )}
         <div className="relative">
@@ -44,21 +50,26 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                   : "border-slate-300 dark:border-dark-border focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20"
               }
               ${icon ? "pl-10" : ""}
+              ${trailing ? "pr-10" : ""}
               ${className}
             `.trim()}
             aria-invalid={error ? "true" : undefined}
-            aria-describedby={error ? `${inputId}-error` : undefined}
+            aria-describedby={describedBy}
             {...props}
           />
+          {trailing && (
+            <div className="absolute inset-y-0 right-0 flex items-center pr-2.5">{trailing}</div>
+          )}
         </div>
-        {error && (
-          <p id={`${inputId}-error`} className="text-caption text-rose-500" role="alert">
+        {error ? (
+          <p id={errorId} className="text-caption text-rose-500" role="alert">
             {error}
           </p>
-        )}
-        {helperText && !error && (
-          <p className="text-caption text-ink-tertiary">{helperText}</p>
-        )}
+        ) : helperText ? (
+          <p id={helperId} className="text-caption text-ink-tertiary dark:text-white/40">
+            {helperText}
+          </p>
+        ) : null}
       </div>
     );
   }

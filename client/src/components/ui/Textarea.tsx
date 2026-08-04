@@ -3,13 +3,19 @@ import { forwardRef, type TextareaHTMLAttributes } from "react";
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label?: string;
   error?: string;
+  helperText?: string;
   showCharCount?: boolean;
   maxLength?: number;
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ label, error, showCharCount, maxLength, className = "", id, value, ...props }, ref) => {
+  ({ label, error, helperText, showCharCount, maxLength, className = "", id, value, ...props }, ref) => {
     const textareaId = id || label?.toLowerCase().replace(/\s+/g, "-");
+    const helperId = `${textareaId}-helper`;
+    const errorId = `${textareaId}-error`;
+    const describedBy = [error ? errorId : null, helperText && !error ? helperId : null]
+      .filter(Boolean)
+      .join(" ") || undefined;
     const charCount = typeof value === "string" ? value.length : 0;
 
     return (
@@ -17,9 +23,10 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         {label && (
           <label
             htmlFor={textareaId}
-            className="block text-label uppercase tracking-wider text-ink-secondary"
+            className="block text-label uppercase tracking-wider text-ink-secondary dark:text-white/60"
           >
             {label}
+            {props.required && <span className="ml-1 text-rose-400" aria-hidden="true">*</span>}
           </label>
         )}
         <div className="relative">
@@ -40,20 +47,25 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
               ${className}
             `.trim()}
             aria-invalid={error ? "true" : undefined}
+            aria-describedby={describedBy}
             maxLength={maxLength}
             {...props}
           />
         </div>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-2">
           {error ? (
-            <p className="text-caption text-rose-500" role="alert">
+            <p id={errorId} className="text-caption text-rose-500" role="alert">
               {error}
+            </p>
+          ) : helperText ? (
+            <p id={helperId} className="text-caption text-ink-tertiary dark:text-white/40">
+              {helperText}
             </p>
           ) : (
             <span />
           )}
           {showCharCount && (
-            <p className="text-caption text-ink-tertiary">
+            <p className="text-caption text-ink-tertiary dark:text-white/40" aria-live="polite">
               {charCount}{maxLength ? ` / ${maxLength}` : ""}
             </p>
           )}

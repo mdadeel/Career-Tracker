@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Button } from "./Button";
 
 interface DialogProps {
@@ -16,9 +16,13 @@ interface DialogProps {
   cancelLabel?: string;
 }
 
-const FOCUSABLE_SELECTOR =
-  'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
+/**
+ * Canonical modal dialog built on the native <dialog> element.
+ * - opened with showModal() → browser top layer, inert page behind, ::backdrop scrim
+ * - Escape closes natively via the `cancel` event
+ * - focus is returned to the invoking control on close
+ * - body scroll is locked while open
+ */
 export function Dialog({
   open,
   onClose,
@@ -28,94 +32,90 @@ export function Dialog({
   action,
   cancelLabel = "Cancel",
 }: DialogProps) {
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Body scroll lock + focus trap + Escape key
+  // Open/close the native dialog and lock body scroll
   useEffect(() => {
-    if (!open) return;
-
-    previousFocusRef.current = document.activeElement as HTMLElement;
-    document.body.style.overflow = "hidden";
-
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", handleEscape);
-
-    // Focus the first focusable element inside the dialog
-    requestAnimationFrame(() => {
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-      const firstFocusable = dialog.querySelector(FOCUSABLE_SELECTOR) as HTMLElement;
-      firstFocusable?.focus();
-    });
-
-    return () => {
-      document.body.style.overflow = "";
-      document.removeEventListener("keydown", handleEscape);
-      previousFocusRef.current?.focus();
-    };
-  }, [open, onClose]);
-
-  // Focus trap — cycle focus within the dialog
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key !== "Tab") return;
     const dialog = dialogRef.current;
     if (!dialog) return;
 
-    const focusable = dialog.querySelectorAll(FOCUSABLE_SELECTOR);
-    if (focusable.length === 0) return;
-
-    const first = focusable[0] as HTMLElement;
-    const last = focusable[focusable.length - 1] as HTMLElement;
-
-    if (e.shiftKey) {
-      if (document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      if (typeof dialog.showModal === "function" && !dialog.open) {
+        dialog.showModal();
+      } else {
+        dialog.setAttribute("open", "");
       }
-    } else {
-      if (document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
+      document.body.style.overflow = "hidden";
+    } else if (dialog.open) {
+      dialog.close();
+      document.body.style.overflow = "";
+      previousFocusRef.current?.focus();
     }
-  }, []);
 
-  if (!open) return null;
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  // Native Escape handling — the dialog fires `cancel`, which we let close it, then sync state.
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const handleCancel = (e: Event) => {
+      // Let the native dialog close; keep parent state in sync
+      e.preventDefault();
+      dialog.close();
+      onClose();
+    };
+    dialog.addEventListener("cancel", handleCancel);
+    return () => dialog.removeEventListener("cancel", handleCancel);
+  }, [onClose]);
+
+  // Light-dismiss on scrim (::backdrop) click — native dialogs don't do this automatically.
+  // Only dismiss when the click lands outside the dialog box itself (bounding-rect check).
+  const handleClick = (e: React.MouseEvent<HTMLDialogElement>) => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    const rect = dialog.getBoundingClientRect();
+    const inBox =
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom;
+    if (!inBox) onClose();
+  };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={title}>
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-fade-in"
-        onClick={onClose}
-      />
-      <div
-        ref={dialogRef}
-        onKeyDown={handleKeyDown}
-        className="relative w-full max-w-md animate-scale-in rounded-2xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-6 shadow-dialog"
-      >
-        <h3 className="text-heading text-ink dark:text-white/90">{title}</h3>
-        {description && (
-          <p className="mt-1.5 text-body text-ink-secondary dark:text-white/50">{description}</p>
-        )}
-        {children && <div className="mt-4">{children}</div>}
-        <div className="mt-6 flex items-center justify-end gap-3">
-          <Button variant="secondary" onClick={onClose}>
-            {cancelLabel}
+    <dialog
+      ref={dialogRef}
+      onClick={handleClick}
+      aria-label={title}
+      className="
+        m-auto w-full max-w-md rounded-2xl border border-slate-200 dark:border-dark-border
+        bg-white dark:bg-dark-surface p-6 shadow-dialog open:animate-scale-in
+      "
+    >
+      <h3 className="text-heading text-ink dark:text-white/90">{title}</h3>
+      {description && (
+        <p className="mt-1.5 text-body text-ink-secondary dark:text-white/50">{description}</p>
+      )}
+      {children && <div className="mt-4">{children}</div>}
+      <div className="mt-6 flex items-center justify-end gap-3">
+        <Button variant="secondary" onClick={onClose}>
+          {cancelLabel}
+        </Button>
+        {action && (
+          <Button
+            variant={action.variant === "danger" ? "danger" : "primary"}
+            onClick={action.onClick}
+            isLoading={action.isLoading}
+          >
+            {action.label}
           </Button>
-          {action && (
-            <Button
-              variant={action.variant === "danger" ? "danger" : "primary"}
-              onClick={action.onClick}
-              isLoading={action.isLoading}
-            >
-              {action.label}
-            </Button>
-          )}
-        </div>
+        )}
       </div>
-    </div>
+    </dialog>
   );
 }

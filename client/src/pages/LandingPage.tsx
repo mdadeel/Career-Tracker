@@ -5,17 +5,13 @@ import {
   FileText,
   ChartBar,
   ShieldCheck,
-  Plus,
-  SignIn,
   MagnifyingGlass,
   SquaresFour,
   CalendarCheck,
   CheckCircle,
-  CaretDown,
-  CaretRight,
   Lightning,
 } from "@phosphor-icons/react";
-import { Button, LogoFull } from "../components/ui";
+import { Button, LogoFull, Accordion } from "../components/ui";
 import { Navigation } from "../components/Navigation";
 import { SEOHead } from "../components/SEOHead";
 
@@ -150,16 +146,6 @@ const DEMO_APPLICATIONS = [
   },
 ];
 
-function AmbientBackground() {
-  return (
-    <div aria-hidden="true" className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
-      <div className="absolute -left-28 -top-28 h-[32rem] w-[32rem] rounded-full bg-brand-500/20 blur-3xl dark:bg-brand-500/15" />
-      <div className="absolute right-[-10%] top-1/3 h-[28rem] w-[28rem] rounded-full bg-brand-400/15 blur-3xl dark:bg-brand-500/10" />
-      <div className="absolute bottom-[-10%] left-1/3 h-[30rem] w-[30rem] rounded-full bg-brand-400/10 blur-3xl dark:bg-brand-500/5" />
-    </div>
-  );
-}
-
 function Reveal({
   children,
   className = "",
@@ -219,7 +205,6 @@ function AsymmetricHero() {
           <div className="lg:col-span-6">
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200/90 bg-white px-3 py-1 text-xs font-semibold text-ink-secondary shadow-sm dark:border-dark-border dark:bg-dark-surface dark:text-white/70">
               <span className="relative flex h-2 w-2">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-75" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
               </span>
               <span>Production-Grade Application Tracking</span>
@@ -227,10 +212,7 @@ function AsymmetricHero() {
             </div>
 
             <h1 className="mt-6 text-balance text-4xl font-extrabold leading-[1.08] tracking-tight text-ink dark:text-white/95 sm:text-5xl lg:text-6xl">
-              Track every job application with{" "}
-              <span className="bg-gradient-to-r from-brand-600 to-violet-600 bg-clip-text text-transparent dark:from-brand-400 dark:to-violet-400">
-                surgical precision.
-              </span>
+              Track every job application with surgical precision.
             </h1>
 
             <p className="mt-5 max-w-xl text-balance text-base leading-relaxed text-ink-secondary dark:text-white/60">
@@ -243,11 +225,6 @@ function AsymmetricHero() {
                   Start Tracking Free
                 </Button>
               </Link>
-              <a href="#sandbox">
-                <Button variant="secondary" size="lg" icon={<Lightning size={16} />}>
-                  Try Interactive Demo
-                </Button>
-              </a>
             </div>
 
           </div>
@@ -308,21 +285,21 @@ function AsymmetricHero() {
                           </div>
                         </div>
                       </div>
-                      <div className="rounded-lg bg-emerald-50/60 p-2.5 dark:bg-emerald-500/10">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Interview (4)</p>
+                      <div className="rounded-lg bg-purple-50/60 p-2.5 dark:bg-purple-500/10">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400">Interview (4)</p>
                         <div className="mt-2 space-y-1.5">
                           <div className="rounded-md border border-emerald-200 bg-white p-2 text-xs font-medium shadow-sm dark:border-emerald-500/30 dark:bg-dark-surface">
                             <p className="font-semibold text-ink dark:text-white">Stripe</p>
-                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium">Jul 23 • 3:00 PM</p>
+                            <p className="text-[10px] text-purple-600 dark:text-purple-400 font-medium">Jul 23 • 3:00 PM</p>
                           </div>
                         </div>
                       </div>
-                      <div className="rounded-lg bg-amber-50/60 p-2.5 dark:bg-amber-500/10">
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Offer (2)</p>
+                      <div className="rounded-lg bg-emerald-50/60 p-2.5 dark:bg-emerald-500/10">
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400">Offer (2)</p>
                         <div className="mt-2 space-y-1.5">
                           <div className="rounded-md border border-amber-200 bg-white p-2 text-xs font-medium shadow-sm dark:border-amber-500/30 dark:bg-dark-surface">
                             <p className="font-semibold text-ink dark:text-white">Vercel</p>
-                            <p className="text-[10px] text-amber-600 dark:text-amber-400 font-semibold">$195,000 / yr</p>
+                            <p className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">$195,000 / yr</p>
                           </div>
                         </div>
                       </div>
@@ -356,9 +333,9 @@ function AsymmetricHero() {
                         <span
                           className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
                             app.status === "Interview"
-                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                              ? "bg-purple-50 text-purple-700 dark:bg-purple-500/10 dark:text-purple-400"
                               : app.status === "Offer"
-                              ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
+                              ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
                               : "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
                           }`}
                         >
@@ -510,7 +487,7 @@ function BentoFeatureGrid() {
 
             <div className="mt-6 flex items-center justify-between rounded-xl border border-emerald-200/80 bg-emerald-50/50 p-3 dark:border-emerald-500/30 dark:bg-emerald-500/10">
               <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping" />
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
                 <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300">Stripe Technical Round</span>
               </div>
               <span className="text-caption font-bold text-emerald-600 dark:text-emerald-400">Today • 3:00 PM</span>
@@ -552,183 +529,6 @@ function BentoFeatureGrid() {
 }
 
 /**
- * Interactive Live Sandbox Component
- */
-function InteractiveSandbox() {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState<string>("All");
-
-  const filteredApps = DEMO_APPLICATIONS.filter((app) => {
-    const matchesSearch =
-      app.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.jobTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      app.location.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = selectedStatus === "All" || app.status === selectedStatus;
-    return matchesSearch && matchesStatus;
-  });
-
-  return (
-    <section id="sandbox" className="scroll-mt-14 border-t border-slate-200 bg-surface-secondary py-20 dark:border-dark-border dark:bg-dark lg:py-24">
-      <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
-        <div className="mb-12 text-center">
-          <span className="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
-            Live Interactive Playground
-          </span>
-          <h2 className="mt-3 text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
-            Test the application table live
-          </h2>
-          <p className="mt-2 text-sm text-ink-secondary dark:text-white/50">
-            Search roles, filter by status, and explore real data right now.
-          </p>
-        </div>
-
-        <div className="rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xl dark:border-dark-border dark:bg-dark-surface">
-          {/* Controls */}
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="relative flex-1 max-w-md">
-              <MagnifyingGlass size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-tertiary" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by company, role, or location..."
-                className="w-full rounded-lg border border-slate-200 bg-surface-secondary py-2 pl-9 pr-4 text-xs text-ink transition-colors focus:border-brand-500 focus:outline-none dark:border-dark-border dark:bg-dark dark:text-white"
-              />
-            </div>
-
-            <div className="flex flex-wrap items-center gap-1.5">
-              {["All", "Saved", "Applied", "Assessment", "Interview", "Offer"].map((st) => (
-                <button
-                  key={st}
-                  onClick={() => setSelectedStatus(st)}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
-                    selectedStatus === st
-                      ? "bg-brand-600 text-white dark:bg-brand-500"
-                      : "bg-surface-tertiary text-ink-secondary hover:bg-slate-200 dark:bg-dark dark:text-white/60 dark:hover:bg-white/5"
-                  }`}
-                >
-                  {st}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Table */}
-          <div className="mt-6 overflow-x-auto">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="border-b border-slate-200/80 text-[11px] font-bold uppercase text-ink-tertiary dark:border-dark-border dark:text-white/40">
-                  <th className="pb-3 pl-2">Company & Role</th>
-                  <th className="pb-3">Location</th>
-                  <th className="pb-3">Salary Range</th>
-                  <th className="pb-3">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-dark-border">
-                {filteredApps.map((app) => (
-                  <tr key={app.id} className="transition-colors hover:bg-surface-secondary/60 dark:hover:bg-white/[0.02]">
-                    <td className="py-3 pl-2">
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={`https://logo.clearbit.com/${app.domain}`}
-                          alt={app.companyName}
-                          onError={(e) => {
-                            (e.target as HTMLElement).style.display = "none";
-                          }}
-                          className="h-6 w-6 rounded object-contain"
-                        />
-                        <div>
-                          <p className="font-bold text-ink dark:text-white/90">{app.jobTitle}</p>
-                          <p className="text-[11px] text-ink-tertiary dark:text-white/40">{app.companyName}</p>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="py-3 text-ink-secondary dark:text-white/60">{app.location}</td>
-                    <td className="py-3 font-mono font-medium text-ink dark:text-white/80">
-                      ${app.salaryMin.toLocaleString()} - ${app.salaryMax.toLocaleString()}
-                    </td>
-                    <td className="py-3">
-                      <span
-                        className={`rounded-full px-2.5 py-0.5 text-[11px] font-bold ${
-                          app.status === "Interview"
-                            ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                            : app.status === "Offer"
-                            ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-                            : app.status === "Applied"
-                            ? "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
-                            : "bg-slate-100 text-slate-700 dark:bg-white/10 dark:text-white/60"
-                        }`}
-                      >
-                        {app.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
-/**
- * How It Works Section
- */
-function HowItWorks() {
-  const steps = [
-    {
-      n: "01",
-      title: "Create your private account",
-      body: "Register securely with hashed passwords and token-based authentication.",
-      icon: <SignIn size={20} weight="bold" />,
-    },
-    {
-      n: "02",
-      title: "Log applications & paste JDs",
-      body: "Record job titles, company info, salary ranges, JD text, and submission dates.",
-      icon: <Plus size={20} weight="bold" />,
-    },
-    {
-      n: "03",
-      title: "Track pipeline & analytics",
-      body: "Drag roles across Kanban columns, schedule interviews, and measure response rates.",
-      icon: <ChartBar size={20} weight="bold" />,
-    },
-  ];
-
-  return (
-    <section id="how-it-works" className="scroll-mt-14 border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
-      <Reveal className="mx-auto max-w-7xl px-5 lg:px-8">
-        <div className="mb-14 text-center">
-          <p className="text-xs font-bold uppercase tracking-widest text-brand-600 dark:text-brand-400">Simple 3-Step Setup</p>
-          <h2 className="mt-2 text-3xl font-extrabold tracking-tight text-ink dark:text-white/90 sm:text-4xl">
-            Up and running in under a minute
-          </h2>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-3">
-          {steps.map((s) => (
-            <div
-              key={s.n}
-              className="relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-7 dark:border-dark-border dark:bg-dark"
-            >
-              <span className="text-xs font-mono font-extrabold text-brand-600 dark:text-brand-400">{s.n}</span>
-              <div className="mt-3 flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
-                {s.icon}
-              </div>
-              <h3 className="mt-4 text-base font-bold text-ink dark:text-white/90">{s.title}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-ink-secondary dark:text-white/50">{s.body}</p>
-            </div>
-          ))}
-        </div>
-      </Reveal>
-    </section>
-  );
-}
-
-/**
  * Realistic Social Proof & Metrics Section
  */
 function StatsAndTestimonials() {
@@ -761,8 +561,6 @@ function StatsAndTestimonials() {
  * Interactive FAQ Accordion Section
  */
 function FaqSection() {
-  const [openIdx, setOpenIdx] = useState<number | null>(0);
-
   return (
     <section id="faq" className="scroll-mt-14 border-t border-slate-200 bg-white py-20 dark:border-dark-border dark:bg-dark-surface lg:py-24">
       <Reveal className="mx-auto max-w-4xl px-5 lg:px-8">
@@ -773,27 +571,14 @@ function FaqSection() {
           </h2>
         </div>
 
-        <div className="space-y-3">
-          {FAQ_ITEMS.map((item, idx) => (
-            <div
-              key={idx}
-              className="rounded-xl border border-slate-200/90 bg-surface-secondary/50 dark:border-dark-border dark:bg-dark"
-            >
-              <button
-                onClick={() => setOpenIdx(openIdx === idx ? null : idx)}
-                className="flex w-full items-center justify-between p-5 text-left text-sm font-bold text-ink dark:text-white/90"
-              >
-                <span>{item.question}</span>
-                {openIdx === idx ? <CaretDown size={18} className="text-brand-500" /> : <CaretRight size={18} />}
-              </button>
-              {openIdx === idx && (
-                <div className="border-t border-slate-200/60 px-5 pb-5 pt-3 text-sm leading-relaxed text-ink-secondary dark:border-dark-border dark:text-white/60">
-                  {item.answer}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
+        {/* Reusable Accordion — animated grid-rows disclosure per the namethatui pattern */}
+        <Accordion
+          items={FAQ_ITEMS.map((item, idx) => ({
+            id: `faq-${idx}`,
+            trigger: item.question,
+            children: item.answer,
+          }))}
+        />
       </Reveal>
     </section>
   );
@@ -839,7 +624,6 @@ function CtaFooter() {
               <p className="text-xs font-bold uppercase tracking-wider text-ink dark:text-white">Product</p>
               <ul className="mt-3 space-y-2 text-xs text-ink-secondary dark:text-white/50">
                 <li><a href="#features" className="hover:text-ink dark:hover:text-white">Kanban Pipeline</a></li>
-                <li><a href="#sandbox" className="hover:text-ink dark:hover:text-white">Live Search Sandbox</a></li>
                 <li><a href="#features" className="hover:text-ink dark:hover:text-white">Analytics Engine</a></li>
               </ul>
             </div>
@@ -873,14 +657,11 @@ export function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col bg-surface-secondary text-ink dark:bg-dark dark:text-white">
       <SEOHead schema={[faqJsonLdSchema]} />
-      <AmbientBackground />
       <Navigation />
       <main className="flex-1">
         <AsymmetricHero />
         <TrustBar />
         <BentoFeatureGrid />
-        <InteractiveSandbox />
-        <HowItWorks />
         <StatsAndTestimonials />
         <FaqSection />
         <CtaFooter />

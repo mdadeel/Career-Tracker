@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useDashboard } from "../hooks/useDashboard";
-import type { ReactNode } from "react";
-import { Badge, statusVariantMap, Button, Skeleton } from "../components/ui";
-import { StackSimple, ChatCircle, CheckCircle, ChartBar, Plus, ArrowUp, XCircle, CalendarCheck, WarningCircle } from "@phosphor-icons/react";
+import { Badge, statusVariantMap, Button, Skeleton, Alert, Tabs, MetricCard, Widget } from "../components/ui";
+import { StackSimple, ChatCircle, CheckCircle, ChartBar, Plus, ArrowUp, XCircle, CalendarCheck } from "@phosphor-icons/react";
 import { formatDate } from "../utils/format";
+import { PIPELINE_STAGES, groupRecentByStage } from "../utils/pipeline";
 import { Info } from "@phosphor-icons/react";
-import { useCountUp } from "../hooks/useCountUp";
 
 /* ─── Tooltip ─── */
 function InfoTooltip({ text }: { text: string }) {
@@ -17,50 +17,6 @@ function InfoTooltip({ text }: { text: string }) {
         {text}
       </span>
     </span>
-  );
-}
-
-/* ─── Metric Card ─── */
-function MetricCard({
-  label,
-  value,
-  sub,
-  icon,
-  onClick,
-  empty,
-  valueSuffix,
-}: {
-  label: ReactNode;
-  value: number | string;
-  sub?: string;
-  icon: ReactNode;
-  onClick?: () => void;
-  empty?: boolean;
-  valueSuffix?: string;
-}) {
-  const numVal = typeof value === "number" ? value : parseInt(value, 10);
-  const counted = useCountUp(isNaN(numVal) ? 0 : numVal, 1000, !empty && !isNaN(numVal));
-  const displayVal = typeof value === "number" ? counted : value;
-  return (
-    <button
-      onClick={onClick}
-      className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4 text-left transition-[border-color,box-shadow,background-color] duration-200 hover:border-brand-500/50 hover:bg-slate-50/50 dark:hover:bg-white/[0.02] hover:shadow-card-hover"
-    >
-      <div className="flex items-center justify-between mb-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">
-          {label}
-        </span>
-        <span className="text-ink-tertiary dark:text-white/30">{icon}</span>
-      </div>
-      {empty ? (
-        <p className="text-xs text-ink-tertiary dark:text-white/40">No data yet</p>
-      ) : (
-        <>
-          <p className="text-2xl font-extrabold text-ink dark:text-white/90 tabular-nums">{displayVal}{valueSuffix}</p>
-          {sub && <p className="mt-0.5 text-xs text-ink-tertiary dark:text-white/40">{sub}</p>}
-        </>
-      )}
-    </button>
   );
 }
 
@@ -89,23 +45,10 @@ function EmptyStageBar({ label }: { label: string }) {
   );
 }
 
-/* ─── Widget Shell ─── */
-function Widget({ title, action, children }: { title: string; action?: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface">
-      <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-dark-border">
-        <h3 className="text-xs font-semibold text-ink dark:text-white/85">{title}</h3>
-        {action}
-      </div>
-      <div className="px-4 py-3">{children}</div>
-    </div>
-  );
-}
-
 /* ─── Dashboard Skeleton ─── */
 function DashboardSkeleton() {
   return (
-    <div className="py-4 lg:py-5 space-y-4">
+    <div className="py-4 lg:py-5 space-y-4" aria-busy="true" aria-label="Loading dashboard">
       <div className="flex items-center justify-between">
         <div className="space-y-1.5">
           <Skeleton width={160} height={18} />
@@ -147,16 +90,17 @@ function DashboardSkeleton() {
 function ErrorWidget({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
     <div className="py-4 lg:py-5">
-      <div className="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 px-4 py-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-500">
-          <WarningCircle size={16} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-rose-800 dark:text-rose-300">Failed to load dashboard</p>
-          <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5">{message}</p>
-        </div>
-        <Button variant="secondary" size="sm" onClick={onRetry}>Retry</Button>
-      </div>
+      <Alert
+        variant="error"
+        title="Failed to load dashboard"
+        action={
+          <Button variant="secondary" size="sm" onClick={onRetry}>
+            Retry
+          </Button>
+        }
+      >
+        {message}
+      </Alert>
     </div>
   );
 }
@@ -166,6 +110,7 @@ export function DashboardPage() {
   const { user } = useAuth();
   const { stats, isLoading, error, refresh } = useDashboard();
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState<"overview" | "pipeline">("overview");
 
   if (isLoading) return <DashboardSkeleton />;
   if (error) return <ErrorWidget message={error} onRetry={refresh} />;
@@ -204,15 +149,8 @@ export function DashboardPage() {
     ? stats!.recentApplications.filter((a) => a.status === "Interview" && a.interviewDate && new Date(a.interviewDate) > new Date()).length
     : 0;
 
-  // Pipeline stages in order
-  const pipelineStages = [
-    { key: "saved" as const, label: "Saved", color: "bg-slate-400" },
-    { key: "applied" as const, label: "Applied", color: "bg-blue-500" },
-    { key: "assessment" as const, label: "Assessment", color: "bg-amber-500" },
-    { key: "interview" as const, label: "Interview", color: "bg-purple-500" },
-    { key: "rejected" as const, label: "Rejected", color: "bg-rose-500" },
-    { key: "offer" as const, label: "Offer", color: "bg-emerald-500" },
-  ];
+  // Recent applications grouped by pipeline stage (for the Pipeline detail view)
+  const recentByStage = hasData ? groupRecentByStage(stats!.recentApplications) : [];
 
   return (
     <div className="mx-auto max-w-5xl py-4 lg:py-5 space-y-4">
@@ -225,7 +163,7 @@ export function DashboardPage() {
           <p className="mt-0.5 text-xs text-ink-secondary dark:text-white/50">
             {hasData
               ? `${stats!.total} application${stats!.total !== 1 ? "s" : ""} tracked`
-              : "Let's start tracking your job search"}
+              : "Add your first application to get started"}
           </p>
         </div>
         <Button
@@ -237,25 +175,50 @@ export function DashboardPage() {
         </Button>
       </div>
 
-      {/* ─── Metric Cards ─── */}
-      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
-        <MetricCard
-          label="Applications"
-          value={stats?.total ?? 0}
-          icon={<StackSimple size={16} />}
-          onClick={() => navigate("/applications")}
+      {/* ─── View Tabs ─── */}
+      <div className="flex items-center justify-between gap-3 border-b border-slate-200 dark:border-dark-border pb-2">
+        <Tabs
+          tabs={[
+            { value: "overview", label: "Overview" },
+            { value: "pipeline", label: "Pipeline detail" },
+          ]}
+          active={activeSection}
+          onChange={setActiveSection}
+          ariaLabel="Dashboard views"
+          idPrefix="dashboard-tabs"
         />
+        <span className="hidden sm:block text-[11px] text-ink-tertiary dark:text-white/40">
+          {activeSection === "overview" ? "Weekly activity at a glance" : "Stage counts and pipeline breakdown"}
+        </span>
+      </div>
+
+      {activeSection === "overview" ? (
+        <div
+          role="tabpanel"
+          id="dashboard-tabs-panel-overview"
+          aria-labelledby="dashboard-tabs-tab-overview"
+          className="space-y-4"
+        >
+          {/* ─── Metric Cards ─── */}
+          <MetricCard
+            label="Applications"
+            value={stats?.total ?? 0}
+            sub={hasData ? `${thisWeekApps} this week` : undefined}
+            icon={<StackSimple size={18} />}
+            onClick={() => navigate("/applications")}
+          />
+          <div className="grid gap-3 grid-cols-3">
         <MetricCard
           label="Interviews"
           value={stats?.interview ?? 0}
-          icon={<ChatCircle size={16} />}
+          icon={<ChatCircle size={14} />}
           empty={!hasData}
           onClick={() => navigate("/applications?status=Interview")}
         />
         <MetricCard
           label="Offers"
           value={stats?.offer ?? 0}
-          icon={<CheckCircle size={16} />}
+          icon={<CheckCircle size={14} />}
           empty={!hasData}
           onClick={() => navigate("/applications?status=Offer")}
         />
@@ -268,45 +231,15 @@ export function DashboardPage() {
           }
           value={hasData ? stats!.responseRate : 0}
           valueSuffix={hasData ? "%" : ""}
-          sub={hasData ? `${stats!.interview + stats!.offer} of ${stats!.total} applications` : undefined}
-          icon={<ChartBar size={16} />}
+          sub={hasData ? `${stats!.interview + stats!.offer} of ${stats!.total}` : undefined}
+          icon={<ChartBar size={14} />}
           empty={!hasData}
         />
       </div>
 
-      {/* ─── Pipeline + Recent Activity ─── */}
-      <div className="grid gap-4 lg:grid-cols-2">
-        {/* Pipeline */}
-        <Widget
-          title="Pipeline"
-          action={
-            <button
-              onClick={() => navigate("/applications")}
-              className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
-            >
-              View all
-            </button>
-          }
-        >
-          <div className="space-y-2.5">
-            {hasData
-              ? pipelineStages.map((s) => (
-                  <StageBar
-                    key={s.key}
-                    label={s.label}
-                    count={(stats as unknown as Record<string, number>)[s.key] ?? 0}
-                    total={stats!.total}
-                    color={s.color}
-                  />
-                ))
-              : pipelineStages.map((s) => <EmptyStageBar key={s.key} label={s.label} />)}
-          </div>
-        </Widget>
-
-        {/* This Week / Upcoming */}
-        <div className="space-y-4">
-          {/* This Week */}
-          <Widget title="This Week">
+          {/* ─── This Week + Upcoming Interviews ─── */}
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Widget title="This Week">
             {hasData ? (
               <div className="space-y-2.5">
                 <div className="flex items-center gap-3">
@@ -393,18 +326,10 @@ export function DashboardPage() {
                   <CalendarCheck size={20} className="text-ink-tertiary dark:text-white/40" />
                 </div>
                 <p className="text-xs font-medium text-ink dark:text-white/70">No upcoming interviews</p>
-                <p className="text-[11px] text-ink-tertiary dark:text-white/40 mt-1">Schedule an interview with a company</p>
-                <button
-                  onClick={() => navigate("/applications")}
-                  className="mt-3 inline-flex items-center gap-1 rounded-lg bg-brand-600 px-3 py-1.5 text-[11px] font-semibold text-white shadow-sm hover:bg-brand-700 transition-colors"
-                >
-                  <CalendarCheck size={12} />
-                  Schedule an interview
-                </button>
+                <p className="text-[11px] text-ink-tertiary dark:text-white/40 mt-1">Interviews you schedule will appear here</p>
               </div>
             )}
           </Widget>
-        </div>
       </div>
 
       {/* ─── Recent Applications ─── */}
@@ -446,6 +371,7 @@ export function DashboardPage() {
         ) : (
           <div className="py-6 text-center">
             <p className="text-xs text-ink-tertiary dark:text-white/40">No applications yet</p>
+            <p className="text-[11px] text-ink-tertiary dark:text-white/40 mt-1">Add your first application to see it here</p>
             <button
               onClick={() => navigate("/applications/new")}
               className="mt-2 text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
@@ -455,9 +381,83 @@ export function DashboardPage() {
           </div>
         )}
       </Widget>
+      </div>
+      ) : (
+      <div
+        role="tabpanel"
+        id="dashboard-tabs-panel-pipeline"
+        aria-labelledby="dashboard-tabs-tab-pipeline"
+        className="space-y-4"
+      >
+        {/* ─── Pipeline ─── */}
+        <Widget
+          title="Pipeline"
+          action={
+            <button
+              onClick={() => navigate("/applications")}
+              className="text-xs font-medium text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 transition-colors"
+            >
+              View all
+            </button>
+          }
+        >
+          <div className="space-y-2.5">
+            {hasData
+              ? PIPELINE_STAGES.map((s) => (
+                  <StageBar
+                    key={s.key}
+                    label={s.label}
+                    count={(stats as unknown as Record<string, number>)[s.key] ?? 0}
+                    total={stats!.total}
+                    color={s.color}
+                  />
+                ))
+              : PIPELINE_STAGES.map((s) => <EmptyStageBar key={s.key} label={s.label} />)}
+          </div>
+        </Widget>
 
-      {/* ─── Insights ─── */}
-      <Widget title="Insights">
+        {/* ─── Applications by Stage ─── */}
+        <Widget title="Applications by Stage">
+          {hasData && recentByStage.length > 0 ? (
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {recentByStage.map((stage) => (
+                <div key={stage.key} className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-3.5">
+                  <div className="mb-2.5 flex items-center justify-between">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-ink dark:text-white/85">
+                      <span className={`h-2 w-2 rounded-full ${stage.color}`} />
+                      {stage.label}
+                    </span>
+                    <span className="font-mono text-[11px] font-semibold text-ink-tertiary dark:text-white/40">{stage.apps.length}</span>
+                  </div>
+                  <div className="space-y-1">
+                    {stage.apps.slice(0, 4).map((app) => (
+                      <button
+                        key={app.id}
+                        onClick={() => navigate(`/applications/${app.id}`)}
+                        className="flex w-full items-center gap-2 rounded-lg p-1.5 text-left transition-colors hover:bg-surface-secondary dark:hover:bg-white/[0.03]"
+                      >
+                        <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-slate-100 dark:bg-white/[0.06] text-[10px] font-bold text-slate-500 dark:text-white/50">
+                          {app.companyName.charAt(0)}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block truncate text-[11px] font-medium text-ink dark:text-white/85">{app.jobTitle}</span>
+                          <span className="block truncate text-[10px] text-ink-secondary dark:text-white/50">{app.companyName}</span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-4 text-center">
+              <p className="text-xs text-ink-tertiary dark:text-white/40">Applications you add will appear grouped by stage here</p>
+            </div>
+          )}
+        </Widget>
+
+        {/* ─── Insights ─── */}
+        <Widget title="Insights">
         {hasData && stats!.total >= 3 ? (
           <div className="space-y-4">
             {/* Rate cards */}
@@ -520,6 +520,8 @@ export function DashboardPage() {
           </div>
         )}
       </Widget>
+      </div>
+      )}
     </div>
   );
 }

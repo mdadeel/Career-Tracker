@@ -18,25 +18,20 @@ import { useApplications } from "../hooks/useApplications";
 import { Skeleton, Button } from "../components/ui";
 import { formatDate } from "../utils/format";
 import { Plus } from "@phosphor-icons/react";
+import { STATUS_CONFIG, type JobStatus } from "../constants/statusColors";
 import type { Application, ApplicationStatus } from "../types";
 
-const PIPELINE_STAGES: { key: ApplicationStatus; label: string; color: string }[] = [
-  { key: "Saved", label: "Saved", color: "bg-slate-400" },
-  { key: "Applied", label: "Applied", color: "bg-blue-500" },
-  { key: "Assessment", label: "Assessment", color: "bg-amber-500" },
-  { key: "Interview", label: "Interview", color: "bg-purple-500" },
-  { key: "Rejected", label: "Rejected", color: "bg-rose-500" },
-  { key: "Offer", label: "Offer", color: "bg-emerald-500" },
-];
+const PIPELINE_STAGES: { key: ApplicationStatus; label: string; color: string }[] = (
+  Object.entries(STATUS_CONFIG) as [JobStatus, typeof STATUS_CONFIG[JobStatus]][]
+).map(([key, config]) => ({
+  key,
+  label: config.label,
+  color: config.pipeline,
+}));
 
-const statusColors: Record<string, string> = {
-  Saved: "bg-slate-400",
-  Applied: "bg-blue-500",
-  Assessment: "bg-amber-500",
-  Interview: "bg-purple-500",
-  Rejected: "bg-rose-500",
-  Offer: "bg-emerald-500",
-};
+const statusColors: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_CONFIG).map(([status, config]) => [status, config.pipeline])
+);
 
 /* ─── Sortable Card ─── */
 function PipelineCard({ app, isDragging }: { app: Application; isDragging?: boolean }) {
@@ -156,7 +151,7 @@ function PipelineColumn({
 /* ─── Skeleton ─── */
 function PipelineSkeleton() {
   return (
-    <div className="w-full overflow-x-auto pb-4 pt-1">
+    <div className="w-full overflow-x-auto pb-4 pt-1" aria-busy="true" aria-label="Loading pipeline">
       <div className="flex gap-3.5 min-w-max pb-2">
         {PIPELINE_STAGES.map((stage) => (
           <div key={stage.key} className="flex h-[460px] w-[260px] shrink-0 flex-col rounded-2xl border border-slate-200 dark:border-dark-border bg-slate-50/50 dark:bg-white/[0.02]">

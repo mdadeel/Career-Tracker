@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAnalytics } from "../hooks/useAnalytics";
-import { Skeleton, Button } from "../components/ui";
+import { Skeleton, Button, ToggleGroup, Alert, MetricCard, Widget } from "../components/ui";
+import { STATUS_CONFIG } from "../constants/statusColors";
 import { ChartBar } from "@phosphor-icons/react";
 import {
   BarChart,
@@ -17,21 +18,25 @@ import {
 } from "recharts";
 
 /* ─── Color palette for charts ─── */
-const STATUS_COLORS: Record<string, string> = {
-  Saved: "#94a3b8",
-  Applied: "#3b82f6",
-  Assessment: "#f59e0b",
-  Interview: "#8b5cf6",
-  Rejected: "#ef4444",
-  Offer: "#10b981",
-};
+const STATUS_HEX: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_CONFIG).map(([status]) => {
+    const hex = status === "Saved" ? "#94a3b8"
+      : status === "Applied" ? "#3b82f6"
+      : status === "Assessment" ? "#f59e0b"
+      : status === "Interview" ? "#8b5cf6"
+      : status === "Rejected" ? "#ef4444"
+      : status === "Offer" ? "#10b981"
+      : "#94a3b8";
+    return [status, hex];
+  })
+);
 
 const BRAND_GRADIENT = "#6366f1";
 
 /* ─── Skeleton ─── */
 function AnalyticsSkeleton() {
   return (
-    <div className="py-5 lg:py-6 space-y-5">
+    <div className="py-5 lg:py-6 space-y-5" aria-busy="true" aria-label="Loading analytics">
       <div className="flex items-center justify-between">
         <div className="space-y-1.5">
           <Skeleton width={160} height={18} />
@@ -57,43 +62,6 @@ function AnalyticsSkeleton() {
           <Skeleton width="90%" height={200} className="mt-3" />
         </div>
       </div>
-    </div>
-  );
-}
-
-/* ─── Metric Card ─── */
-function MetricCard({
-  label,
-  value,
-  sub,
-}: {
-  label: string;
-  value: string | number;
-  sub?: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4 transition-all duration-150 hover:border-slate-300 dark:hover:border-white/15">
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-tertiary dark:text-white/40">
-        {label}
-      </p>
-      <p className="mt-1 text-2xl font-bold text-ink dark:text-white/90 tabular-nums">
-        {value}
-      </p>
-      {sub && (
-        <p className="mt-0.5 text-xs text-ink-tertiary dark:text-white/40">{sub}</p>
-      )}
-    </div>
-  );
-}
-
-/* ─── Widget Shell ─── */
-function Widget({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface overflow-hidden">
-      <div className="px-4 py-3 border-b border-slate-100 dark:border-dark-border">
-        <h3 className="text-xs font-semibold text-ink dark:text-white/85">{title}</h3>
-      </div>
-      <div className="p-4">{children}</div>
     </div>
   );
 }
@@ -132,9 +100,9 @@ function AnalyticsEmptyState({ onNavigate }: { onNavigate: () => void }) {
       <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-surface-secondary dark:bg-white/[0.04] mb-4">
         <ChartBar size={32} className="text-ink-tertiary dark:text-white/30" />
       </div>
-      <p className="text-sm font-medium text-ink dark:text-white/80">No data yet</p>
+      <p className="text-sm font-medium text-ink dark:text-white/80">No data to analyze yet</p>
       <p className="mt-1 text-xs text-ink-secondary dark:text-white/50">
-        Add some applications first to see analytics
+        Add a few applications and your analytics will appear here
       </p>
       <div className="mt-4">
         <Button size="sm" onClick={onNavigate}>
@@ -148,10 +116,16 @@ function AnalyticsEmptyState({ onNavigate }: { onNavigate: () => void }) {
 /* ─── Error State ─── */
 function AnalyticsError({ message, onRetry }: { message: string; onRetry: () => void }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 px-4 py-3">
-      <p className="flex-1 text-sm text-rose-700 dark:text-rose-300">{message}</p>
-      <Button variant="secondary" size="sm" onClick={onRetry}>Retry</Button>
-    </div>
+    <Alert
+      variant="error"
+      action={
+        <Button variant="secondary" size="sm" onClick={onRetry}>
+          Retry
+        </Button>
+      }
+    >
+      {message}
+    </Alert>
   );
 }
 
@@ -231,22 +205,19 @@ export function AnalyticsPage() {
             Deep insights into your job search performance
           </p>
         </div>
-        {/* Time range selector */}
-        <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-0.5 shadow-sm">
-          {(["7d", "30d", "90d", "all"] as const).map((range) => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-all ${
-                timeRange === range
-                  ? "bg-brand-600 text-white shadow-sm"
-                  : "text-ink-tertiary dark:text-white/40 hover:text-ink dark:hover:text-white/70"
-              }`}
-            >
-              {range === "all" ? "All" : range}
-            </button>
-          ))}
-        </div>
+        {/* Time range selector — reusable segmented control */}
+        <ToggleGroup
+          ariaLabel="Analytics time range"
+          size="sm"
+          value={timeRange}
+          onChange={(r) => setTimeRange(r)}
+          options={[
+            { value: "7d", label: "7d" },
+            { value: "30d", label: "30d" },
+            { value: "90d", label: "90d" },
+            { value: "all", label: "All" },
+          ]}
+        />
       </div>
 
       {/* Summary Metric Cards with deltas */}
@@ -335,7 +306,7 @@ export function AnalyticsPage() {
                       return order.indexOf(a.stage) - order.indexOf(b.stage);
                     })
                     .map((entry) => (
-                      <Cell key={entry.stage} fill={STATUS_COLORS[entry.stage] || "#94a3b8"} />
+                      <Cell key={entry.stage} fill={STATUS_HEX[entry.stage] || "#94a3b8"} />
                     ))}
                 </Bar>
               </BarChart>
@@ -401,7 +372,7 @@ export function AnalyticsPage() {
                       {statusDistribution.map((entry) => (
                         <Cell
                           key={entry.status}
-                          fill={STATUS_COLORS[entry.status] || "#94a3b8"}
+                          fill={STATUS_HEX[entry.status] || "#94a3b8"}
                           stroke="transparent"
                         />
                       ))}
@@ -418,7 +389,7 @@ export function AnalyticsPage() {
                     <div key={entry.status} className="flex items-center gap-2">
                       <span
                         className="h-2 w-2 shrink-0 rounded-full"
-                        style={{ backgroundColor: STATUS_COLORS[entry.status] || "#94a3b8" }}
+                        style={{ backgroundColor: STATUS_HEX[entry.status] || "#94a3b8" }}
                       />
                       <span className="flex-1 text-xs text-ink-secondary dark:text-white/60 truncate">
                         {entry.status}

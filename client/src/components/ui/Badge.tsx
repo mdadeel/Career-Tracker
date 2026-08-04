@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { STATUS_CONFIG } from "../../constants/statusColors";
 
 type BadgeVariant = "default" | "success" | "warning" | "danger" | "info" | "neutral";
 
@@ -18,14 +19,18 @@ const variantStyles: Record<BadgeVariant, { bg: string; text: string; dot: strin
   neutral: { bg: "bg-purple-50", text: "text-purple-700", dot: "bg-purple-500" },
 };
 
-const statusVariantMap: Record<string, BadgeVariant> = {
-  Saved: "default",
-  Applied: "info",
-  Assessment: "warning",
-  Interview: "neutral",
-  Rejected: "danger",
-  Offer: "success",
-};
+const statusVariantMap: Record<string, BadgeVariant> = Object.fromEntries(
+  Object.entries(STATUS_CONFIG).map(([status]) => {
+    const variant = status === "Saved" ? "default"
+      : status === "Applied" ? "info"
+      : status === "Assessment" ? "warning"
+      : status === "Interview" ? "neutral"
+      : status === "Rejected" ? "danger"
+      : status === "Offer" ? "success"
+      : "default";
+    return [status, variant as BadgeVariant];
+  })
+) as Record<string, BadgeVariant>;
 
 export { statusVariantMap };
 
@@ -35,7 +40,7 @@ export function Badge({ children, variant = "default", dot = false, className = 
   return (
     <span
       className={`
-        inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-caption font-medium
+        inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-caption font-medium
         ${styles.bg} ${styles.text}
         ${className}
       `.trim()}

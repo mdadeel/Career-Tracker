@@ -6,22 +6,22 @@ export default {
     extend: {
       fontFamily: {
         sans: ['Geist', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
-        display: ['Inter', 'Geist', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
+        display: ['Geist', 'Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['Geist Mono', 'JetBrains Mono', 'SF Mono', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
         brand: {
-          50: '#eef2ff',
-          100: '#e0e7ff',
-          200: '#c7d2fe',
-          300: '#a5b4fc',
-          400: '#818cf8',
-          500: '#6366f1',
-          600: '#4f46e5',
-          700: '#4338ca',
-          800: '#3730a3',
-          900: '#312e81',
-          950: '#1e1b4b',
+          50: '#f0f7fa',
+          100: '#d9edf4',
+          200: '#b3dbea',
+          300: '#7dc1d9',
+          400: '#4da6c7',
+          500: '#3b6b8a',
+          600: '#335972',
+          700: '#2d4a5e',
+          800: '#283e4f',
+          900: '#253543',
+          950: '#18222c',
         },
         surface: {
           DEFAULT: '#ffffff',
@@ -41,6 +41,9 @@ export default {
           elevated: '#1e293b',
           border: '#1e293b',
           hover: '#1e293b',
+          'surface-subtle': 'rgba(255,255,255,0.03)',
+          'surface-elevated': 'rgba(255,255,255,0.06)',
+          'surface-overlay': 'rgba(255,255,255,0.08)',
         },
       },
       borderRadius: {
@@ -72,10 +75,6 @@ export default {
         'slide-in-right': 'slideInRight 0.25s ease-out',
         'scale-in': 'scaleIn 0.2s ease-out',
         'slide-up': 'slideUp 0.3s ease-out',
-        'blob': 'blob 18s ease-in-out infinite',
-        'blob-slow': 'blob 26s ease-in-out infinite',
-        'blob-slow': 'blob 26s ease-in-out infinite',
-        'shine': 'shine 2.5s linear infinite',
         'float-up': 'floatUp 0.6s ease-out both',
       },
       keyframes: {
@@ -98,15 +97,6 @@ export default {
         slideUp: {
           '0%': { opacity: '0', transform: 'translateY(4px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
-        },
-        blob: {
-          '0%, 100%': { transform: 'translate(0px, 0px) scale(1)' },
-          '33%': { transform: 'translate(30px, -40px) scale(1.1)' },
-          '66%': { transform: 'translate(-25px, 20px) scale(0.95)' },
-        },
-        shine: {
-          '0%': { backgroundPosition: '-200% 0' },
-          '100%': { backgroundPosition: '200% 0' },
         },
         floatUp: {
           '0%': { opacity: '0', transform: 'translateY(16px)' },

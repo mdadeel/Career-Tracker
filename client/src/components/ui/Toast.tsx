@@ -17,16 +17,27 @@ const borderMap: Record<ToastType, string> = {
 };
 
 export function ToastContainer() {
-  const { toasts, removeToast } = useToast();
+  const { toasts, removeToast, pauseToast, resumeToast } = useToast();
 
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm">
+    // role="status" live region — screen readers announce new toasts
+    <div
+      className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 max-w-sm"
+      role="status"
+      aria-live="polite"
+      aria-label="Notifications"
+    >
       {toasts.map((toast) => (
         <div
           key={toast.id}
           className={`flex items-start gap-3 rounded-xl border px-4 py-3 shadow-elevated animate-fade-in-up ${borderMap[toast.type]}`}
+          // Pause auto-dismiss while hovered or focused, resume on leave
+          onMouseEnter={() => pauseToast(toast.id)}
+          onMouseLeave={() => resumeToast(toast.id, toast.duration)}
+          onFocus={() => pauseToast(toast.id)}
+          onBlur={() => resumeToast(toast.id, toast.duration)}
         >
           <span className="mt-0.5 shrink-0">{iconMap[toast.type]}</span>
           <p className="flex-1 text-sm font-medium">{toast.message}</p>

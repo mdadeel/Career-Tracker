@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { applicationService } from "../services/applicationService";
 import { aiService, MatchAnalysis, InterviewQuestion, EmailDraft } from "../services/ai.service";
 import { useToast } from "../context/ToastContext";
-import { Button, Badge, statusVariantMap, SparkleIcon } from "../components/ui";
+import { Button, Badge, statusVariantMap, SparkleIcon, Tabs } from "../components/ui";
 import {
   ArrowLeft,
   Spinner,
@@ -235,50 +235,34 @@ export function ApplicationAiDetailPage() {
         {/* Right Column: AI Career Copilot Interactive Workspace */}
         <div className="lg:col-span-7 space-y-4">
           <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-500/20 bg-white dark:bg-dark-surface p-5 space-y-4 shadow-sm">
-            {/* Copilot Header Tabs */}
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-4">
+            {/* Copilot Header Tabs — reusable accessible Tabs */}
+            <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-3">
               <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
                 <SparkleIcon className="w-5 h-5" />
                 <h2 className="font-bold text-sm">AI Career Copilot Workspace</h2>
               </div>
 
-              <div className="flex items-center gap-1 bg-slate-100 dark:bg-zinc-800 p-1 rounded-lg border border-slate-200 dark:border-white/10 text-xs">
-                <button
-                  onClick={() => { setActiveTab("match"); if (!matchData && !isMatchLoading) handleAnalyzeMatch(); }}
-                  className={`px-3 py-1.5 rounded-md font-medium transition-all ${
-                    activeTab === "match"
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300 hover:text-indigo-600"
-                  }`}
-                >
-                  Match Score
-                </button>
-                <button
-                  onClick={() => { setActiveTab("interview"); if (questions.length === 0 && !isInterviewLoading) handleFetchInterview(); }}
-                  className={`px-3 py-1.5 rounded-md font-medium transition-all ${
-                    activeTab === "interview"
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300 hover:text-indigo-600"
-                  }`}
-                >
-                  Interview Prep
-                </button>
-                <button
-                  onClick={() => { setActiveTab("email"); if (!emailDraft && !isEmailLoading) handleFetchEmail(); }}
-                  className={`px-3 py-1.5 rounded-md font-medium transition-all ${
-                    activeTab === "email"
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "text-slate-600 dark:text-slate-300 hover:text-indigo-600"
-                  }`}
-                >
-                  Outreach Email
-                </button>
-              </div>
+              <Tabs
+                ariaLabel="Copilot tools"
+                idPrefix="copilot-workspace"
+                active={activeTab}
+                onChange={(tab) => {
+                  setActiveTab(tab);
+                  if (tab === "match" && !matchData && !isMatchLoading) handleAnalyzeMatch();
+                  if (tab === "interview" && questions.length === 0 && !isInterviewLoading) handleFetchInterview();
+                  if (tab === "email" && !emailDraft && !isEmailLoading) handleFetchEmail();
+                }}
+                tabs={[
+                  { value: "match", label: "Match Score" },
+                  { value: "interview", label: "Interview Prep" },
+                  { value: "email", label: "Outreach Email" },
+                ]}
+              />
             </div>
 
             {/* TAB 1: MATCH SCORE & SKILLS GAP */}
             {activeTab === "match" && (
-              <div className="space-y-4 pt-1">
+              <div role="tabpanel" id="copilot-workspace-panel-match" aria-labelledby="copilot-workspace-tab-match" className="space-y-4 pt-1">
                 {!matchData && !isMatchLoading && (
                   <div className="text-center py-10 space-y-3">
                     <p className="text-xs text-slate-500">Calculate how well your saved resume profile aligns with this role.</p>
@@ -358,7 +342,7 @@ export function ApplicationAiDetailPage() {
 
             {/* TAB 2: INTERVIEW PREPARATION */}
             {activeTab === "interview" && (
-              <div className="space-y-4 pt-1">
+              <div role="tabpanel" id="copilot-workspace-panel-interview" aria-labelledby="copilot-workspace-tab-interview" className="space-y-4 pt-1">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-slate-500">Practice questions generated specifically for this JD.</p>
                   <Button size="sm" onClick={handleFetchInterview} disabled={isInterviewLoading} className="bg-indigo-600 text-white">
@@ -397,7 +381,7 @@ export function ApplicationAiDetailPage() {
 
             {/* TAB 3: OUTREACH EMAIL DRAFT */}
             {activeTab === "email" && (
-              <div className="space-y-4 pt-1">
+              <div role="tabpanel" id="copilot-workspace-panel-email" aria-labelledby="copilot-workspace-tab-email" className="space-y-4 pt-1">
                 <div className="flex items-center gap-3">
                   <select
                     value={emailType}

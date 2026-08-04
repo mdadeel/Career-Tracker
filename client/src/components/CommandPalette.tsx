@@ -82,6 +82,7 @@ export function CommandPalette({ applications, onClose, onNavigate, onAddApplica
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const navActions = NAV_ACTIONS.map((a) => ({
     ...a,
@@ -131,12 +132,17 @@ export function CommandPalette({ applications, onClose, onNavigate, onAddApplica
     ...filtered,
   ];
 
+  // Capture the invoking control and restore focus to it on dismissal (per the command-palette pattern)
   useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement;
     inputRef.current?.focus();
+    return () => previousFocusRef.current?.focus();
   }, []);
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
+      // Ignore arrow/enter while an IME composition is in progress
+      if (e.nativeEvent.isComposing) return;
       if (e.key === "ArrowDown") {
         e.preventDefault();
         setSelectedIndex((i) => Math.min(i + 1, results.length - 1));
@@ -155,7 +161,12 @@ export function CommandPalette({ applications, onClose, onNavigate, onAddApplica
   );
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]">
+    <div
+      className="fixed inset-0 z-[60] flex items-start justify-center pt-[15vh]"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Command palette"
+    >
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div
         className="relative w-full max-w-lg animate-scale-in rounded-2xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface shadow-dialog overflow-hidden"

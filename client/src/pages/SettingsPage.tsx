@@ -5,6 +5,7 @@ import { useToast } from "../context/ToastContext";
 import { authService } from "../services/authService";
 import { aiService } from "../services/ai.service";
 import { ResumeManager } from "../components/ResumeManager";
+import { Alert } from "../components/ui";
 import { Eye, EyeSlash, Sun, Moon, Warning, Spinner, CheckCircle, Lightning } from "@phosphor-icons/react";
 
 /* ─── Password toggle icon ─── */
@@ -569,12 +570,7 @@ export function SettingsPage() {
                 </div>
               </div>
 
-              {passwordError && (
-                <div className="flex items-center gap-2 rounded-lg bg-rose-50 dark:bg-rose-500/10 px-3 py-2" role="alert">
-                  <Warning size={16} className="shrink-0 text-rose-500" />
-                  <span className="text-xs text-rose-700 dark:text-rose-400">{passwordError}</span>
-                </div>
-              )}
+              {passwordError && <Alert variant="error">{passwordError}</Alert>}
 
               <div className="flex items-center gap-2 pt-1">
                 <button type="submit" disabled={isChangingPassword} className="inline-flex items-center gap-1.5 rounded-lg bg-brand-600 px-4 py-2 text-xs font-medium text-white shadow-sm transition-all hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed">

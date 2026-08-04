@@ -40,3 +40,7 @@ secs/mini.md
 design.md
 client/playwright-report/
 demo/dashboard.html
+.firecrawl
+/demo/
+DESIGN-RECOMMENDATIONS.md
+/namethatui-site/

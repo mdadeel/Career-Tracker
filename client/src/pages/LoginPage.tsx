@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDemoRateLimiter } from "../hooks/useDemoRateLimiter";
-import { Button, Input, LogoFull } from "../components/ui";
+import { Button, Input, LogoFull, Alert } from "../components/ui";
 import { Lightning, WarningCircle, Spinner, Eye, EyeSlash } from "@phosphor-icons/react";
 import { Navigation } from "../components/Navigation";
 
@@ -100,35 +100,27 @@ export function LoginPage() {
                 placeholder="you@example.com"
               />
 
-              <div className="space-y-1.5">
-                <label className="block text-label uppercase tracking-wider text-ink-secondary">
-                  Password
-                </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                    className="block w-full rounded-lg border border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface px-3 py-2.5 pr-10 text-body text-ink dark:text-white/80 placeholder:text-ink-tertiary dark:placeholder:text-white/30 transition-all duration-150 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 focus:outline-none"
-                  />
+              <Input
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                trailing={
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 text-ink-tertiary dark:text-white/40 hover:text-ink-secondary dark:hover:text-white/60 transition-colors"
+                    className="p-0.5 text-ink-tertiary dark:text-white/40 hover:text-ink-secondary dark:hover:text-white/60 transition-colors"
                     tabIndex={-1}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeSlash size={18} /> : <Eye size={18} />}
                   </button>
-                </div>
-              </div>
+                }
+              />
 
-              {error && (
-                <div className="rounded-lg border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 px-4 py-3">
-                  <p className="text-sm text-rose-700 dark:text-rose-300">{error}</p>
-                </div>
-              )}
+              {error && <Alert variant="error">{error}</Alert>}
 
               <Button type="submit" isLoading={isSubmitting} className="w-full">
                 {isSubmitting ? "Signing in..." : "Sign In"}
@@ -176,14 +168,11 @@ export function LoginPage() {
 
               {/* Rate limit status below the button */}
               {!rateLimit.allowed && (
-                <div className="flex items-center gap-2 rounded-lg bg-amber-50 dark:bg-amber-500/10 px-3 py-2 border border-amber-200 dark:border-amber-500/20" role="alert" aria-live="polite">
-                  <WarningCircle size={16} className="shrink-0 text-amber-600 dark:text-amber-400" />
-                  <span className="text-xs text-amber-700 dark:text-amber-400">
-                    Too many demo login attempts. Please wait{" "}
-                    <span className="font-mono font-semibold tabular-nums">{rateLimit.cooldownSeconds}</span>{" "}
-                    second{rateLimit.cooldownSeconds !== 1 ? "s" : ""} before trying again.
-                  </span>
-                </div>
+                <Alert variant="warning" role="status">
+                  Too many demo login attempts. Please wait{" "}
+                  <span className="font-mono font-semibold tabular-nums">{rateLimit.cooldownSeconds}</span>{" "}
+                  second{rateLimit.cooldownSeconds !== 1 ? "s" : ""} before trying again.
+                </Alert>
               )}
 
               {rateLimit.allowed && rateLimit.attemptsUsed > 0 && (

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useId, type ReactNode } from "react";
 import { Button } from "./Button";
 
 interface EmptyStateProps {
@@ -16,6 +16,10 @@ interface EmptyStateProps {
   tips?: string[];
 }
 
+/**
+ * Canonical empty state: a labelled <section> with aria-labelledby pointing at its
+ * heading, a simple icon, a one-line explanation, and one primary recovery action.
+ */
 export function EmptyState({
   icon,
   title,
@@ -24,14 +28,21 @@ export function EmptyState({
   secondaryAction,
   tips,
 }: EmptyStateProps) {
+  const titleId = useId();
+
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface px-6 py-16 text-center">
+    <section
+      aria-labelledby={titleId}
+      className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 dark:border-dark-border bg-white dark:bg-dark-surface px-6 py-16 text-center"
+    >
       {icon && (
         <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 dark:bg-white/[0.06] text-3xl">
           {icon}
         </div>
       )}
-      <h3 className="text-heading text-ink dark:text-white/90">{title}</h3>
+      <h3 id={titleId} className="text-heading text-ink dark:text-white/90">
+        {title}
+      </h3>
       {description && (
         <p className="mt-1.5 max-w-md text-body text-ink-secondary dark:text-white/50">
           {description}
@@ -64,6 +75,6 @@ export function EmptyState({
           </ul>
         </div>
       )}
-    </div>
+    </section>
   );
 }

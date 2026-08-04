@@ -10,6 +10,8 @@ import {
   Button,
   Dialog,
   SparkleIcon,
+  ToggleGroup,
+  Alert,
 } from "../components/ui";
 import { ApplicationRow } from "../components/ApplicationRow";
 import { ApplicationFormFields } from "../components/ApplicationFormFields";
@@ -18,7 +20,6 @@ import type { Application, ApplicationFormData } from "../types";
 import {
   Plus,
   MagnifyingGlass,
-  Warning,
   FileText,
   CaretLeft,
   CaretRight,
@@ -72,7 +73,7 @@ const SAVE_DELAY = 1500;
 
 function ApplicationsSkeleton() {
   return (
-    <div className="space-y-2">
+    <div className="space-y-2" aria-busy="true" aria-label="Loading applications">
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="flex items-center gap-3 rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface px-3 py-2.5">
           <div className="h-9 w-9 rounded-lg bg-slate-100 dark:bg-white/5" />
@@ -325,42 +326,17 @@ export function ApplicationsPage() {
           <p className="mt-0.5 text-sm text-ink-secondary dark:text-white/50">{total} application{total !== 1 ? "s" : ""} tracked</p>
         </div>
 
-        {/* View Switcher Pills */}
-        <div className="flex items-center gap-1.5 bg-slate-200/70 dark:bg-zinc-800/90 p-1.5 rounded-2xl border border-slate-300/80 dark:border-white/10 text-xs font-semibold shadow-inner backdrop-blur-sm">
-          <button
-            onClick={() => handleSwitchView("list")}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
-              activeView === "list"
-                ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-white shadow-md scale-[1.02]"
-                : "text-slate-600 dark:text-slate-400 hover:text-ink dark:hover:text-white hover:bg-white/50 dark:hover:bg-zinc-700/50"
-            }`}
-          >
-            <List size={16} weight={activeView === "list" ? "bold" : "regular"} />
-            <span>List View</span>
-          </button>
-          <button
-            onClick={() => handleSwitchView("board")}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
-              activeView === "board"
-                ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-white shadow-md scale-[1.02]"
-                : "text-slate-600 dark:text-slate-400 hover:text-ink dark:hover:text-white hover:bg-white/50 dark:hover:bg-zinc-700/50"
-            }`}
-          >
-            <SquaresFour size={16} weight={activeView === "board" ? "bold" : "regular"} />
-            <span>Kanban Board</span>
-          </button>
-          <button
-            onClick={() => handleSwitchView("saved")}
-            className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer ${
-              activeView === "saved"
-                ? "bg-white dark:bg-zinc-700 text-indigo-600 dark:text-white shadow-md scale-[1.02]"
-                : "text-slate-600 dark:text-slate-400 hover:text-ink dark:hover:text-white hover:bg-white/50 dark:hover:bg-zinc-700/50"
-            }`}
-          >
-            <Bookmark size={16} weight={activeView === "saved" ? "bold" : "regular"} />
-            <span>Saved Jobs</span>
-          </button>
-        </div>
+        {/* View Switcher — reusable segmented control */}
+        <ToggleGroup
+          ariaLabel="View applications as"
+          value={activeView}
+          onChange={(v) => handleSwitchView(v)}
+          options={[
+            { value: "list", label: "List View", icon: <List size={15} weight="bold" /> },
+            { value: "board", label: "Kanban Board", icon: <SquaresFour size={15} weight="bold" /> },
+            { value: "saved", label: "Saved Jobs", icon: <Bookmark size={15} weight="bold" /> },
+          ]}
+        />
 
         <Button
           size="sm"
@@ -430,18 +406,19 @@ export function ApplicationsPage() {
         )}
       </div>
 
-      {/* Error State */}
+      {/* Error State — reusable Alert callout */}
       {error && (
-        <div className="flex items-center gap-3 rounded-xl border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 px-4 py-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-500">
-            <Warning size={16} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-rose-800 dark:text-rose-300">Failed to load applications</p>
-            <p className="text-xs text-rose-600 dark:text-rose-400 mt-0.5">{error}</p>
-          </div>
-          <Button variant="secondary" size="sm" onClick={() => refresh()}>Retry</Button>
-        </div>
+        <Alert
+          variant="error"
+          title="Failed to load applications"
+          action={
+            <Button variant="secondary" size="sm" onClick={() => refresh()}>
+              Retry
+            </Button>
+          }
+        >
+          {error}
+        </Alert>
       )}
 
       {/* Board / Kanban View */}
@@ -496,9 +473,9 @@ export function ApplicationsPage() {
         </div>
       )}
 
-      {/* Pagination */}
+      {/* Pagination — nav landmark with aria-current=page per the pagination pattern */}
       {activeView !== "board" && !isLoading && totalPages > 1 && (
-        <div className="flex items-center justify-between pt-1">
+        <nav aria-label="pagination" className="flex items-center justify-between pt-1">
           <p className="text-xs text-ink-tertiary dark:text-white/40">
             Page {page} of {totalPages}
             <span className="hidden sm:inline"> &middot; {total} total</span>
@@ -507,6 +484,7 @@ export function ApplicationsPage() {
             <button
               onClick={() => goToPage(page - 1)}
               disabled={page <= 1}
+              aria-label="Previous page"
               className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-secondary dark:text-white/50 transition-colors hover:bg-surface-tertiary dark:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <CaretLeft size={14} />
@@ -524,11 +502,13 @@ export function ApplicationsPage() {
               return pages;
             })().map((p, i) =>
               p === "..." ? (
-                <span key={`e-${i}`} className="px-1.5 text-xs text-ink-tertiary dark:text-white/40">...</span>
+                <span key={`e-${i}`} className="px-1.5 text-xs text-ink-tertiary dark:text-white/40" aria-hidden="true">...</span>
               ) : (
                 <button
                   key={p}
                   onClick={() => goToPage(p as number)}
+                  aria-current={p === page ? "page" : undefined}
+                  aria-label={`Page ${p}`}
                   className={`min-w-[1.75rem] rounded-lg px-1.5 py-1 text-xs font-medium transition-colors ${
                     p === page
                       ? "bg-brand-600 text-white shadow-sm"
@@ -542,12 +522,13 @@ export function ApplicationsPage() {
             <button
               onClick={() => goToPage(page + 1)}
               disabled={page >= totalPages}
+              aria-label="Next page"
               className="rounded-lg px-2.5 py-1.5 text-xs font-medium text-ink-secondary dark:text-white/50 transition-colors hover:bg-surface-tertiary dark:hover:bg-white/5 disabled:cursor-not-allowed disabled:opacity-40"
             >
               <CaretRight size={14} />
             </button>
           </div>
-        </div>
+        </nav>
       )}
 
       {/* Detail Slide-over */}
@@ -819,12 +800,8 @@ export function ApplicationsPage() {
                 wideLayout
               />
 
-              {/* Error */}
-              {formError && (
-                <div className="rounded-lg border border-rose-200 dark:border-rose-500/20 bg-rose-50 dark:bg-rose-500/10 px-4 py-3">
-                  <p className="text-sm text-rose-700 dark:text-rose-300">{formError}</p>
-                </div>
-              )}
+              {/* Error — reusable Alert callout */}
+              {formError && <Alert variant="error">{formError}</Alert>}
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-1 border-t border-slate-100 dark:border-dark-border">

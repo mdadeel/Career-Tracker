@@ -1,20 +1,16 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApplications } from "../hooks/useApplications";
-import { Skeleton } from "../components/ui";
+import { Skeleton, ToggleGroup } from "../components/ui";
 import { CaretLeft, CaretRight, Plus, Chats, Bookmark, ArrowUp, PencilLine, ChatCircle, XCircle, CheckCircle } from "@phosphor-icons/react";
+import { STATUS_CONFIG, getPillClasses, type JobStatus } from "../constants/statusColors";
 import type { Application } from "../types";
 
 const WEEKDAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const STATUS_PILL_STYLES: Record<string, string> = {
-  Saved: "bg-slate-100 dark:bg-slate-500/20 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-500/30",
-  Applied: "bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-500/30",
-  Assessment: "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 hover:bg-amber-200 dark:hover:bg-amber-500/30",
-  Interview: "bg-purple-100 dark:bg-purple-500/20 text-purple-700 dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-500/30",
-  Rejected: "bg-rose-100 dark:bg-rose-500/20 text-rose-700 dark:text-rose-300 hover:bg-rose-200 dark:hover:bg-rose-500/30",
-  Offer: "bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-200 dark:hover:bg-emerald-500/30",
-};
+const STATUS_PILL_STYLES: Record<string, string> = Object.fromEntries(
+  Object.entries(STATUS_CONFIG).map(([status]) => [status, getPillClasses(status as JobStatus)])
+);
 
 function getMonthGrid(year: number, month: number) {
   const firstDay = new Date(year, month, 1).getDay();
@@ -27,7 +23,7 @@ function getMonthGrid(year: number, month: number) {
 
 function CalendarSkeleton() {
   return (
-    <div className="py-5 lg:py-6 space-y-4">
+    <div className="py-5 lg:py-6 space-y-4" aria-busy="true" aria-label="Loading calendar">
       <Skeleton width={160} height={18} />
       <div className="rounded-xl border border-slate-200 dark:border-dark-border bg-white dark:bg-dark-surface p-4">
         <div className="grid grid-cols-7 gap-1">
@@ -150,21 +146,16 @@ export function CalendarPage() {
           >
             Today
           </button>
-          <div className="flex items-center gap-0.5 rounded-lg border border-slate-200 dark:border-dark-border p-0.5">
-            {(["month", "agenda"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => setCalendarView(v)}
-                className={`px-2.5 py-1 text-[11px] font-semibold rounded-md transition-colors ${
-                  calendarView === v
-                    ? "bg-brand-600 text-white shadow-sm"
-                    : "text-ink-tertiary dark:text-white/40 hover:text-ink dark:hover:text-white/70"
-                }`}
-              >
-                {v === "month" ? "Month" : "Agenda"}
-              </button>
-            ))}
-          </div>
+          <ToggleGroup
+            ariaLabel="Calendar view"
+            size="sm"
+            value={calendarView}
+            onChange={(v) => setCalendarView(v)}
+            options={[
+              { value: "month", label: "Month" },
+              { value: "agenda", label: "Agenda" },
+            ]}
+          />
         </div>
       </div>
 

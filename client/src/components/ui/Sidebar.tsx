@@ -18,36 +18,32 @@ interface NavItem {
   comingSoon?: boolean;
 }
 
-const primaryNav: NavItem[] = [
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+const navSections: NavSection[] = [
   {
-    path: "/dashboard",
-    label: "Dashboard",
-    icon: <SquaresFour size={16} />,
+    label: "Work",
+    items: [
+      { path: "/dashboard", label: "Dashboard", icon: <SquaresFour size={16} /> },
+      { path: "/applications", label: "Applications Hub", icon: <StackSimple size={16} /> },
+    ],
   },
   {
-    path: "/applications",
-    label: "Applications Hub",
-    icon: <StackSimple size={16} />,
+    label: "Tools",
+    items: [
+      { path: "/analytics", label: "Analytics", icon: <ChartBar size={16} /> },
+      { path: "/calendar", label: "Calendar", icon: <Calendar size={16} /> },
+      { path: "/resumes", label: "Resumes", icon: <FileText size={16} /> },
+    ],
   },
   {
-    path: "/analytics",
-    label: "Analytics",
-    icon: <ChartBar size={16} />,
-  },
-  {
-    path: "/calendar",
-    label: "Calendar",
-    icon: <Calendar size={16} />,
-  },
-  {
-    path: "/resumes",
-    label: "Resumes",
-    icon: <FileText size={16} />,
-  },
-  {
-    path: "/settings",
-    label: "Settings",
-    icon: <Gear size={16} />,
+    label: "Account",
+    items: [
+      { path: "/settings", label: "Settings", icon: <Gear size={16} /> },
+    ],
   },
 ];
 
@@ -61,6 +57,7 @@ export function SidebarLayout() {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const sidebarToggleRef = useRef<HTMLButtonElement>(null);
 
   // Close user menu on click outside
   useEffect(() => {
@@ -74,6 +71,21 @@ export function SidebarLayout() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, [showUserMenu]);
 
+  // Mobile drawer: lock body scroll while open, close on Escape, return focus to toggle on close
+  useEffect(() => {
+    if (!isMobileOpen) return;
+    document.body.style.overflow = "hidden";
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsMobileOpen(false);
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", handleEscape);
+      sidebarToggleRef.current?.focus();
+    };
+  }, [isMobileOpen]);
+
   return (
     <div className="flex min-h-screen bg-surface-secondary dark:bg-dark">
       {/* Mobile overlay */}
@@ -81,11 +93,13 @@ export function SidebarLayout() {
         <div
           className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
           onClick={() => setIsMobileOpen(false)}
+          aria-hidden="true"
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar — the mobile variant is a nav drawer per the hamburger-menu pattern */}
       <aside
+        id="mobile-sidebar"
         className={`fixed inset-y-0 left-0 z-50 flex flex-col bg-[#0b1120] transition-all duration-200 w-48 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
         }`}
@@ -117,48 +131,58 @@ export function SidebarLayout() {
           </button>
         </div>
 
-        {/* Primary nav */}
-        <div className="flex-1 overflow-y-auto px-2 py-3">
-          <div className="space-y-0.5">
-            {primaryNav.map((item) => {
-              const isActive = location.pathname.startsWith(item.path);
-              const classes = `
-                flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium transition-all duration-150
-                ${isActive && !item.comingSoon
-                  ? "bg-brand-500/10 text-brand-400"
-                  : item.comingSoon
-                    ? "text-white/40 cursor-default"
-                    : "text-white/60 hover:text-white/85 hover:bg-white/[0.05]"
-                }
-              `.trim();
-              return item.comingSoon ? (
-                <div key={item.path} className={classes}>
-                  <span className="shrink-0">{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
-                  <span className="rounded border border-white/[0.07] px-1.5 py-[1px] text-[9px] font-medium text-white/35">
-                    Soon
-                  </span>
-                </div>
-              ) : (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setIsMobileOpen(false)}
-                  className={classes}
-                >
-                  <span className="shrink-0">{item.icon}</span>
-                  <span className="flex-1">{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
+        {/* Primary nav — only the link group is <nav> per the header-navbar pattern */}
+        <nav aria-label="Main" className="flex-1 overflow-y-auto px-2 py-3">
+          {navSections.map((section, idx) => (
+            <div key={section.label} className={idx > 0 ? "mt-4" : ""}>
+              <p className="mb-1.5 px-2.5 text-[10px] font-semibold uppercase tracking-wider text-white/30">
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map((item) => {
+                  const isActive = location.pathname.startsWith(item.path);
+                  const classes = `
+                    flex items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium transition-all duration-150
+                    ${isActive && !item.comingSoon
+                      ? "bg-brand-500/10 text-brand-400"
+                      : item.comingSoon
+                        ? "text-white/40 cursor-default"
+                        : "text-white/60 hover:text-white/85 hover:bg-white/[0.05]"
+                    }
+                  `.trim();
+                  return item.comingSoon ? (
+                    <div key={item.path} className={classes}>
+                      <span className="shrink-0">{item.icon}</span>
+                      <span className="flex-1">{item.label}</span>
+                      <span className="rounded border border-white/[0.07] px-1.5 py-[1px] text-[9px] font-medium text-white/35">
+                        Soon
+                      </span>
+                    </div>
+                  ) : (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setIsMobileOpen(false)}
+                      className={classes}
+                      aria-current={isActive ? "page" : undefined}
+                    >
+                      <span className="shrink-0">{item.icon}</span>
+                      <span className="flex-1">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </nav>
 
         {/* User section with dropdown */}
         <div ref={userMenuRef} className="relative border-t border-white/[0.06]">
           <button
             onClick={() => setShowUserMenu(!showUserMenu)}
             className="flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-xs font-medium text-white/60 transition-colors hover:bg-white/[0.05] hover:text-white/85"
+            aria-haspopup="menu"
+            aria-expanded={showUserMenu}
           >
             <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-500/20 text-xs font-semibold text-brand-400">
               {user?.name?.charAt(0)?.toUpperCase() || "U"}
@@ -171,7 +195,7 @@ export function SidebarLayout() {
 
           {/* Dropdown menu */}
           {showUserMenu && (
-            <div className="absolute bottom-full left-2 right-2 mb-1 rounded-xl border border-white/[0.08] bg-[#161b2e] py-1 shadow-xl">
+            <div role="menu" className="absolute bottom-full left-2 right-2 mb-1 rounded-xl border border-white/[0.08] bg-[#161b2e] py-1 shadow-xl">
               <div className="border-b border-white/[0.06] px-3 py-2.5">
                 <p className="text-xs font-medium text-white/85">{user?.name}</p>
                 <p className="mt-0.5 text-xs text-white/40">{user?.email}</p>
@@ -180,6 +204,7 @@ export function SidebarLayout() {
               <button
                 onClick={() => { setShowUserMenu(false); logout(); }}
                 className="flex w-full items-center gap-2.5 px-3 py-2 text-xs text-white/60 transition-colors hover:bg-white/[0.05] hover:text-rose-400"
+                role="menuitem"
               >
                 <SignOut size={16} />
                 Sign out
@@ -194,9 +219,12 @@ export function SidebarLayout() {
         {/* Mobile top bar */}
         <header className="sticky top-0 z-30 flex h-12 items-center gap-2 border-b border-slate-200 bg-white/90 backdrop-blur-md px-3 dark:border-dark-border dark:bg-dark/90 md:hidden">
           <button
-            onClick={() => setIsMobileOpen(true)}
+            ref={sidebarToggleRef}
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
             className="rounded-md p-1.5 text-ink-secondary hover:bg-surface-tertiary dark:text-white/60 dark:hover:bg-dark-hover"
             aria-label="Open menu"
+            aria-expanded={isMobileOpen}
+            aria-controls="mobile-sidebar"
           >
             <List size={16} />
           </button>
