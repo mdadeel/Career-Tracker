@@ -13,7 +13,7 @@ import {
 } from "@phosphor-icons/react";
 import { Button, LogoFull, Accordion } from "../components/ui";
 import { Navigation } from "../components/Navigation";
-import { SEOHead } from "../components/SEOHead";
+import { useSEO } from "../hooks/useSEO";
 
 
 const SITE_OWNER = {
@@ -51,19 +51,6 @@ const FAQ_ITEMS = [
       "CareerTrack is 100% free for job seekers with zero limits on the number of applications, notes, or saved jobs you can log.",
   },
 ];
-
-const faqJsonLdSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: FAQ_ITEMS.map((item) => ({
-    "@type": "Question",
-    name: item.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: item.answer,
-    },
-  })),
-};
 
 /**
  * Realistic Sample Applications used for the Interactive Hero Preview & Sandbox
@@ -654,11 +641,14 @@ function CtaFooter() {
 }
 
 export function LandingPage() {
+  const seo = useSEO({
+    faq: FAQ_ITEMS.map((item) => ({ question: item.question, answer: item.answer })),
+  });
   return (
     <div className="flex min-h-screen flex-col bg-surface-secondary text-ink dark:bg-dark dark:text-white">
-      <SEOHead schema={[faqJsonLdSchema]} />
+      {seo}
       <Navigation />
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <AsymmetricHero />
         <TrustBar />
         <BentoFeatureGrid />

@@ -5,6 +5,7 @@ import { useTheme } from "../../hooks/useTheme";
 import { ErrorBoundary } from "../ErrorBoundary";
 import { CommandPalette } from "../CommandPalette";
 import { LogoFull } from "./Logo";
+import { SEO } from "../../seo/SEO";
 import {
   SquaresFour, StackSimple, ChartBar, Calendar, FileText,
   Gear, SignOut, Sun, Moon, CaretDown, List,
@@ -88,6 +89,7 @@ export function SidebarLayout() {
 
   return (
     <div className="flex min-h-screen bg-surface-secondary dark:bg-dark">
+      <SEO pathname={location.pathname} />
       {/* Mobile overlay */}
       {isMobileOpen && (
         <div
@@ -235,7 +237,7 @@ export function SidebarLayout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1">
+        <main id="main-content" className="flex-1">
           <ErrorBoundary>
             <div className="px-3 py-5 lg:px-4 lg:py-6">
               <Suspense fallback={

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSEO } from "../hooks/useSEO";
 import { Button, Input, LogoFull, Alert } from "../components/ui";
 import { Eye, EyeSlash } from "@phosphor-icons/react";
 import { Navigation } from "../components/Navigation";
 
 export function RegisterPage() {
   const { register } = useAuth();
+  const seo = useSEO();
   const navigate = useNavigate();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,8 +33,9 @@ export function RegisterPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {seo}
       <Navigation />
-      <div className="flex flex-1">
+      <main id="main-content" className="flex flex-1">
         {/* Left - Visual */}
         <div className="hidden lg:flex flex-1 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800">
           {/* Image overlay */}
@@ -52,7 +55,7 @@ export function RegisterPage() {
             <div className="mb-5">
               <LogoFull size={32} textClassName="text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Stay organized</h2>
+            <p className="text-2xl font-bold text-white">Stay organized</p>
             <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-sm">
               Keep every application, interview, and offer in one place. Know where you stand at a glance.
             </p>
@@ -117,7 +120,7 @@ export function RegisterPage() {
             </form>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

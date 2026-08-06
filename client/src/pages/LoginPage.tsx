@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useDemoRateLimiter } from "../hooks/useDemoRateLimiter";
+import { useSEO } from "../hooks/useSEO";
 import { Button, Input, LogoFull, Alert } from "../components/ui";
 import { Lightning, WarningCircle, Spinner, Eye, EyeSlash } from "@phosphor-icons/react";
 import { Navigation } from "../components/Navigation";
@@ -11,6 +12,7 @@ const DEMO_PASSWORD = "demo@123";
 
 export function LoginPage() {
   const { login } = useAuth();
+  const seo = useSEO();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -51,8 +53,9 @@ export function LoginPage() {
 
   return (
     <div className="flex min-h-screen flex-col">
+      {seo}
       <Navigation />
-      <div className="flex flex-1">
+      <main id="main-content" className="flex flex-1">
         {/* Left - Visual */}
         <div className="hidden lg:flex flex-1 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800">
           {/* Image overlay */}
@@ -72,13 +75,12 @@ export function LoginPage() {
             <div className="mb-5">
               <LogoFull size={32} textClassName="text-white" />
             </div>
-            <h2 className="text-2xl font-bold text-white">Track your job search</h2>
+            <p className="text-2xl font-bold text-white">Track your job search</p>
             <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-sm">
               Organize applications, store job descriptions, track statuses, and gain insights into your pipeline.
             </p>
           </div>
         </div>
-
         {/* Right - Form */}
         <div className="relative flex flex-1 items-center justify-center px-6 py-12 bg-white dark:bg-dark">
           <div className="w-full max-w-sm">
@@ -183,7 +185,7 @@ export function LoginPage() {
             </form>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }
