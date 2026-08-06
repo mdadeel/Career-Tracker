@@ -44,8 +44,8 @@
   }
 
   body {
-    background-color: #f8f9fb;
-    color: #0f172a;
+    background-color: #F2EFE8;
+    color: #000000;
   }
 
   .dark body {
@@ -54,8 +54,8 @@
   }
 
   ::selection {
-    background-color: rgba(79, 70, 229, 0.15);
-    color: #312e81;
+    background-color: rgba(0, 100, 255, 0.18);
+    color: #001a45;
   }
 
   .dark ::selection {
@@ -126,7 +126,7 @@
   }
 
   .font-display {
-    font-family: 'Geist', 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Source Serif 4', 'Georgia', serif;
   }
 }
 
