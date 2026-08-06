@@ -200,42 +200,42 @@ export function DashboardPage() {
           className="space-y-4"
         >
           {/* ─── Metric Cards ─── */}
-          <MetricCard
-            label="Applications"
-            value={stats?.total ?? 0}
-            sub={hasData ? `${thisWeekApps} this week` : undefined}
-            icon={<StackSimple size={18} />}
-            onClick={() => navigate("/applications")}
-          />
-          <div className="grid gap-3 grid-cols-3">
-        <MetricCard
-          label="Interviews"
-          value={stats?.interview ?? 0}
-          icon={<ChatCircle size={14} />}
-          empty={!hasData}
-          onClick={() => navigate("/applications?status=Interview")}
-        />
-        <MetricCard
-          label="Offers"
-          value={stats?.offer ?? 0}
-          icon={<CheckCircle size={14} />}
-          empty={!hasData}
-          onClick={() => navigate("/applications?status=Offer")}
-        />
-        <MetricCard
-          label={
-            <span className="inline-flex items-center gap-1">
-              Response Rate
-              <InfoTooltip text="Responses (interviews + offers + rejections) ÷ Total applications" />
-            </span>
-          }
-          value={hasData ? stats!.responseRate : 0}
-          valueSuffix={hasData ? "%" : ""}
-          sub={hasData ? `${stats!.interview + stats!.offer} of ${stats!.total}` : undefined}
-          icon={<ChartBar size={14} />}
-          empty={!hasData}
-        />
-      </div>
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
+            <MetricCard
+              label="Applications"
+              value={stats?.total ?? 0}
+              sub={hasData ? `${thisWeekApps} this week` : undefined}
+              icon={<StackSimple size={18} />}
+              onClick={() => navigate("/applications")}
+            />
+            <MetricCard
+              label="Interviews"
+              value={stats?.interview ?? 0}
+              icon={<ChatCircle size={14} />}
+              empty={!hasData}
+              onClick={() => navigate("/applications?status=Interview")}
+            />
+            <MetricCard
+              label="Offers"
+              value={stats?.offer ?? 0}
+              icon={<CheckCircle size={14} />}
+              empty={!hasData}
+              onClick={() => navigate("/applications?status=Offer")}
+            />
+            <MetricCard
+              label={
+                <span className="inline-flex items-center gap-1">
+                  Response Rate
+                  <InfoTooltip text="Responses (interviews + offers + rejections) ÷ Total applications" />
+                </span>
+              }
+              value={hasData ? stats!.responseRate : 0}
+              valueSuffix={hasData ? "%" : ""}
+              sub={hasData ? `${stats!.interview + stats!.offer} of ${stats!.total}` : undefined}
+              icon={<ChartBar size={14} />}
+              empty={!hasData}
+            />
+          </div>
 
           {/* ─── This Week + Upcoming Interviews ─── */}
           <div className="grid gap-4 lg:grid-cols-2">
