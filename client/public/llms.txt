@@ -1,0 +1,24 @@
+# CareerTrack Lite
+
+> CareerTrack is a free, private job application tracker with a kanban pipeline, interview calendar, and real-time analytics. Built for job seekers who want surgical precision in their search: organize applications, store job descriptions and resume links, track statuses from Saved to Offer, and measure response rates, interview conversion, and time-to-interview.
+
+## Core features
+- Kanban pipeline with 6 stages: Saved, Applied, Assessment, Interview, Rejected, Offer (drag-and-drop)
+- Applications hub with list, kanban board, and saved-jobs views
+- Full-text search across job titles, companies, and stored job descriptions
+- Interview scheduling with a calendar view
+- Analytics: response rate, interview rate, offer rate, monthly velocity, average time to interview, source breakdown
+- Resume management: store per-application resume versions and job-description links
+- AI career copilot: match scoring and skill gap analysis per application
+- Private, secure: JWT auth (httpOnly cookie) + bcrypt password hashing, per-user data isolation
+
+## Key pages
+- Home: https://careertrack.app/
+- Sign in: https://careertrack.app/login
+- Create account: https://careertrack.app/register
+
+## Documentation
+The application is a full-stack product (React 18 + Vite frontend, Express + Prisma + PostgreSQL backend). API endpoints under /api require authentication.
+
+## Support
+For issues or feedback, contact the maintainer (Shahnawas Adeel). The product is free to use with no credit card required.

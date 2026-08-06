@@ -1,0 +1,65 @@
+# CareerTrack robots.txt
+# Allow all major search engines and AI crawlers on public content.
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Yandex
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# AI / LLM crawlers
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: CCBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+# Crawl budget: don't let crawlers hammer dynamic API endpoints
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /login
+Disallow: /register
+Disallow: /dashboard
+Disallow: /applications
+Disallow: /analytics
+Disallow: /calendar
+Disallow: /resumes
+Disallow: /settings
+Disallow: /*/edit
+Disallow: /*/copilot
+
+Sitemap: https://careertrack.app/sitemap.xml
