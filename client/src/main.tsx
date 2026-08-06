@@ -2,33 +2,23 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
-import * as Sentry from "@sentry/react";
 import App from "./App";
 import "./index.css";
 
-// Initialize Sentry for client-side error monitoring
-if (import.meta.env.VITE_SENTRY_DSN) {
-  Sentry.init({
-    dsn: import.meta.env.VITE_SENTRY_DSN,
-    environment: import.meta.env.MODE || "development",
-    tracesSampleRate: 0.1,
-    integrations: [Sentry.browserTracingIntegration()],
-    // Only enable in production/staging to reduce dev noise
-    enabled: import.meta.env.PROD,
-  });
+async function initSentry() {
+  if (!import.meta.env.VITE_SENTRY_DSN) return null;
+  // Lazy-load Sentry so it only enters the bundle when a DSN is configured.
+  const Sentry = await import("@sentry/react");
+  if (import.meta.env.PROD) {
+    Sentry.init({
+      dsn: import.meta.env.VITE_SENTRY_DSN,
+      environment: import.meta.env.MODE || "production",
+      tracesSampleRate: 0.1,
+      integrations: [Sentry.browserTracingIntegration()],
+    });
+  }
+  return Sentry;
 }
-
-ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
-        <Sentry.ErrorBoundary fallback={<ErrorFallback />}>
-          <App />
-        </Sentry.ErrorBoundary>
-      </BrowserRouter>
-    </HelmetProvider>
-  </React.StrictMode>
-);
 
 function ErrorFallback() {
   return (
@@ -50,3 +40,20 @@ function ErrorFallback() {
   );
 }
 
+initSentry().then((Sentry) => {
+  type ErrorBoundaryProps = { children: React.ReactNode; fallback: React.ReactNode };
+  const ErrorBoundary = (Sentry?.ErrorBoundary ??
+    (({ children }: ErrorBoundaryProps) => <>{children}</>)) as React.ComponentType<ErrorBoundaryProps>;
+
+  ReactDOM.createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <HelmetProvider>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+          <ErrorBoundary fallback={<ErrorFallback />}>
+            <App />
+          </ErrorBoundary>
+        </BrowserRouter>
+      </HelmetProvider>
+    </React.StrictMode>
+  );
+});
