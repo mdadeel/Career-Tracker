@@ -120,18 +120,18 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
   };
 
   return (
-    <div className="mt-6 rounded-2xl border border-indigo-200/80 dark:border-indigo-500/30 bg-gradient-to-b from-indigo-50/40 to-slate-50/50 dark:from-indigo-950/20 dark:to-zinc-900/50 p-5 space-y-4 shadow-sm">
+    <div className="mt-6 rounded-2xl border border-brand-200/80 dark:border-brand-500/30 bg-white dark:bg-dark-surface p-5 space-y-4">
       {/* Header bar with title and prominent Open Full Page button */}
-      <div className="flex items-center justify-between gap-3 border-b border-indigo-100 dark:border-white/10 pb-3.5">
-        <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-300">
-          <SparkleIcon className="w-4.5 h-4.5 text-indigo-500 animate-pulse" />
+      <div className="flex items-center justify-between gap-3 border-b border-brand-100 dark:border-white/10 pb-3.5">
+        <div className="flex items-center gap-2 text-brand-700 dark:text-brand-300">
+          <SparkleIcon className="w-4.5 h-4.5 text-brand-500" />
           <h3 className="font-bold text-sm tracking-tight">AI Career Copilot</h3>
         </div>
 
         <button
           type="button"
           onClick={() => navigate(`/applications/${applicationId}/copilot`)}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 dark:bg-indigo-500 dark:hover:bg-indigo-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:shadow-indigo-500/20 transition-all cursor-pointer group shrink-0"
+          className="inline-flex items-center gap-1.5 rounded-xl bg-brand-600 hover:bg-brand-700 dark:bg-brand-500 dark:hover:bg-brand-600 px-3 py-1.5 text-xs font-semibold text-white shadow-sm hover:shadow-brand-500/20 transition-all cursor-pointer group shrink-0"
         >
           <span>Open Full Page</span>
           <ArrowUpRight size={14} />
@@ -144,8 +144,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           onClick={() => { setActiveTab("match"); if (!matchData) fetchMatch(); }}
           className={`flex-1 py-1.5 rounded-lg font-medium transition-all text-center ${
             activeTab === "match"
-              ? "bg-indigo-600 text-white shadow-sm font-semibold"
-              : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white"
+              ? "bg-brand-600 text-white shadow-sm font-semibold"
+              : "text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white"
           }`}
         >
           Match Score
@@ -154,8 +154,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           onClick={() => { setActiveTab("interview"); if (questions.length === 0) fetchInterview(); }}
           className={`flex-1 py-1.5 rounded-lg font-medium transition-all text-center ${
             activeTab === "interview"
-              ? "bg-indigo-600 text-white shadow-sm font-semibold"
-              : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white"
+              ? "bg-brand-600 text-white shadow-sm font-semibold"
+              : "text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white"
           }`}
         >
           Interview Prep
@@ -164,8 +164,8 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           onClick={() => { setActiveTab("email"); if (!emailDraft) fetchEmail(); }}
           className={`flex-1 py-1.5 rounded-lg font-medium transition-all text-center ${
             activeTab === "email"
-              ? "bg-indigo-600 text-white shadow-sm font-semibold"
-              : "text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-white"
+              ? "bg-brand-600 text-white shadow-sm font-semibold"
+              : "text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-white"
           }`}
         >
           Outreach Email
@@ -180,14 +180,14 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           {!matchData && !isMatchLoading && (
             <div className="text-center py-6">
               <p className="text-xs text-slate-500 mb-3">Analyze how well your resume matches this job description.</p>
-              <Button size="sm" onClick={fetchMatch} className="bg-indigo-600 text-white">
+              <Button size="sm" onClick={fetchMatch} className="bg-brand-600 text-white">
                 Analyze Match
               </Button>
             </div>
           )}
 
           {isMatchLoading && (
-            <div className="flex items-center justify-center py-8 gap-2 text-xs text-indigo-600 font-medium">
+            <div className="flex items-center justify-center py-8 gap-2 text-xs text-brand-600 font-medium">
               <Spinner size={16} className="animate-spin" /> Analyzing resume & JD requirements...
             </div>
           )}
@@ -197,9 +197,9 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
           {matchData && (
             <div className="space-y-3 text-xs">
               <div className="flex items-center gap-4 bg-white dark:bg-zinc-800 p-3 rounded-lg border border-slate-200 dark:border-white/10">
-                <div className="flex flex-col items-center justify-center bg-indigo-50 dark:bg-indigo-950/40 p-3 rounded-xl min-w-[70px]">
-                  <span className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">{matchData.matchScore}%</span>
-                  <span className="text-[10px] text-indigo-500 uppercase tracking-wider font-semibold">Match</span>
+                <div className="flex flex-col items-center justify-center bg-brand-50 dark:bg-brand-950/40 p-3 rounded-xl min-w-[70px]">
+                  <span className="text-2xl font-bold text-brand-600 dark:text-brand-400">{matchData.matchScore}%</span>
+                  <span className="text-[10px] text-brand-500 uppercase tracking-wider font-semibold">Match</span>
                 </div>
                 <div>
                   <p className="font-medium text-slate-800 dark:text-slate-200">{matchData.summary}</p>
@@ -233,7 +233,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
               {matchData.recommendations?.length > 0 && (
                 <div className="bg-white dark:bg-zinc-800 p-3 rounded-lg border border-slate-200 dark:border-white/10 space-y-1">
                   <h4 className="font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-1">
-                    <SparkleIcon className="w-3.5 h-3.5 text-indigo-500" /> Key Recommendations
+                    <SparkleIcon className="w-3.5 h-3.5 text-brand-500" /> Key Recommendations
                   </h4>
                   <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-0.5 pl-1">
                     {matchData.recommendations.map((rec, i) => (
@@ -251,7 +251,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
       {activeTab === "interview" && (
         <div className="space-y-3 text-xs">
           {isInterviewLoading && (
-            <div className="flex items-center justify-center py-8 gap-2 text-indigo-600 font-medium">
+            <div className="flex items-center justify-center py-8 gap-2 text-brand-600 font-medium">
               <Spinner size={16} className="animate-spin" /> Generating practice questions...
             </div>
           )}
@@ -263,7 +263,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
               {questions.map((q, idx) => (
                 <div key={idx} className="bg-white dark:bg-zinc-800 p-3 rounded-lg border border-slate-200 dark:border-white/10 space-y-1">
                   <div className="flex items-center justify-between">
-                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400">
+                    <span className="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400">
                       {q.category}
                     </span>
                     <span className="text-slate-400 text-[10px]">Q{idx + 1}</span>
@@ -292,7 +292,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
               <option value="thank_you">Post-Interview Thank You</option>
               <option value="cold_outreach">Recruiter Cold Outreach</option>
             </select>
-            <Button size="sm" onClick={fetchEmail} disabled={isEmailLoading} className="bg-indigo-600 text-white">
+            <Button size="sm" onClick={fetchEmail} disabled={isEmailLoading} className="bg-brand-600 text-white">
               {isEmailLoading ? <Spinner size={14} className="animate-spin" /> : "Generate Draft"}
             </Button>
           </div>
@@ -305,7 +305,7 @@ export function AiAssistantDrawer({ applicationId }: AiAssistantDrawerProps) {
                 <span className="font-medium text-slate-700 dark:text-slate-300">Subject: {emailDraft.subject}</span>
                 <button
                   onClick={() => copyToClipboard(`Subject: ${emailDraft.subject}\n\n${emailDraft.body}`)}
-                  className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
+                  className="flex items-center gap-1 text-brand-600 dark:text-brand-400 font-medium hover:underline"
                 >
                   {copied ? <CheckCircle size={14} /> : null}
                   {copied ? "Copied!" : "Copy All"}

@@ -78,12 +78,12 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
 
   if (compact) {
     return (
-      <div className="rounded-xl border-2 border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/40 dark:from-indigo-950/30 dark:via-zinc-900/50 dark:to-purple-950/20 p-4 space-y-3 shadow-md shadow-indigo-500/5">
-        <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
-          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-100 dark:bg-indigo-500/20">
-            <SparkleIcon className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+      <div className="rounded-xl border-2 border-brand-200 dark:border-brand-500/30 bg-white dark:bg-dark-surface p-4 space-y-3">
+        <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400">
+          <span className="flex h-6 w-6 items-center justify-center rounded-md bg-brand-100 dark:bg-brand-500/20">
+            <SparkleIcon className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400" />
           </span>
-          <span className="text-xs font-bold text-indigo-700 dark:text-indigo-300">AI Auto-Fill</span>
+          <span className="text-xs font-bold text-brand-700 dark:text-brand-300">AI Auto-Fill</span>
           {isSuccess && (
             <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-emerald-100 dark:bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
               <CheckCircle size={10} weight="fill" /> Done
@@ -96,7 +96,7 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
           onChange={(e) => setJdText(e.target.value)}
           placeholder="Paste job description..."
           rows={2}
-          className="w-full rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-white dark:bg-zinc-900/80 p-2.5 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-shadow"
+          className="w-full rounded-lg border border-brand-200 dark:border-brand-500/20 bg-white dark:bg-zinc-900/80 p-2.5 text-xs text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 transition-shadow"
         />
 
         {showSetupPrompt && <AiSetupPrompt message="Add your API key in Settings to use AI Auto-Fill." />}
@@ -112,7 +112,7 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
           size="sm"
           onClick={handleParse}
           disabled={isParsing || !jdText.trim()}
-          className="!w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-1.5 text-xs font-semibold shadow-sm shadow-indigo-500/20"
+          className="!w-full bg-brand-600 hover:bg-brand-700 text-white gap-1.5 text-xs font-semibold shadow-sm shadow-brand-500/20"
         >
           {isParsing ? (
             <>
@@ -131,15 +131,15 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
   }
 
   return (
-    <div className="rounded-xl border-2 border-indigo-200 dark:border-indigo-500/30 bg-gradient-to-br from-indigo-50/80 via-white to-purple-50/40 dark:from-indigo-950/30 dark:via-zinc-900/50 dark:to-purple-950/20 p-5 space-y-4 shadow-md shadow-indigo-500/5">
+    <div className="rounded-xl border-2 border-brand-200 dark:border-brand-500/30 bg-white dark:bg-dark-surface p-5 space-y-4">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2.5 text-indigo-600 dark:text-indigo-400">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 dark:bg-indigo-500/20">
-            <SparkleIcon className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex items-center gap-2.5 text-brand-600 dark:text-brand-400">
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-100 dark:bg-brand-500/20">
+            <SparkleIcon className="w-4 h-4 text-brand-600 dark:text-brand-400" />
           </span>
           <div>
-            <h3 className="text-sm font-bold text-indigo-700 dark:text-indigo-300">AI Auto-Fill Assistant</h3>
-            <p className="text-[11px] text-indigo-500/70 dark:text-indigo-400/60">Paste a job description to auto-populate fields</p>
+            <h3 className="text-sm font-bold text-brand-700 dark:text-brand-300">AI Auto-Fill Assistant</h3>
+            <p className="text-[11px] text-brand-500/70 dark:text-brand-400/60">Paste a job description to auto-populate fields</p>
           </div>
         </div>
         {isSuccess && (
@@ -158,7 +158,7 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
         onChange={(e) => setJdText(e.target.value)}
         placeholder="Paste the full job description text here..."
         rows={4}
-        className="w-full rounded-lg border border-indigo-200 dark:border-indigo-500/20 bg-white dark:bg-zinc-900/80 p-3 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-shadow"
+        className="w-full rounded-lg border border-brand-200 dark:border-brand-500/20 bg-white dark:bg-zinc-900/80 p-3 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 transition-shadow"
       />
 
       {showSetupPrompt && <AiSetupPrompt message="Add your API key in Settings to use AI Auto-Fill." />}
@@ -174,7 +174,7 @@ export function AiJdParserBox({ onParsed, compact }: AiJdParserBoxProps) {
         size="md"
         onClick={handleParse}
         disabled={isParsing || !jdText.trim()}
-        className="!w-full bg-indigo-600 hover:bg-indigo-700 text-white gap-2 !py-2.5 text-sm font-semibold shadow-md shadow-indigo-500/20"
+        className="!w-full bg-brand-600 hover:bg-brand-700 text-white gap-2 !py-2.5 text-sm font-semibold shadow-md shadow-brand-500/20"
       >
         {isParsing ? (
           <>

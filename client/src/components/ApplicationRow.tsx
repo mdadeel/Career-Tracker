@@ -181,8 +181,8 @@ export const ApplicationRow = memo(function ApplicationRow({
 
         <div className="w-24 shrink-0 flex items-center justify-center">
           {application.aiMatchScore !== undefined && application.aiMatchScore !== null ? (
-            <span className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-500/30 shadow-sm">
-              <SparkleIcon className="w-3 h-3 text-indigo-500" />
+            <span className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-bold bg-brand-50 dark:bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-500/30">
+              <SparkleIcon className="w-3 h-3 text-brand-500" />
               <span>{application.aiMatchScore}%</span>
             </span>
           ) : (
@@ -191,7 +191,7 @@ export const ApplicationRow = memo(function ApplicationRow({
                 e.stopPropagation();
                 if (onAnalyzeMatch) onAnalyzeMatch();
               }}
-              className="rounded-md p-1.5 text-ink-tertiary dark:text-white/30 opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 hover:text-indigo-600 dark:hover:text-indigo-400"
+              className="rounded-md p-1.5 text-ink-tertiary dark:text-white/30 opacity-0 group-hover:opacity-100 transition-all duration-150 hover:bg-brand-50 dark:hover:bg-brand-500/10 hover:text-brand-600 dark:hover:text-brand-400"
               title="Analyze AI Match Score"
               aria-label="Analyze AI Match Score"
             >
@@ -202,7 +202,7 @@ export const ApplicationRow = memo(function ApplicationRow({
 
         <span className="w-12 shrink-0 flex items-center justify-center">
           {hasResume ? (
-            <FileText size={14} className="text-indigo-500" />
+            <FileText size={14} className="text-brand-500" />
           ) : (
             <FileText size={14} className="text-ink-tertiary dark:text-white/30 opacity-40" />
           )}

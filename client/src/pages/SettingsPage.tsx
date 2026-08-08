@@ -396,16 +396,16 @@ export function SettingsPage() {
         {/* Right column */}
         <div className="space-y-6">
           {/* AI Provider & API Keys Configuration Section */}
-          <section className="rounded-xl border border-indigo-200/80 dark:border-indigo-500/20 bg-white dark:bg-dark-surface overflow-hidden shadow-sm">
-            <div className="px-5 py-4 border-b border-indigo-100 dark:border-white/10 flex items-center justify-between bg-indigo-50/40 dark:bg-indigo-950/20">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+          <section className="rounded-xl border border-brand-200/80 dark:border-brand-500/20 bg-white dark:bg-dark-surface overflow-hidden shadow-sm">
+            <div className="px-5 py-4 border-b border-brand-100 dark:border-white/10 flex items-center justify-between bg-brand-50/40 dark:bg-brand-950/20">
+              <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400">
                 <Lightning size={18} />
                 <h2 className="text-sm font-semibold">AI Provider & API Keys</h2>
               </div>
               <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
                 aiProvider === "system_default"
                   ? "bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300"
-                  : "bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300"
+                  : "bg-brand-100 dark:bg-brand-900/40 text-brand-700 dark:text-brand-300"
               }`}>
                 {aiProvider === "system_default" ? "Built-in" : "Custom Keys"}
               </span>
@@ -532,7 +532,7 @@ export function SettingsPage() {
                 <button
                   type="submit"
                   disabled={isSavingAiConfig}
-                  className="rounded-lg bg-indigo-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+                  className="rounded-lg bg-brand-600 px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-brand-700 disabled:opacity-50 transition-colors flex items-center gap-1.5"
                 >
                   {isSavingAiConfig ? <Spinner size={14} className="animate-spin" /> : null}
                   {isSavingAiConfig ? "Saving..." : "Save AI Settings"}

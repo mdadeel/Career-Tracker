@@ -218,7 +218,7 @@ function AsymmetricHero() {
 
           {/* Right Column: Dynamic Interactive Mockup */}
           <div className="lg:col-span-6">
-            <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-2xl ring-1 ring-slate-900/5 dark:border-dark-border dark:bg-dark-surface">
+            <div className="relative rounded-2xl border border-slate-200/90 bg-white shadow-card dark:border-dark-border dark:bg-dark-surface">
               {/* Browser Header Bar */}
               <div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3 dark:border-dark-border">
                 <div className="flex items-center gap-1.5">
@@ -379,7 +379,7 @@ function TrustBar() {
           <span>No Credit Card Required</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <ChartBar size={16} className="text-violet-500" />
+          <ChartBar size={16} className="text-brand-500" />
           <span>Real-Time Analytics</span>
         </div>
       </div>
@@ -445,7 +445,7 @@ function BentoFeatureGrid() {
 
           {/* Card 2: Command Input Cmd+K Typewriter */}
           <div className="group relative rounded-2xl border border-slate-200/90 bg-surface-secondary/60 p-6 transition-all duration-200 hover:border-brand-500/40 hover:shadow-card-hover dark:border-dark-border dark:bg-dark">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600 dark:bg-violet-500/10 dark:text-violet-400">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-500/10 dark:text-brand-400">
               <MagnifyingGlass size={22} weight="bold" />
             </div>
             <h3 className="mt-5 text-lg font-bold text-ink dark:text-white/90">Global Command Palette</h3>
@@ -534,7 +534,7 @@ function StatsAndTestimonials() {
             <p className="mt-1 text-xs text-ink-tertiary dark:text-white/40">Calculated directly from active interview funnel</p>
           </div>
           <div className="rounded-2xl border border-slate-200/80 bg-white p-6 dark:border-dark-border dark:bg-dark-surface">
-            <p className="text-4xl font-extrabold tracking-tight text-violet-600 dark:text-violet-400">100%</p>
+            <p className="text-4xl font-extrabold tracking-tight text-brand-600 dark:text-brand-400">100%</p>
             <p className="mt-2 text-sm font-semibold text-ink dark:text-white/80">Private User Isolation</p>
             <p className="mt-1 text-xs text-ink-tertiary dark:text-white/40">JWT authentication with bcrypt security</p>
           </div>

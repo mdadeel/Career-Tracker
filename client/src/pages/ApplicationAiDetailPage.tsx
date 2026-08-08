@@ -164,7 +164,7 @@ export function ApplicationAiDetailPage() {
                 {application.status}
               </Badge>
               {matchData?.matchScore !== undefined && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/20">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 border border-brand-200 dark:border-brand-500/20">
                   <SparkleIcon className="w-3 h-3" /> {matchData.matchScore}% Match
                 </span>
               )}
@@ -234,10 +234,10 @@ export function ApplicationAiDetailPage() {
 
         {/* Right Column: AI Career Copilot Interactive Workspace */}
         <div className="lg:col-span-7 space-y-4">
-          <div className="rounded-xl border border-indigo-200/80 dark:border-indigo-500/20 bg-white dark:bg-dark-surface p-5 space-y-4 shadow-sm">
+          <div className="rounded-xl border border-brand-200/80 dark:border-brand-500/20 bg-white dark:bg-dark-surface p-5 space-y-4 shadow-sm">
             {/* Copilot Header Tabs — reusable accessible Tabs */}
             <div className="flex items-center justify-between gap-4 border-b border-slate-100 dark:border-white/10 pb-3">
-              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400">
+              <div className="flex items-center gap-2 text-brand-600 dark:text-brand-400">
                 <SparkleIcon className="w-5 h-5" />
                 <h2 className="font-bold text-sm">AI Career Copilot Workspace</h2>
               </div>
@@ -266,14 +266,14 @@ export function ApplicationAiDetailPage() {
                 {!matchData && !isMatchLoading && (
                   <div className="text-center py-10 space-y-3">
                     <p className="text-xs text-slate-500">Calculate how well your saved resume profile aligns with this role.</p>
-                    <Button size="sm" onClick={() => handleAnalyzeMatch(false)} className="bg-indigo-600 text-white">
+                    <Button size="sm" onClick={() => handleAnalyzeMatch(false)} className="bg-brand-600 text-white">
                       🎯 Analyze Match Score
                     </Button>
                   </div>
                 )}
 
                 {isMatchLoading && (
-                  <div className="flex flex-col items-center justify-center py-12 gap-2 text-xs text-indigo-600 font-medium">
+                  <div className="flex flex-col items-center justify-center py-12 gap-2 text-xs text-brand-600 font-medium">
                     <Spinner size={24} className="animate-spin" />
                     <span>Analyzing resume requirements against job description...</span>
                   </div>
@@ -283,7 +283,7 @@ export function ApplicationAiDetailPage() {
                   <div className="space-y-4 text-xs">
                     <div className="flex items-center justify-between bg-slate-50 dark:bg-zinc-900/60 p-4 rounded-xl border border-slate-200 dark:border-white/10">
                       <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-center justify-center bg-indigo-600 text-white p-3 rounded-xl min-w-[75px]">
+                        <div className="flex flex-col items-center justify-center bg-brand-600 text-white p-3 rounded-xl min-w-[75px]">
                           <span className="text-2xl font-black">{matchData.matchScore}%</span>
                           <span className="text-[10px] uppercase font-semibold">Match</span>
                         </div>
@@ -292,7 +292,7 @@ export function ApplicationAiDetailPage() {
 
                       <button
                         onClick={() => handleAnalyzeMatch(true)}
-                        className="inline-flex items-center gap-1 text-xs text-indigo-600 dark:text-indigo-400 font-medium hover:underline"
+                        className="inline-flex items-center gap-1 text-xs text-brand-600 dark:text-brand-400 font-medium hover:underline"
                         title="Re-run analysis"
                       >
                         🔄 Re-analyze
@@ -326,7 +326,7 @@ export function ApplicationAiDetailPage() {
                     {matchData.recommendations?.length > 0 && (
                       <div className="bg-white dark:bg-zinc-800 p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2">
                         <h4 className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5 text-xs">
-                          <SparkleIcon className="w-3.5 h-3.5 text-indigo-500" /> Tailoring Recommendations
+                          <SparkleIcon className="w-3.5 h-3.5 text-brand-500" /> Tailoring Recommendations
                         </h4>
                         <ul className="list-disc list-inside text-slate-600 dark:text-slate-400 space-y-1 pl-1 text-xs">
                           {matchData.recommendations.map((rec, i) => (
@@ -345,13 +345,13 @@ export function ApplicationAiDetailPage() {
               <div role="tabpanel" id="copilot-workspace-panel-interview" aria-labelledby="copilot-workspace-tab-interview" className="space-y-4 pt-1">
                 <div className="flex items-center justify-between">
                   <p className="text-xs text-slate-500">Practice questions generated specifically for this JD.</p>
-                  <Button size="sm" onClick={handleFetchInterview} disabled={isInterviewLoading} className="bg-indigo-600 text-white">
+                  <Button size="sm" onClick={handleFetchInterview} disabled={isInterviewLoading} className="bg-brand-600 text-white">
                     {isInterviewLoading ? <Spinner size={14} className="animate-spin" /> : <>🔄 Regenerate</>}
                   </Button>
                 </div>
 
                 {isInterviewLoading && (
-                  <div className="flex flex-col items-center justify-center py-12 gap-2 text-xs text-indigo-600 font-medium">
+                  <div className="flex flex-col items-center justify-center py-12 gap-2 text-xs text-brand-600 font-medium">
                     <Spinner size={24} className="animate-spin" />
                     <span>Generating tailored behavioral & technical interview questions...</span>
                   </div>
@@ -362,14 +362,14 @@ export function ApplicationAiDetailPage() {
                     {questions.map((q, idx) => (
                       <div key={idx} className="bg-slate-50 dark:bg-zinc-900/60 p-4 rounded-xl border border-slate-200 dark:border-white/10 space-y-2 text-xs">
                         <div className="flex items-center justify-between">
-                          <span className="uppercase text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
+                          <span className="uppercase text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300">
                             {q.category}
                           </span>
                           <span className="text-slate-400 text-[11px] font-semibold">Question {idx + 1}</span>
                         </div>
                         <p className="font-bold text-slate-900 dark:text-white text-sm">{q.question}</p>
                         <div className="bg-white dark:bg-zinc-800 p-3 rounded-lg border border-slate-200/60 dark:border-white/5 text-slate-600 dark:text-slate-300 leading-relaxed">
-                          <strong className="text-indigo-600 dark:text-indigo-400 font-semibold">STAR Tip: </strong>
+                          <strong className="text-brand-600 dark:text-brand-400 font-semibold">STAR Tip: </strong>
                           {q.tip}
                         </div>
                       </div>
@@ -392,13 +392,13 @@ export function ApplicationAiDetailPage() {
                     <option value="thank_you">Post-Interview Thank You</option>
                     <option value="cold_outreach">Recruiter Cold Outreach</option>
                   </select>
-                  <Button size="sm" onClick={handleFetchEmail} disabled={isEmailLoading} className="bg-indigo-600 text-white">
+                  <Button size="sm" onClick={handleFetchEmail} disabled={isEmailLoading} className="bg-brand-600 text-white">
                     {isEmailLoading ? <Spinner size={14} className="animate-spin" /> : "Generate Email Draft"}
                   </Button>
                 </div>
 
                 {isEmailLoading && (
-                  <div className="flex flex-col items-center justify-center py-12 gap-2 text-xs text-indigo-600 font-medium">
+                  <div className="flex flex-col items-center justify-center py-12 gap-2 text-xs text-brand-600 font-medium">
                     <Spinner size={24} className="animate-spin" />
                     <span>Drafting personalized email...</span>
                   </div>
@@ -410,7 +410,7 @@ export function ApplicationAiDetailPage() {
                       <span className="font-semibold text-slate-800 dark:text-slate-200">Subject: {emailDraft.subject}</span>
                       <button
                         onClick={() => copyToClipboard(`Subject: ${emailDraft.subject}\n\n${emailDraft.body}`)}
-                        className="flex items-center gap-1 text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+                        className="flex items-center gap-1 text-brand-600 dark:text-brand-400 font-bold hover:underline"
                       >
                         {copied ? <CheckCircle size={16} /> : null}
                         {copied ? "Copied!" : "Copy Draft"}

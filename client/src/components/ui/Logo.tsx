@@ -15,32 +15,19 @@ export const Logo: React.FC<LogoProps> = ({ size = 28, className, ...props }) =>
       className={className}
       {...props}
     >
-      <defs>
-        <linearGradient id="ct-grad-1" x1="4" y1="28" x2="28" y2="4" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#4f46e5" /> {/* Indigo 600 */}
-          <stop offset="50%" stopColor="#6366f1" /> {/* Indigo 500 */}
-          <stop offset="100%" stopColor="#818cf8" /> {/* Indigo 400 */}
-        </linearGradient>
-        <linearGradient id="ct-grad-2" x1="12" y1="28" x2="30" y2="10" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#3b82f6" /> {/* Blue 500 */}
-          <stop offset="50%" stopColor="#8b5cf6" /> {/* Purple 500 */}
-          <stop offset="100%" stopColor="#ec4899" /> {/* Pink 500 */}
-        </linearGradient>
-      </defs>
-      
-      {/* Wave ribbon 1 (Blue/Purple) */}
+      {/* Wave ribbon 1 */}
       <path
         d="M 6 24 C 8 16, 12 14, 15 18 C 18 22, 21 21, 23.5 17.5 L 27.5 11"
-        stroke="url(#ct-grad-2)"
+        stroke="#0064FF"
         strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
       
-      {/* Wave ribbon 2 (Indigo/Pink) */}
+      {/* Wave ribbon 2 */}
       <path
         d="M 11 25 C 12.5 18, 15.5 16, 18 19.5 C 20.5 23, 23 20, 25.5 14.5 L 27.5 11"
-        stroke="url(#ct-grad-1)"
+        stroke="#0064FF"
         strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
@@ -49,7 +36,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 28, className, ...props }) =>
       {/* Arrowhead at top-right */}
       <path
         d="M 21.5 10.5 H 28 V 17"
-        stroke="url(#ct-grad-1)"
+        stroke="#0064FF"
         strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"

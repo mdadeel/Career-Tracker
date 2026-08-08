@@ -138,7 +138,7 @@ function PipelineColumn({
       <div className="p-2 border-t border-slate-200/80 dark:border-dark-border/80 bg-white/30 dark:bg-white/[0.01] rounded-b-2xl">
         <button
           onClick={onAdd}
-          className="w-full rounded-xl py-1.5 text-xs font-semibold text-slate-500 dark:text-white/50 hover:text-indigo-600 dark:hover:text-white hover:bg-white dark:hover:bg-white/10 transition-all flex items-center justify-center gap-1 cursor-pointer"
+          className="w-full rounded-xl py-1.5 text-xs font-semibold text-slate-500 dark:text-white/50 hover:text-brand-600 dark:hover:text-white hover:bg-white dark:hover:bg-white/10 transition-all flex items-center justify-center gap-1 cursor-pointer"
         >
           <Plus size={14} />
           <span>Add Job</span>

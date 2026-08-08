@@ -128,7 +128,7 @@ export function ResumeManager() {
                       size={12}
                       className={`shrink-0 text-ink-tertiary transition-transform ${expandedId === r.id ? "rotate-0" : "-rotate-90"}`}
                     />
-                    <FileText size={16} className="shrink-0 text-indigo-500" />
+                    <FileText size={16} className="shrink-0 text-brand-500" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="text-xs font-semibold text-ink dark:text-white/90 truncate">

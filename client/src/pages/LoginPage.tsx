@@ -57,26 +57,14 @@ export function LoginPage() {
       <Navigation />
       <main id="main-content" className="flex flex-1">
         {/* Left - Visual */}
-        <div className="hidden lg:flex flex-1 relative overflow-hidden bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-800">
-          {/* Image overlay */}
-          <div className="absolute inset-0">
-            <img
-              src="https://picsum.photos/seed/careertrack-login/800/1200"
-              alt=""
-              className="w-full h-full object-cover opacity-60"
-            />
-          </div>
-
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-slate-900/30" />
-
+        <div className="hidden lg:flex flex-1 relative overflow-hidden bg-surface-secondary border-r border-slate-200 dark:border-dark-border">
           {/* Content */}
-          <div className="relative z-10 flex flex-col justify-end p-12">
+          <div className="relative flex flex-col justify-end p-12">
             <div className="mb-5">
-              <LogoFull size={32} textClassName="text-white" />
+              <LogoFull size={32} textClassName="text-ink dark:text-white/90" />
             </div>
-            <p className="text-2xl font-bold text-white">Track your job search</p>
-            <p className="mt-2 text-sm text-white/60 leading-relaxed max-w-sm">
+            <p className="text-2xl font-bold text-ink dark:text-white/90">Track your job search</p>
+            <p className="mt-2 text-sm text-ink-secondary dark:text-white/50 leading-relaxed max-w-sm">
               Organize applications, store job descriptions, track statuses, and gain insights into your pipeline.
             </p>
           </div>
