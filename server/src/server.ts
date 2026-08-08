@@ -107,7 +107,8 @@ app.use(
       // Allow server-to-server / curl requests with no origin
       if (!origin) return callback(null, true);
       const cleanOrigin = origin.replace(/\/$/, "");
-      if (allowedOrigins.includes(cleanOrigin) || cleanOrigin.endsWith(".vercel.app")) {
+      const isLocalhostDev = /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(cleanOrigin);
+      if (allowedOrigins.includes(cleanOrigin) || isLocalhostDev || cleanOrigin.endsWith(".vercel.app")) {
         return callback(null, true);
       }
       return callback(new Error(`Origin ${cleanOrigin} not allowed by CORS`));

@@ -31,7 +31,7 @@ const STATUS_HEX: Record<string, string> = Object.fromEntries(
   })
 );
 
-const BRAND_GRADIENT = "#6366f1";
+const BRAND_GRADIENT = "#0064FF";
 
 /* ─── Skeleton ─── */
 function AnalyticsSkeleton() {
