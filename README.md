@@ -4,6 +4,9 @@
 
 ![CareerTrack Banner](https://img.shields.io/badge/CareerTrack_Lite-SaaS_Job_Tracker-6366f1?style=for-the-badge&logo=target)
 
+[![CI](https://github.com/mdadeel/Career-Tracker/actions/workflows/ci.yml/badge.svg)](https://github.com/mdadeel/Career-Tracker/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/mdadeel/Career-Tracker/branch/main/graph/badge.svg)](https://codecov.io/gh/mdadeel/Career-Tracker)
+
 [![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev)
 [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://react.dev)
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org)
@@ -427,7 +430,7 @@ The project includes a **GitHub Actions** workflow (`.github/workflows/ci.yml`) 
 | Stage | What It Does |
 |:------|:-------------|
 | **Server Tests** | Spins up a PostgreSQL 16 service container, pushes the Prisma schema (`prisma db push`), and executes all 11 server unit tests. |
-| **Client Tests** | Runs all 52 client unit tests with Vitest (includes a `tsc --noEmit` type check). |
+| **Client Tests** | Runs all 52 client unit tests with Vitest (includes a `tsc --noEmit` type check) and uploads coverage to **Codecov**. |
 | **Server TypeScript** | Type-checks the full `server/` codebase. |
 | **Build Verification** | Builds both `server/` (`tsc`) and `client/` (Vite production build), then verifies the `dist` artifacts. |
 
