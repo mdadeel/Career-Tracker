@@ -25,7 +25,7 @@
 
 > A production-grade, highly secure, and responsive job application tracking SaaS. Register, log every application, track it through a visual pipeline, analyze metrics, and prepare for interviews using AI tools — all in one dashboard.
 
-**Test Suite Status:** 🟢 42 Client Tests · 🟢 11 Server Tests · 🟢 5 E2E Playwright Tests — All Passing
+**Test Suite Status:** 🟢 52 Client Tests · 🟢 11 Server Tests · 🟢 5 E2E Playwright Tests — All Passing
 
 </div>
 
@@ -58,7 +58,7 @@
 | 🔒 **httpOnly Cookie Auth**<br/><sub>XSS-protected JWT sessions via secure httpOnly cookies. `SameSite=None; Secure` in production.</sub> | 📋 **Full CRUD Metadata**<br/><sub>Salary ranges, location, employment type, remote status, JDs, resume links, custom notes.</sub> | 📊 **Dashboard & KPIs**<br/><sub>Real-time summaries via SQL aggregation. Total Apps, Interview Count, Offers, Response Rate.</sub> |
 | 🎛️ **Kanban Pipeline**<br/><sub>6-stage drag-and-drop with `@dnd-kit` spring animations: Saved → Applied → Assessment → Interview → Offer → Rejected.</sub> | 📈 **Analytics & Charts**<br/><sub>4 interactive Recharts diagrams — velocity, funnel, source effectiveness, status distribution. Typed SQL backend.</sub> | 📅 **Interview Calendar**<br/><sub>Monthly grid view displaying all scheduled interviews and application deadlines at a glance.</sub> |
 | 📎 **S3 Resume Uploads**<br/><sub>Upload to AWS S3 with signed, time-limited download URLs. Falls back gracefully to text-only storage.</sub> | 🛠️ **Bento 2.0 Matrix**<br/><sub>Asymmetric animated layout: Pipeline, `Cmd+K` palette, countdowns, funnels, and JD Vault.</sub> | 🎮 **Sandbox Mode**<br/><sub>Visitors explore search and filters on real-world mock data before registering.</sub> |
-| ⚡ **Premium UX**<br/><sub>`Cmd+K` palette, debounced inputs, localStorage drafts, 30s TTL cache with BroadcastChannel cross-tab sync, dark mode.</sub> | 🔍 **SEO & Metadata**<br/><sub>Helmet-driven OG tags, JSON-LD structured data (`SoftwareApplication`, `FAQPage` schemas).</sub> | 🚀 **Optimized Queries**<br/><sub>`groupBy` + typed `$queryRaw` aggregation instead of `findMany`. Rows → aggregates instantly.</sub> |
+| ⚡ **Premium UX**<br/><sub>`Cmd+K` palette, debounced inputs, localStorage drafts, 30s TTL cache with BroadcastChannel cross-tab sync, high-contrast dark-first design system.</sub> | 🔍 **SEO & Metadata**<br/><sub>Helmet-driven OG tags, JSON-LD structured data (`SoftwareApplication`, `FAQPage` schemas).</sub> | 🚀 **Optimized Queries**<br/><sub>`groupBy` + typed `$queryRaw` aggregation instead of `findMany`. Rows → aggregates instantly.</sub> |
 
 </div>
 
@@ -143,16 +143,16 @@ graph TB
 ```mermaid
 graph LR
     subgraph Frontend
-        Pages[Pages<br/>Landing · Login · Dashboard<br/>Applications · Analytics]
-        Components[Components<br/>Navbar · AppTable · AppForm<br/>Dialog · CommandPalette]
-        Hooks[Hooks<br/>useAuth · useApplications]
+        Pages[Pages<br/>Landing · Login · Dashboard · Pipeline<br/>Applications · Analytics · Calendar<br/>Resumes · Settings]
+        Components[Components<br/>Navigation · ApplicationRow<br/>ApplicationFormFields · Dialog · CommandPalette]
+        Hooks[Hooks<br/>useApplications · useDashboard<br/>useAnalytics · useSEO]
         Cache[In-Memory Cache<br/>BroadcastChannel Sync<br/>30s TTL]
-        Services[API Service Layer<br/>api.ts · authService.ts<br/>appService.ts · aiService.ts]
+        Services[API Service Layer<br/>api.ts · authService.ts<br/>applicationService.ts · ai.service.ts]
     end
 
     subgraph Backend
-        Routes[Routes<br/>authRoutes · applicationRoutes<br/>analyticsRoutes · aiRoutes]
-        Controllers[Controllers<br/>authController · appController<br/>aiController]
+        Routes[Routes<br/>authRoutes · applicationRoutes<br/>dashboardRoutes · analyticsRoutes<br/>resumeRoutes · aiRoutes]
+        Controllers[Controllers<br/>authController · applicationController<br/>dashboardController · analyticsController<br/>resumeController · aiController]
         Middlewares[Middlewares<br/>authMiddleware · rateLimiter<br/>errorHandler · Sentry capture]
     end
 
@@ -246,6 +246,8 @@ sequenceDiagram
 | <span style="color:#22c55e">●</span> POST | `/login` | — | Authenticate credentials. JWT set as httpOnly cookie. |
 | <span style="color:#3b82f6">●</span> GET | `/me` | ✅ | Get profile for the currently logged-in user. |
 | <span style="color:#eab308">●</span> PATCH | `/password` | ✅ | Update password (requires current password). |
+| <span style="color:#eab308">●</span> PATCH | `/resume` | ✅ | Set the user's active resume. |
+| <span style="color:#eab308">●</span> PATCH | `/ai-config` | ✅ | Configure custom AI model settings. |
 | <span style="color:#ef4444">●</span> POST | `/logout` | — | Clear the auth cookie. |
 
 > 🔒 **Auth Note:** Sessions use **httpOnly cookies**, not Bearer tokens. The JWT is automatically sent with every request by the browser. No client-side token management needed.
@@ -275,7 +277,9 @@ GET /api/applications?search=engineer&status=Interview&source=LinkedIn&sortBy=ne
 | Method | Endpoint | Auth | Description |
 |:------:|:---------|:----:|:------------|
 | <span style="color:#3b82f6">●</span> GET | `/` | ✅ | List all user's uploaded resumes. |
+| <span style="color:#3b82f6">●</span> GET | `/:id` | ✅ | Get a single resume by ID. |
 | <span style="color:#22c55e">●</span> POST | `/upload` | ✅ | Upload resume (multipart). Stores in S3 if configured, otherwise extracts text. |
+| <span style="color:#eab308">●</span> PATCH | `/:id` | ✅ | Update a resume (e.g. filename, text content). |
 | <span style="color:#ef4444">●</span> DELETE | `/:id` | ✅ | Delete a resume. |
 
 ```json
@@ -422,37 +426,61 @@ The project includes a **GitHub Actions** workflow (`.github/workflows/ci.yml`) 
 
 | Stage | What It Does |
 |:------|:-------------|
-| **Server Tests** | Spins up a PostgreSQL service container, runs `prisma migrate deploy`, and executes all 11 server unit tests. |
-| **Client Tests** | Runs all 42 client unit tests with Vitest. |
-| **TypeScript Checks** | Checks both `server/` and `client/` for type errors. |
-| **Client Build** | Verifies the Vite production build succeeds. |
+| **Server Tests** | Spins up a PostgreSQL 16 service container, pushes the Prisma schema (`prisma db push`), and executes all 11 server unit tests. |
+| **Client Tests** | Runs all 52 client unit tests with Vitest (includes a `tsc --noEmit` type check). |
+| **Server TypeScript** | Type-checks the full `server/` codebase. |
+| **Build Verification** | Builds both `server/` (`tsc`) and `client/` (Vite production build), then verifies the `dist` artifacts. |
 
 ### 🐳 Docker Deployment
 
 A multi-stage `Dockerfile` is provided at the project root for containerized deployments:
 
 ```dockerfile
-# Stage 1: Build
+# ── Build Stage ──
 FROM node:20-alpine AS builder
+
 WORKDIR /app
-COPY server/package*.json ./
+
+# Install build dependencies for Prisma
+RUN apk add --no-cache openssl
+
+# Copy package files and install dependencies
+COPY server/package.json server/package-lock.json ./
 RUN npm ci
+
+# Copy Prisma schema and generate client
 COPY server/prisma ./prisma
 RUN npx prisma generate
-COPY server/ ./
+
+# Copy source and build
+COPY server/tsconfig.json server/tsconfig.build.json ./
+COPY server/src ./src
 RUN npm run build
 
-# Stage 2: Production
-FROM node:20-alpine AS runner
+# ── Production Stage ──
+FROM node:20-alpine AS production
+
 WORKDIR /app
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
+
+# Install only production dependencies
+COPY server/package.json server/package-lock.json ./
+RUN npm ci --production
+
+# Copy Prisma client from builder (needed at runtime)
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY server/package*.json ./
-RUN npm ci --production --ignore-scripts
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s \
-  CMD node -e "fetch('http://localhost:5000/api/health').then(r=>process.exit(r.ok?0:1))"
-USER node
+COPY --from=builder /app/prisma ./prisma
+
+# Copy compiled output
+COPY --from=builder /app/dist ./dist
+
+# Expose the API port
+EXPOSE 5000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/health || exit 1
+
+# Run the server
 CMD ["node", "dist/server.js"]
 ```
 
@@ -541,7 +569,7 @@ The codebase features three advanced UX patterns that ensure rapid interactions,
 
 ## 🤖 AI Integration Engine
 
-The server includes a dedicated AI services wrapper ([ai.service.ts](file:///home/adeel/Documents/projects/task/server/src/services/ai.service.ts)) that supports multiple LLM providers.
+The server includes a dedicated AI services wrapper ([ai.service.ts](server/src/services/ai.service.ts)) that supports multiple LLM providers.
 
 ```
        ┌────────────────────────┐
@@ -577,37 +605,45 @@ The server includes a dedicated AI services wrapper ([ai.service.ts](file:///hom
 ```
 task/
 ├── .github/
-│   └── workflows/ci.yml           # GitHub Actions CI/CD pipeline
-├── Dockerfile                      # Multi-stage production build
+│   └── workflows/ci.yml           # GitHub Actions CI/CD pipeline (4 jobs)
+├── Dockerfile                      # Multi-stage production build (server)
 ├── client/                         # Vite + React Client
 │   ├── e2e/                        # Playwright E2E tests (5 tests)
+│   ├── scripts/                    # Icon generation scripts
 │   ├── src/
-│   │   ├── components/             # Component architecture
-│   │   │   ├── ui/                 # Reusable design primitives (Buttons, Inputs, Dialogs)
-│   │   │   ├── CommandPalette      # Global navigations palette
-│   │   │   └── SEOHead.tsx         # Dynamic SEO manager
-│   │   ├── constants/              # Select options, menus, and paths
-│   │   ├── context/                # Context providers (Auth, Toast notification)
-│   │   ├── hooks/                  # Custom hooks (optimistic handlers, theme detectors)
-│   │   ├── pages/                  # Route components (Kanban board, analytics, settings)
-│   │   ├── services/               # Network request layers (cache with BroadcastChannel sync, fetch handlers)
+│   │   ├── components/             # Feature components
+│   │   │   ├── ui/                 # Reusable design primitives (Button, Input, Dialog, Sidebar…)
+│   │   │   ├── CommandPalette      # Global `Cmd+K` navigation palette
+│   │   │   ├── AiAssistantDrawer   # AI interview & email assistant drawer
+│   │   │   └── ResumeManager       # Resume upload & selector flows
+│   │   ├── constants/              # Select options, menus, and status colors
+│   │   ├── context/                # Context providers (Auth, Toast notifications)
+│   │   ├── hooks/                  # Custom hooks (optimistic CRUD, dashboard, analytics, SEO)
+│   │   ├── pages/                  # Route components (Dashboard, Pipeline, Calendar, Analytics…)
+│   │   ├── seo/                    # Per-page metadata, JSON-LD schemas, site config
+│   │   ├── services/               # API layers (cache with BroadcastChannel sync, fetch handlers)
+│   │   ├── test/                   # Vitest setup
+│   │   ├── types/                  # Shared TypeScript types
 │   │   └── utils/                  # Text parsing and layout formatters
-│   ├── tailwind.config.js          # Brand design system tokens
-│   └── vite.config.ts              # Proxy dev configurations + gzip/brotli compression
+│   ├── tailwind.config.js          # Brand design system tokens (dark, sky-blue accent)
+│   └── vite.config.ts              # Proxy dev configuration + gzip/brotli compression
 │
 └── server/                         # Node.js + Express API
     ├── prisma/
-    │   ├── schema.prisma           # Schema layout
+    │   ├── schema.prisma           # Schema (User, Application, Resume)
     │   ├── migrations/             # Database migrations
-    │   └── seed.ts                 # Demo data seeder
+    │   └── seed.ts                 # Demo data seeder (24 applications)
     └── src/
-        ├── controllers/            # Express handlers (auth, analytics, AI, resumes)
+        ├── controllers/            # Express handlers (auth, applications, analytics, AI, resumes)
+        ├── docs/                   # Swagger API documentation
+        ├── lib/                    # Shared libraries (resumeParser)
         ├── middlewares/            # Security protections & rate limit filters
         │   ├── auth-middleware.ts   # JWT cookie verification
         │   ├── error-handler.ts    # Centralized error handling + Sentry capture
         │   └── rate-limiter.ts     # Per-endpoint rate limiting
         ├── routes/                 # Path definitions (includes health check)
         ├── services/               # Service layers (typed SQL aggregation, S3, AI)
+        ├── types/                  # Shared server types
         ├── utils/
         │   ├── prisma.ts           # Prisma client with connection pool management
         │   ├── s3.ts               # S3 upload/signed URL utilities
@@ -691,11 +727,11 @@ task/
 ### Unit & Integration Tests
 
 ```bash
-# Server tests (11 tests — auth, token, resume parser)
+# Server tests (11 tests — token auth, resume parser)
 cd server
 npm test
 
-# Client tests (42 tests — components, hooks, services, utils)
+# Client tests (52 tests — components, hooks, services, utils)
 cd client
 npm test
 
@@ -730,7 +766,7 @@ npx playwright test
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `DATABASE_URL` | ✅ **Yes** | — | PostgreSQL connection string (with connection pooler for Neon) |
-| `DIRECT_URL` | ✅ **Yes** | — | Direct (non-pooled) connection for Prisma migrations |
+| `DIRECT_URL` | ✅ **Yes** | — | Direct (non-pooled) connection string for Prisma migrations (`directUrl` in schema) |
 | `JWT_SECRET` | ✅ **Yes** | — | Generate with `openssl rand -hex 64` |
 | `CLIENT_URL` | ✅ **Yes** | — | Frontend URL for CORS (e.g. `http://localhost:5173`) |
 | `NODE_ENV` | ✅ **Yes** | — | Set to `production` in production; `development` locally |
@@ -740,6 +776,7 @@ npx playwright test
 | `AUTH_RATE_LIMIT_MAX` | ❌ No | `15` | Login attempts per 15-min window (production) |
 | `PRISMA_POOL_SIZE` | ❌ No | — | Connection pool size (injected into `DATABASE_URL`) |
 | `SENTRY_DSN` | ❌ No | — | Sentry project DSN for error monitoring |
+| `SENTRY_TRACES_SAMPLE_RATE` | ❌ No | `0.1` | Sentry traces sample rate (0–1) |
 | `S3_BUCKET` | ❌ No | — | S3 bucket name for resume file uploads |
 | `S3_REGION` | ❌ No | `us-east-1` | AWS region for S3 bucket |
 | `S3_ACCESS_KEY_ID` | ❌ No | — | AWS access key for S3 |

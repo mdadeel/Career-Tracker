@@ -153,7 +153,7 @@ app.use("/api/resumes", resumeRoutes);
 
 // Timeout error handler — runs AFTER all routes but BEFORE the generic error handler
 app.use((req: Request, res: Response, next: NextFunction) => {
-  if ((req as any).timedout) {
+  if ((req as Request & { timedout?: boolean }).timedout) {
     res.status(503).json({ success: false, message: "Request timed out" });
     return;
   }

@@ -5,36 +5,36 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Source Serif 4', 'Georgia', 'serif'],
-        display: ['Source Serif 4', 'Georgia', 'serif'],
+        sans: ['Inter', 'sans-serif'],
+        display: ['Inter', 'sans-serif'],
         mono: ['JetBrains Mono', 'Geist Mono', 'SF Mono', 'Monaco', 'Consolas', 'monospace'],
       },
       colors: {
         brand: {
-          50: '#e6f0ff',
-          100: '#c2daff',
-          200: '#8ab8ff',
-          300: '#4d94ff',
-          400: '#1a78ff',
-          500: '#0064FF',
-          600: '#0052d6',
-          700: '#0042ad',
-          800: '#003585',
-          900: '#002a6b',
-          950: '#001a45',
+          50: '#f0f9ff',
+          100: '#e0f2fe',
+          200: '#bae6fd',
+          300: '#7dd3fc',
+          400: '#38bdf8', // color.surface.raised
+          500: '#0ea5e9',
+          600: '#0284c7',
+          700: '#0369a1',
+          800: '#075985',
+          900: '#0c4a6e',
+          950: '#082f49',
         },
         surface: {
-          DEFAULT: '#ffffff',
-          secondary: '#F2EFE8',
-          tertiary: '#ece8de',
+          DEFAULT: '#000000', // color.surface.base
+          muted: '#f9fafb', // color.surface.muted
+          raised: '#38bdf8', // color.surface.raised
         },
         ink: {
-          DEFAULT: '#000000',
-          secondary: '#5F5F5F',
-          tertiary: '#8a8a8a',
-          disabled: '#c6c6c6',
+          DEFAULT: '#ffffff', // color.text.tertiary (on dark surface)
+          secondary: '#111212', // color.text.secondary
+          tertiary: '#ffffff', // color.text.tertiary
+          inverse: 'oklch(0.373 0.034 259.733)', // color.text.inverse
         },
-        // Dark mode surfaces (used via dark:)
+        // Dark mode surfaces (kept for compatibility)
         dark: {
           DEFAULT: '#0a0f1a',
           surface: '#111827',
@@ -45,6 +45,16 @@ export default {
           'surface-elevated': 'rgba(255,255,255,0.06)',
           'surface-overlay': 'rgba(255,255,255,0.08)',
         },
+      },
+      spacing: {
+        '1': '2px',
+        '2': '4px',
+        '3': '6px',
+        '4': '8px',
+        '5': '12px',
+        '6': '16px',
+        '7': '20px',
+        '8': '24px',
       },
       borderRadius: {
         sm: '0px',
@@ -59,9 +69,18 @@ export default {
         'card-hover': '0 4px 12px -2px rgb(0 0 0 / 0.08), 0 2px 4px -2px rgb(0 0 0 / 0.06)',
         'elevated': '0 8px 24px -4px rgb(0 0 0 / 0.08), 0 2px 6px 0 rgb(0 0 0 / 0.04)',
         'dialog': '0 20px 48px -8px rgb(0 0 0 / 0.12), 0 4px 12px 0 rgb(0 0 0 / 0.08)',
+        'irfan-shadow': 'rgba(0, 0, 0, 0.15) 0px 12px 0px 0px',
       },
       fontSize: {
-        'display': ['2.5rem', { lineHeight: '3rem', fontWeight: '800', letterSpacing: '-0.04em' }],
+        'xs': '14px',
+        'sm': '15px',
+        'md': '16px',
+        'lg': '18px',
+        'xl': '30px',
+        '2xl': '35px',
+        '3xl': '44px',
+        '4xl': '60px',
+        'display': ['72px', { lineHeight: '72px', fontWeight: '500', letterSpacing: '-0.04em' }],
         'heading': ['1.125rem', { lineHeight: '1.5rem', fontWeight: '700' }],
         'body': ['0.875rem', { lineHeight: '1.5rem' }],
         'caption': ['0.75rem', { lineHeight: '1rem' }],
